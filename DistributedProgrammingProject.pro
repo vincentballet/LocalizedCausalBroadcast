@@ -5,4 +5,8 @@ CONFIG -= qt
 TARGET = da_proc
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+    membership.cpp
+
+HEADERS += \
+    membership.h

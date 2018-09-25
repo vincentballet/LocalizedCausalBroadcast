@@ -8,6 +8,7 @@
 #include <string>
 #include <stdlib.h>
 #include <csignal>
+#include "membership.h"
 
 using std::string;
 using std::cout;
@@ -78,11 +79,11 @@ int main(int argc, char** argv)
     }
 
     // obtaining n and membership file
-    else
-    {
-        int n = atoi(argv[1]);
-        string membership = argv[2];
-        cout << n << membership;
-    }
+    int n = atoi(argv[1]);
+    string membership = argv[2];
+
+    // parsing membership file
+    Membership m(membership);
+
     return 0;
 }
