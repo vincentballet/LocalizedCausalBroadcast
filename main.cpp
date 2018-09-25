@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <csignal>
 #include "membership.h"
+#include <time.h>
 
 using std::string;
 using std::cout;
@@ -30,6 +31,12 @@ void onSignalUsr1(int signal_num)
  */
 void writeOutputAndHalt()
 {
+    //reset signal handlers to default
+    signal(SIGTERM, SIG_DFL);
+    signal(SIGINT, SIG_DFL);
+
+    // stop networking
+
     // writing output file
     exit(0);
 }
@@ -84,6 +91,14 @@ int main(int argc, char** argv)
 
     // parsing membership file
     Membership m(membership);
+
+    while(true)
+    {
+        struct timespec sleep_time;
+        sleep_time.tv_sec = 0;
+        sleep_time.tv_nsec = 1000;
+        nanosleep(&sleep_time, NULL);
+    }
 
     return 0;
 }
