@@ -7,8 +7,10 @@ TARGET = da_proc
 SOURCES += \
         main.cpp \
     membership.cpp \
-    udpsender.cpp
+    udpsender.cpp \
+    udpreceiver.cpp
 
 HEADERS += \
     membership.h \
-    udpsender.h
+    udpsender.h \
+    udpreceiver.h
