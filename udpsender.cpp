@@ -21,22 +21,11 @@ UDPSender::UDPSender(std::string host, int port)
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr(host.c_str());
     servaddr.sin_port = htons(port);
-
 }
 
 UDPSender::~UDPSender()
 {
     if(fd >= 0) close(fd);
-}
-
-void UDPSender::send(std::string data)
-{
-    send(data.c_str());
-}
-
-void UDPSender::send(char *data)
-{
-    send(data, strlen(data) + 1);
 }
 
 void UDPSender::send(char *data, int N)

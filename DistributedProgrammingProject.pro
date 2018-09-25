@@ -8,9 +8,15 @@ SOURCES += \
         main.cpp \
     membership.cpp \
     udpsender.cpp \
-    udpreceiver.cpp
+    udpreceiver.cpp \
+    perfectsender.cpp \
+    sender.cpp \
+    receiver.cpp
 
 HEADERS += \
     membership.h \
     udpsender.h \
-    udpreceiver.h
+    udpreceiver.h \
+    perfectsender.h \
+    sender.h \
+    receiver.h

@@ -8,11 +8,12 @@
 #define UDPRECEIVER_H
 
 #include <string>
+#include "receiver.h"
 
 using std::string;
 
 /** @brief Receive UDP packets */
-class UDPReceiver
+class UDPReceiver : public Receiver
 {
 private:
     int fd;
@@ -32,7 +33,7 @@ public:
      * @param maxlen Maximal length to receive
      * @return Number of bytes received
      */
-    int receive(char* data, int maxlen);
+    virtual int receive(char* data, int maxlen);
 };
 
 #endif // UDPRECEIVER_H

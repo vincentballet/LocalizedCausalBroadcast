@@ -9,11 +9,12 @@
 
 #include <netinet/in.h>
 #include <string>
+#include "sender.h"
 
 using std::string;
 
 /** @brief Send UDP packets */
-class UDPSender
+class UDPSender : public Sender
 {
 private:
     int fd;
@@ -26,26 +27,15 @@ public:
      */
     UDPSender(string host, int port);
 
-    ~UDPSender();
+    virtual ~UDPSender();
 
-    /**
-     * @brief send a string
-     * @param data (string)
-     */
-    void send(string data);
-
-    /**
-     * @brief send
-     * @param data Null-terminated string
-     */
-    void send(char* data);
-
+    using Sender::send;
     /**
      * @brief send array of bytes
      * @param data array of bytes
      * @param N length of the array
      */
-    void send(char* data, int N);
+    virtual void send(char* data, int N);
 };
 
 #endif // UDPSENDER_H
