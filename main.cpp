@@ -5,12 +5,15 @@
  */
 
 #include <iostream>
+#include <unistd.h>
 #include <string>
 #include <stdlib.h>
 #include <csignal>
 #include "membership.h"
 #include "udpreceiver.h"
 #include "udpsender.h"
+#include "perfectsender.h"
+#include "perfectreceiver.h"
 #include <time.h>
 
 using std::string;
@@ -94,16 +97,32 @@ int main(int argc, char** argv)
     // parsing membership file
     Membership m(membership);
 
-    char buf[1000];
+    // listening on our port
+    UDPReceiver r(m.getIP(n), m.getPort(n));
 
-    UDPReceiver r("127.0.0.1", 11091);
-    cout << "Receiver OK" << endl;
-    UDPSender s("127.0.0.1", 11091);
-    cout << "Sender OK" << endl;
-    s.send("abacaba");
-    cout << "Sent OK" << endl;
-    cout << r.receive(buf, 100) << buf;
-    cout << "Receive OK" << endl;
+    // sending message over perfect link
+    if(n == 1) {
+        PerfectSender sender(m.getIP(2), m.getPort(2), &r);
+        cout << "Created Sender" << endl;
+        while(true)
+        {
+            sender.send("Hello World!");
+            cout << "Sent a message" << endl;
+        }
+    }
+
+    // receiving message over perfect link
+    else if(n == 2) {
+        char buf[1000];
+        PerfectReceiver receiver(&r, m.getIP(1), m.getPort(1));
+        cout << "Created receiver" << endl;
+        while(true)
+        {
+            int len = receiver.receive(buf, 1000);
+            cout << "Received [" << buf << "], " << len << " bytes!" << endl;
+            sleep(1);
+        }
+    }
 
     // waiting for start...
     while(true)

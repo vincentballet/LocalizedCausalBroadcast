@@ -10,6 +10,7 @@ class PerfectSender : public Sender
 private:
     UDPSender* s;
     UDPReceiver* r;
+    int seqnum;
 public:
     PerfectSender(string host, int port, UDPReceiver* r);
     ~PerfectSender() {}

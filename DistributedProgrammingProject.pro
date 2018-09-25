@@ -11,7 +11,9 @@ SOURCES += \
     udpreceiver.cpp \
     perfectsender.cpp \
     sender.cpp \
-    receiver.cpp
+    receiver.cpp \
+    common.cpp \
+    perfectreceiver.cpp
 
 HEADERS += \
     membership.h \
@@ -19,4 +21,6 @@ HEADERS += \
     udpreceiver.h \
     perfectsender.h \
     sender.h \
-    receiver.h
+    receiver.h \
+    common.h \
+    perfectreceiver.h
