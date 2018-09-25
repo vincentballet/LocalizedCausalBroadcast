@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <csignal>
 #include "membership.h"
+#include "udpreceiver.h"
+#include "udpsender.h"
 #include <time.h>
 
 using std::string;
@@ -92,6 +94,18 @@ int main(int argc, char** argv)
     // parsing membership file
     Membership m(membership);
 
+    char buf[1000];
+
+    UDPReceiver r("127.0.0.1", 11091);
+    cout << "Receiver OK" << endl;
+    UDPSender s("127.0.0.1", 11091);
+    cout << "Sender OK" << endl;
+    s.send("abacaba");
+    cout << "Sent OK" << endl;
+    cout << r.receive(buf, 100) << buf;
+    cout << "Receive OK" << endl;
+
+    // waiting for start...
     while(true)
     {
         struct timespec sleep_time;
