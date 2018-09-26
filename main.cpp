@@ -94,6 +94,9 @@ int main(int argc, char** argv)
     int n = atoi(argv[1]);
     string membership = argv[2];
 
+	// check the parameters
+	assert(1 <= n && n <= 5);
+	
     // parsing membership file
     Membership m(membership);
 
