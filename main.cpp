@@ -15,6 +15,7 @@
 #include "perfectsender.h"
 #include "perfectreceiver.h"
 #include <time.h>
+#include "common.h"
 
 using std::string;
 using std::cout;
@@ -27,8 +28,12 @@ using std::endl;
 void onSignalUsr1(int signal_num)
 {
     if(signal_num != SIGUSR1) return;
-
+	
     // Start broadcasting messages
+	// Each process starts broadcasting messages
+	// Content of messages : 1 ... m
+	// Each time a process sends a message m, we store "b m\n"
+	// Each time a process receives a message m from process q, we store "d q m\n"
 }
 
 /**
@@ -92,37 +97,42 @@ int main(int argc, char** argv)
 
     // obtaining n and membership file
     int n = atoi(argv[1]);
-    string membership = argv[2];
+	int m = 10;
+	string membership = argv[2];
+	
+	// extra params (expected to be the # of messages)
+	// default : 10
+	if (argc > 2){ m = atoi(argv[3]); }
 
 	// check the parameters
-	assert(1 <= n && n <= 5);
+	assert(1 <= n && n <= 5 && m > 0);
 	
     // parsing membership file
-    Membership m(membership);
+    Membership members(membership);
 
     // listening on our port
-    UDPReceiver r(m.getIP(n), m.getPort(n));
+    UDPReceiver r(members.getIP(n), members.getPort(n));
 
     // sending message over perfect link
     if(n == 1) {
-        PerfectSender sender(m.getIP(2), m.getPort(2), &r);
+        PerfectSender sender(members.getIP(2), members.getPort(2), &r);
         cout << "Created Sender" << endl;
-        while(true)
+		
+        while(sender.getNAcks() < m)
         {
-            sender.send("Hello World!");
-            cout << "Sent a message" << endl;
+            sender.send(1000);
         }
     }
 
     // receiving message over perfect link
     else if(n == 2) {
         char buf[1000];
-        PerfectReceiver receiver(&r, m.getIP(1), m.getPort(1));
+        PerfectReceiver receiver(&r, members.getIP(1), members.getPort(1));
         cout << "Created receiver" << endl;
         while(true)
         {
             int len = receiver.receive(buf, 1000);
-            cout << "Received [" << buf << "], " << len << " bytes!" << endl;
+            cout << "Received [" << charsToInt32(buf) << "], " << len << " bytes!" << endl;
             sleep(1);
         }
     }

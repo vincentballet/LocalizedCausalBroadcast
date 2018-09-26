@@ -6,32 +6,32 @@
 
 PerfectSender::PerfectSender(std::string host, int port, UDPReceiver* r)
 {
-    this->r = r;
+	this->r = r;
     this->s = new UDPSender(host, port);
     seqnum = 0;
+	nAcks = 0;
 }
 
-void PerfectSender::send(char *data, int N)
+void PerfectSender::send(int N)
 {
-    // allocating new memory
-    char* data1 = (char*) malloc(N + 4);
-    memcpy(data1 + 4, data, N);
+	// allocating new memory
+    char* data = (char*) malloc(N + 4);
 
     // adding the sequence number
-    int32ToChars(seqnum++, data1);
+    int32ToChars(seqnum++, data);
 
     char buf[10000];
 
     while(true)
     {
-        s->send(data1, N + 4);
+        s->send(data, N + 4);
         int len = r->receive(buf, 10000);
-        if(len == 7 && memmem(buf, 4, data1, 4) && memmem(buf + 4, 3, "ACK", 3))
+        if(len == 7 && memmem(buf, 4, data, 4) && memmem(buf + 4, 3, "ACK", 3))
         {
-            // ack received
+			nAcks++;
             break;
         }
     }
 
-    free(data1);
+    free(data);
 }
