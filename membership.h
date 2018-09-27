@@ -10,6 +10,7 @@
 #include <string>
 #include <fstream>
 #include <map>
+#include <vector>
 
 using std::string;
 using std::ifstream;
@@ -27,7 +28,7 @@ public:
      * @brief Load membership file
      * @param File path
      */
-    Membership(string file);
+	Membership(string file);
 
     /**
      * @brief Get IP of a process
@@ -42,6 +43,18 @@ public:
      * @return Port as an int
      */
     int getPort(int process);
+	
+	/**
+	 * @brief Get IDs of membership
+	 * @return IDs as a map
+	 */
+	map<int, string> getIPs();
+	
+	/**
+	 * @brief Get Ports of membership
+	 * @return Ports as a map
+	 */
+	map<int, int> getPorts();
 };
 
 #endif // MEMBERSHIP_H

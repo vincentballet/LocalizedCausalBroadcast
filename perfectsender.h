@@ -4,15 +4,17 @@
 #include "sender.h"
 #include "udpsender.h"
 #include "udpreceiver.h"
+#include <map>
+#include <list>
 
 class PerfectSender : public Sender
 {
 private:
-    UDPSender* s;
+    std::list<UDPSender>* s;
     UDPReceiver* r;
 	int seqnum;
 public:
-    PerfectSender(string host, int port, UDPReceiver* r);
+    PerfectSender(std::list<UDPSender>*, UDPReceiver* r);
 	int nAcks;
 	int getNAcks(){ return nAcks; }
 
@@ -25,6 +27,7 @@ public:
      * @param N length of the array
      */
     virtual void send(int N);
+	void setNAcks(int n) { nAcks = n; }
 };
 
 #endif // PERFECTSENDER_H

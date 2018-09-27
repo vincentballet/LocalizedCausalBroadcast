@@ -3,6 +3,7 @@
 
 using std::cout;
 using std::endl;
+using std::map;
 
 Membership::Membership(std::string file)
 {
@@ -45,4 +46,18 @@ int Membership::getPort(int process)
         exit(0);
     }
     return ports[process];
+}
+
+map<int, string> Membership::getIPs()
+{
+	map<int, string> ips_return;
+	ips_return.insert(ips.begin(), ips.end());
+	return ips_return;
+}
+
+map<int, int> Membership::getPorts()
+{
+	map<int, int> ports_return;
+	ports_return.insert(ports.begin(), ports.end());
+	return ports_return;
 }
