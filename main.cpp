@@ -4,6 +4,8 @@
  * @author Volodin Sergei, EPFL
  */
 
+#include <cassert>
+#include <climits>
 #include <iostream>
 #include <unistd.h>
 #include <string>
@@ -132,7 +134,10 @@ int main(int argc, char** argv)
 	
 	// Set up senders for the membership
 	std::list<UDPSender> s;
-	for (auto&& [key, value] : members.getIPs()) {
+        std::map<int, string>::iterator it;
+        std::map<int, string> IPs = members.getIPs();
+	for (it = IPs.begin(); it != IPs.end(); it++) {
+                int key = (*it).first;
 		if (key != n){ // should not send messages to self
 			UDPSender sender(members.getIP(key), members.getPort(key));
 			s.insert(s.begin(), sender);
