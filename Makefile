@@ -4,7 +4,7 @@ CXXFLAGS=-O0 -g
 
 all: $(MYPROGRAM)
 
-$(MYPROGRAM): main.o common.o membership.o perfectlink.o perfectreceiver.o perfectsender.o receiver.o sender.o udpreceiver.o udpsender.o
+$(MYPROGRAM): main.o common.o membership.o perfectlink.o receiver.o sender.o udpreceiver.o udpsender.o
 	$(CC) $^ -o$(MYPROGRAM)
 
 %.o : %.cpp %.h

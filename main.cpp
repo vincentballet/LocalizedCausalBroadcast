@@ -14,8 +14,7 @@
 #include "membership.h"
 #include "udpreceiver.h"
 #include "udpsender.h"
-#include "perfectsender.h"
-#include "perfectreceiver.h"
+#include "perfectlink.h"
 #include <time.h>
 #include "common.h"
 #include <list>
@@ -26,8 +25,6 @@ using std::string;
 using std::cout;
 using std::endl;
 
-PerfectSender* perfectSender;
-PerfectReceiver* perfectReceiver;
 int m = 10;
 
 /**
@@ -39,16 +36,6 @@ void onSignalUsr1(int signal_num)
     if(signal_num != SIGUSR1) return;
 	
     // Start broadcasting messages
-	while(perfectSender->getNAcks() < m)
-	{
-		perfectSender->send(1000);
-	}
-	while(true)
-	{
-		char buf[1000];
-		perfectReceiver->receive(buf, 1000);
-		sleep(1);
-	}
 }
 
 /**
@@ -61,7 +48,6 @@ void writeOutputAndHalt()
     signal(SIGINT, SIG_DFL);
 
     // stop networking
-	perfectSender->setNAcks(INT_MAX);
 	
     // writing output file
     exit(0);
@@ -131,35 +117,9 @@ int main(int argc, char** argv)
 
     // listening on our port
     UDPReceiver r(members.getIP(n), members.getPort(n));
-	
-	// Set up senders for the membership
-	std::list<UDPSender> s;
-        std::map<int, string>::iterator it;
-        std::map<int, string> IPs = members.getIPs();
-	for (it = IPs.begin(); it != IPs.end(); it++) {
-                int key = (*it).first;
-		if (key != n){ // should not send messages to self
-			UDPSender sender(members.getIP(key), members.getPort(key));
-			s.insert(s.begin(), sender);
-		}
-	}
-	
-	// Set up the perfect sender
-	perfectSender = new PerfectSender(&s, &r);
-
-	// receiving message over perfect link
-	perfectReceiver = new PerfectReceiver(&r, members.getIP(n), members.getPort(n));
-
-
-	// waiting for start...
-	while(true)
-	{
-		struct timespec sleep_time;
-		sleep_time.tv_sec = 0;
-		sleep_time.tv_nsec = 1000;
-		nanosleep(&sleep_time, NULL);
-	}
-
-
+    UDPSender s(members.getIP(n), members.getPort(n));
+    PerfectLink p0(&s, &r, m);
+    p0.send();
+ 
     return 0;
 }
