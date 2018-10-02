@@ -26,7 +26,7 @@ private:
     int seqnum;
     int window;
     
-    void fillMsgs();
+    char * craftAndStoreMsg();
     
 public:
     PerfectLink(UDPSender *s, UDPReceiver *r, int m);

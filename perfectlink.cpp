@@ -12,6 +12,7 @@
 #include <iostream>
 
 unsigned const MSG_SIZE = 1000;
+unsigned const BUF_SIZE = 10000;
 
 PerfectLink::PerfectLink(UDPSender* s, UDPReceiver* r, int m)
 {
@@ -24,18 +25,42 @@ PerfectLink::PerfectLink(UDPSender* s, UDPReceiver* r, int m)
 
 void PerfectLink::send()
 {
-    // repeat until no more messages to send
-    for(int i=0; i< (int)(this->m/this->window); i++){
-        // fill the list of messages to send
-        fillMsgs();
-        
-        // send all messages of the list to dst
-        std::map<int, char *>::iterator it;
-        for (it = this->msgs.begin(); it != this->msgs.end(); it++) {
-            char* data = (*it).second;
-            this->s->send(data, MSG_SIZE + 4);
+    // buffer for receiving messages
+    char buf[BUF_SIZE];
+
+    // repeat until list len < 10
+    // TODO Stopping criterion ?
+    while(true){
+        if (this->msgs.size() < this->window && this->seqnum < this->m){
+            // TODO Locks ?
+            char* sdata = craftAndStoreMsg();
+            this->s->send(sdata, MSG_SIZE + 4);
         }
     }
+    
+    bool locksimplemented = false;
+    if (locksimplemented){
+        char* rdata = (char*) malloc(MSG_SIZE + 4);
+        while(true){
+            int len = r->receive(buf, MSG_SIZE);
+            // receiving an ACK from sent message
+            if(len == 7 && memmem(buf, 4, rdata, 4) && memmem(buf + 4, 3, "ACK", 3))
+            {
+                // TODO Locks ?
+                int seqnumack = charsToInt32(rdata);
+                this->msgs.erase(seqnumack);
+
+                break;
+            } // receiving content from another process => we send an ACK
+            else {
+                char* sdata = (char*) malloc(7);
+                memcpy(sdata, buf, 4);
+                memcpy(sdata + 4, "ACK", 3);
+                this->s->send(sdata, 7);
+            }
+        }
+    }
+    
 }
 
 void PerfectLink::onMessage()
@@ -43,23 +68,18 @@ void PerfectLink::onMessage()
     
 }
 
-void PerfectLink::fillMsgs()
-{
-    int lb = this->seqnum;
-    int ub = this->seqnum + this->window;
+
+char * PerfectLink::craftAndStoreMsg(){
+    // allocating new memory
+    char* data = (char*) malloc(MSG_SIZE + 4);
     
-    // if window does not divide m, stop at m
-    for(int i = lb; i < ub && i < this->m; i=i+1) {
-        std::cout << i << std::endl;
+    // adding the sequence number
+    int32ToChars(this->seqnum, data);
 
-        // allocating new memory
-        char* data = (char*) malloc(MSG_SIZE + 4);
-        
-        // adding the sequence number
-        int32ToChars(this->seqnum, data);
+    // adding the message to the list
+    this->msgs[this->seqnum] = data;
 
-        // adding the message to the list
-        this->msgs[this->seqnum] = data;
-        this->seqnum++;
-    }
+    this->seqnum++;
+
+    return data;
 }
