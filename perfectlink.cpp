@@ -44,6 +44,9 @@ void* receive(void *argthreads) {
         {
             int seqnumack = charsToInt32(buf);
             std::cout << "** Received ACK " << seqnumack << std::endl;
+            
+            //TODO re
+            
             mtx.lock();
             msgs->erase(seqnumack);
             mtx.unlock();
@@ -90,33 +93,38 @@ void PerfectLink::send()
     
     
     while(true){
-        // end of loop condition
-        if (this->seqnum == this->m){
-            break;
-        } else {
-            // Craft a new message if list contains less than 10 messages to be sent / waiting for acks
-            if (this->msgs.size() < this->window && this->seqnum < this->m){
-                std::cout << "> Crafting message " << this->seqnum << std::endl;
-                craftAndStoreMsg();
+        if (this->seqnum == this->m){break;}//end of program
+        else {
+            // Craft WINDOW new messages if list is empty
+            if (this->msgs.size() == 0){
+                int lb = this->seqnum;
+                int ub = this->seqnum + this->window;
+                for(int i = lb; i < ub && i < this->m; i++){
+                    std::cout << "> Crafting message " << this->seqnum << std::endl;
+                    craftAndStoreMsg();
+                }
             }
-            
-            // Testing purpose
-            sleep(1);
-            
-            if (this->msgs.size() > 0){
-                // Note : map does not keep insertion order but .begin()
-                //returns elements with smallest key
+            // Send all messages if ACK missing
+                std::map<int, char*>::iterator it;
                 mtx.lock();
-                char* sdata = this->msgs.begin()->second;
-                std::cout << "> Sending " << this->msgs.begin()->first << std::endl;
+                for (it = this->msgs.begin(); it != this->msgs.end(); it++) {
+                    int tmp = (*it).first;
+                    char* sdata = (*it).second;
+                    this->s->send(sdata, MSG_SIZE + 4);
+                    std::cout << "> Sending " << tmp << std::endl;
+                }
                 mtx.unlock();
 
-                this->s->send(sdata, MSG_SIZE + 4);
+            while(this->msgs.size() != 0){
+                
             }
+           
             
         }
     }
 }
+
+
 
 void PerfectLink::craftAndStoreMsg(){
     // allocating new memory
