@@ -25,13 +25,10 @@ private:
     int m;
     int seqnum;
     int window;
-    
-    char * craftAndStoreMsg();
-    
+    void craftAndStoreMsg();
 public:
     PerfectLink(UDPSender *s, UDPReceiver *r, int m);
     void send();
-    void onMessage();
 };
 
 #endif /* perfectlink_h */
