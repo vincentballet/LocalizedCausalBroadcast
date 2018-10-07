@@ -97,6 +97,7 @@ void FIFOBroadcast::onMessage(FIFOMessage m)
             if(tryDeliver(*it)) // SUCCESS
             {
                 // sending this data again on delivery to ensure RB4
+                /// @todo Currently can have an issue that process crashes right here and then the message is delivered by this process but not any other
                 broadcast((*it).buffer, (*it).length, (*it).source);
 
                 // after delivering the message it's no longer required
