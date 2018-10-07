@@ -4,7 +4,16 @@ CXXFLAGS=-O0 -g
 
 all: $(MYPROGRAM)
 
-$(MYPROGRAM): main.o common.o membership.o perfectlink.o receiver.o sender.o udpreceiver.o udpsender.o fifobroadcast.o
+$(MYPROGRAM): main.o \
+common.o \
+membership.o \
+perfectlink.o \
+receiver.o \
+sender.o \
+udpreceiver.o \
+udpsender.o \
+fifobroadcast.o \
+inmemorylog.o
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 
 %.o : %.cpp %.h

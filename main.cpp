@@ -19,11 +19,13 @@
 #include "common.h"
 #include <list>
 #include "common.h"
-
+#include "inmemorylog.h"
 
 using std::string;
 using std::cout;
 using std::endl;
+
+InMemoryLog* log;
 
 int m = 10;
 bool sigusr_received = false;
@@ -52,6 +54,8 @@ void writeOutputAndHalt()
     // stop networking
 	
     // writing output file
+    log->dump();
+
     exit(0);
 }
 
@@ -103,6 +107,9 @@ int main(int argc, char** argv)
 
     // obtaining n and membership file
     int n = atoi(argv[1]);
+
+    log = new InMemoryLog(string(argv[1]).append(".log"));
+
 	string membership = argv[2];
 	
 	// extra params (expected to be the # of messages)
@@ -110,10 +117,11 @@ int main(int argc, char** argv)
 
 	// check the parameters
 	assert(1 <= n && n <= 5 && m > 0);
-	
-	
+
 	std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
 	std::cout << "INFO  | Running process " << n << std::endl;
+
+    log->log("Loading membership");
 
     // parsing membership file
 	Membership members(membership);
@@ -123,6 +131,8 @@ int main(int argc, char** argv)
     // listening on our port
     /// @todo Shouldn't we SEND to another process, not this one again (n)?
     UDPReceiver r(members.getIP(n), members.getPort(n));
+
+    log->log("Waiting for SIGUSR1");
 
     // Waiting for sigusr1
     while(sigusr_received == false)
@@ -142,9 +152,13 @@ int main(int argc, char** argv)
     // initializing perfect link
     PerfectLink p0(&s, &r, m);
 
+    log->log("Sending data");
+
     // sending messages
     p0.send();
- 
+
+    writeOutputAndHalt();
+
     // exiting
     return 0;
 }
