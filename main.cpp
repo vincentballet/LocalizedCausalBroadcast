@@ -157,7 +157,11 @@ int main(int argc, char** argv)
     // sending messages
     p0.send();
 
-    writeOutputAndHalt();
+    // Waiting to be killed
+    while(true)
+    {
+        usleep(10000);
+    }
 
     // exiting
     return 0;
