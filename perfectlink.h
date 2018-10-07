@@ -52,6 +52,12 @@ public:
 
     /** @brief ??? */
     void send();
+
+    /** @brief Get target process ID */
+    int getTarget();
+
+    /** @todo Add onMessage() method and use it in other classes
+     * It's logical to start the receiving thread here and not anywhere else */
 };
 
 #endif /* perfectlink_h */

@@ -128,6 +128,12 @@ void PerfectLink::send()
     }
 }
 
+int PerfectLink::getTarget()
+{
+    /// @todo Implement
+    return 0;
+}
+
 
 void PerfectLink::waitForAcksOrTimeout(){
     steady_clock::time_point begin = steady_clock::now();

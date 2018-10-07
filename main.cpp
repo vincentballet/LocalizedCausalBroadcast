@@ -136,7 +136,6 @@ int main(int argc, char** argv)
     // send to myself
     other = n;
 
-
     // initializing sender
     UDPSender s(members.getIP(other), members.getPort(other));
 
