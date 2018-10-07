@@ -116,6 +116,7 @@ int main(int argc, char** argv)
 	Membership members(membership);
 
     // listening on our port
+    /// @todo Shouldn't we SEND to another process, not this one again (n)?
     UDPReceiver r(members.getIP(n), members.getPort(n));
     UDPSender s(members.getIP(n), members.getPort(n));
     PerfectLink p0(&s, &r, m);

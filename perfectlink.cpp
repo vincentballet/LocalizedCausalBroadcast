@@ -8,25 +8,37 @@
 
 #include "perfectlink.h"
 #include "common.h"
+#include <unistd.h>
 #include <pthread.h>
 #include <iostream>
 #include <mutex>
 #include <cstring>
+#include <chrono>
 
 using namespace std;
+using chrono::steady_clock;
 
+/** @brief ??? */
 unsigned const MSG_SIZE = 1000;
-unsigned const BUF_SIZE = 1000;
-unsigned const TIMEOUT = 5e6; //ms
 
+/** @brief ??? */
+unsigned const BUF_SIZE = 1000;
+
+/** @brief ??? */
+unsigned const TIMEOUT = 5000000; // in milliseconds? Is it 5 000 seconds or 83 minutes?
+
+/** @brief A mutex to be used by the PerfectLink class
+ * @todo Use different mutexes for different PerfectLinks to allow concurrent receiving for example */
 mutex mtx;
 
+/** @brief Data to be sent to the receiving thread */
 struct thread_data {
     UDPSender* s;
     UDPReceiver* r;
     map<int, char*>* msgs;
 };
 
+/** @brief ??? */
 void* receive(void *argthreads) {
     struct thread_data *args = (struct thread_data *)argthreads;
     UDPSender* s = args->s;
@@ -51,12 +63,12 @@ void* receive(void *argthreads) {
             mtx.lock();
             msgs->erase(seqnumack);
             mtx.unlock();
-           
+
         } // receiving content from another process => we send an ACK
         else {
             int tmp = charsToInt32(buf);
             cout << "** Received content " << tmp << endl;
-            char* sdata = (char*) malloc(7);
+            char* sdata = static_cast<char*>(malloc(7)); /// @todo Where is it freed?
             memcpy(sdata, buf, 4);
             memcpy(sdata + 4, "ACK", 3);
             cout << "** Sending ACK for " << tmp << endl;
@@ -64,7 +76,6 @@ void* receive(void *argthreads) {
         }
         
     }
-    pthread_exit(NULL);
 }
 
 PerfectLink::PerfectLink(UDPSender* s, UDPReceiver* r, int m)
@@ -78,7 +89,7 @@ PerfectLink::PerfectLink(UDPSender* s, UDPReceiver* r, int m)
 
 void PerfectLink::send()
 {
-    
+    /// @todo what's going on here?..
     pthread_t threadid;
     struct thread_data threadargs;
     threadargs.s = this->s;
@@ -87,7 +98,7 @@ void PerfectLink::send()
     
     // Running the receiving side of a different thread. Passing threadargs as params
     // receive is not a class function
-    if (pthread_create(&threadid, NULL, receive, (void *)&threadargs)) {
+    if (pthread_create(&threadid, nullptr, receive, static_cast<void*>(&threadargs))) {
         cout << "Error: unable to create thread" << endl;
         exit(-1);
     }
@@ -104,33 +115,36 @@ void PerfectLink::send()
             }
         }
         // Send all messages if ACK missing
-            map<int, char*>::iterator it;
-            mtx.lock();
-            for (it = this->msgs.begin(); it != this->msgs.end(); it++) {
-                int tmp = (*it).first;
-                char* sdata = (*it).second;
-                this->s->send(sdata, MSG_SIZE + 4);
-                cout << "> Sending " << tmp << endl;
-            }
-            mtx.unlock();
-
+        map<int, char*>::iterator it;
+        mtx.lock();
+        for (it = this->msgs.begin(); it != this->msgs.end(); it++) {
+            int tmp = (*it).first;
+            char* sdata = (*it).second;
+            this->s->send(sdata, MSG_SIZE + 4);
+            cout << "> Sending " << tmp << endl;
+        }
+        mtx.unlock();
         waitForAcksOrTimeout();
-
     }
 }
 
 
 void PerfectLink::waitForAcksOrTimeout(){
-    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
-    while(this->msgs.size() != 0 ){
-        long a = chrono::duration_cast<chrono::microseconds>(chrono::steady_clock::now() - begin).count();
-        if (a > TIMEOUT){break;}
+    steady_clock::time_point begin = steady_clock::now();
+    while(this->msgs.size() != 0 ) {
+        long a = chrono::duration_cast<chrono::microseconds>(steady_clock::now() - begin).count();
+        if (a > TIMEOUT) break;
+
+        /// Sleep 1 millisecond
+        /// Drastically reduces CPU load (thread sleep instead of busy wait)
+        usleep(1000);
     }
 }
 
 void PerfectLink::craftAndStoreMsg(){
     // allocating new memory
-    char* data = (char*) malloc(MSG_SIZE + 4);
+    /// @todo Where is it freed? Is there a memory leak?
+    char* data = static_cast<char*>(malloc(MSG_SIZE + 4));
     
     // adding the sequence number
     int32ToChars(this->seqnum, data);
@@ -138,7 +152,10 @@ void PerfectLink::craftAndStoreMsg(){
     // adding the message to the list
     mtx.lock();
     this->msgs[this->seqnum] = data;
-    mtx.unlock();
 
+    // IMPORTANT: incrementing the sequence number
+    // Otherwise another thread could send a message with SAME
+    // sequence number
     this->seqnum++;
+    mtx.unlock();
 }
