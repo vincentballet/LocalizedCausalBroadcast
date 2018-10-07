@@ -26,6 +26,7 @@ using std::cout;
 using std::endl;
 
 int m = 10;
+bool sigusr_received = false;
 
 /**
  * @brief Handle the SIGUSR1 signal
@@ -36,6 +37,7 @@ void onSignalUsr1(int signal_num)
     if(signal_num != SIGUSR1) return;
 	
     // Start broadcasting messages
+    sigusr_received = true;
 }
 
 /**
@@ -81,7 +83,8 @@ void onSignalTerm(int signal_num)
  */
 int main(int argc, char** argv)
 {
-	
+    // other host to send data to
+    int other = 0;
 
     // map signals to their handlers
     signal(SIGTERM, onSignalTerm);
@@ -115,12 +118,34 @@ int main(int argc, char** argv)
     // parsing membership file
 	Membership members(membership);
 
+    std::cout << "INFO | Waiting for SIGUSR1 signal" << std::endl;
+
     // listening on our port
     /// @todo Shouldn't we SEND to another process, not this one again (n)?
     UDPReceiver r(members.getIP(n), members.getPort(n));
-    UDPSender s(members.getIP(n), members.getPort(n));
+
+    // Waiting for sigusr1
+    while(sigusr_received == false)
+    {
+        usleep(10000);
+    }
+
+    // send to another host
+    //other = n == 1 ? 2 : 1;
+
+    // send to myself
+    other = n;
+
+
+    // initializing sender
+    UDPSender s(members.getIP(other), members.getPort(other));
+
+    // initializing perfect link
     PerfectLink p0(&s, &r, m);
+
+    // sending messages
     p0.send();
  
+    // exiting
     return 0;
 }

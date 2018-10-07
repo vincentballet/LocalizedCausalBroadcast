@@ -25,7 +25,7 @@ unsigned const MSG_SIZE = 1000;
 unsigned const BUF_SIZE = 1000;
 
 /** @brief ??? */
-unsigned const TIMEOUT = 5000000; // in milliseconds? Is it 5 000 seconds or 83 minutes?
+unsigned const TIMEOUT = 5000000; // in microseconds (1e-6 sec)
 
 /** @brief A mutex to be used by the PerfectLink class
  * @todo Use different mutexes for different PerfectLinks to allow concurrent receiving for example */
