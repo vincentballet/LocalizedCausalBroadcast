@@ -62,6 +62,9 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
 
 void PerfectLink::send(char* buffer, int length)
 {
+    /// @todo: Now retransmission only happens on send()
+    /// How to make it work if noone sends more data and just wants to send what's in the buffer?
+
     // filling the buffer
     craftAndStoreMsg(buffer, length);
 
@@ -89,7 +92,8 @@ void PerfectLink::send(char* buffer, int length)
     mtx.unlock();
 
     // waiting if there are messages left
-    // WARNING: no retransmission after failure
+    /// @todo What is the point of waiting here? If this function returns, it's not clear
+    /// if the message was sent or if there was a timeout...
     waitForAcksOrTimeout();
 }
 
