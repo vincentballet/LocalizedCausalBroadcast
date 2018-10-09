@@ -159,8 +159,7 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     {
         PerfectLink* link = (*it);
 
-        /// @todo make it work
-        //link->send(buffer, length + 8)
+        link->send(buffer, length + 8);
     }
 
     // incrementing sequence number
