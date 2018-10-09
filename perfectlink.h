@@ -8,8 +8,8 @@
 
 #ifndef perfectlink_h
 #define perfectlink_h
-#include "udpsender.h"
-#include "udpreceiver.h"
+#include "sender.h"
+#include "receiver.h"
 #include <stdio.h>
 #include <list>
 #include <map>
@@ -18,17 +18,16 @@ using std::string;
 using std::map;
 
 /** @class This class implements the Perfect Link */
-class PerfectLink
+class PerfectLink : public Sender, public Receiver, public Target
 {
 private:
     map<int, char *> msgs;
 
     /** @brief Object for sending data to other host */
-    UDPSender* s;
+    Sender* s;
 
     /** @brief Object for receiving data from the other host */
-    UDPReceiver* r;
-    int m;
+    Receiver* r;
 
     /** @brief Current sequence number? Receive or send? */
     int seqnum;
@@ -36,28 +35,23 @@ private:
     /** @brief ??? */
     int window;
 
-    /** @brief ??? */
+    /** @brief Add message to send loop */
     void craftAndStoreMsg();
 
-    /** @brief ??? */
+    /** @brief Wait for an ACK */
     void waitForAcksOrTimeout();
+
+    void onMessage(unsigned source, char* buffer, unsigned length);
 public:
     /**
      * @brief Establish a perfect link
      * @param s A UDPSender targeted at a host
      * @param r A UDPReceiver obtaining data from the same host
-     * @param m ???
      */
-    PerfectLink(UDPSender *s, UDPReceiver *r, int m);
+    PerfectLink(Sender *s, Receiver *r, Target *target = nullptr);
 
-    /** @brief ??? */
-    void send();
-
-    /** @brief Get target process ID */
-    int getTarget();
-
-    /** @todo Add onMessage() method and use it in other classes
-     * It's logical to start the receiving thread here and not anywhere else */
+    /** @brief Send data */
+    void send(char *buffer, int length);
 };
 
 #endif /* perfectlink_h */

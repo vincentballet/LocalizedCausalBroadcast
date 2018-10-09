@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <string>
 #include "sender.h"
+#include "membership.h"
 
 using std::string;
 
@@ -17,15 +18,24 @@ using std::string;
 class UDPSender : public Sender
 {
 private:
+    /// @brief Socket to destination
     int fd;
+
+    /// @brief Destination address
     sockaddr_in servaddr;
+
+    /// @brief IP-ID mapping
+    Membership* membership;
+
+    /// @brief This process ID
+    int this_process;
 public:
     /**
      * @brief Initialize sender
-     * @param host Destination host
-     * @param port Destination port
+     * @param membership The membership mapping
+     * @param n The destination process
      */
-    UDPSender(string host, int port);
+    UDPSender(Membership* membership, int n);
 
     virtual ~UDPSender();
 

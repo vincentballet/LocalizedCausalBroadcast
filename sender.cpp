@@ -5,9 +5,9 @@
 using std::cout;
 using std::endl;
 
-Sender::Sender()
+Sender::Sender(int destination)
 {
-
+    this->destination = destination;
 }
 
 void Sender::send(std::string data)
@@ -23,4 +23,9 @@ void Sender::send(char *data)
 void Sender::send(char *data, int N)
 {
     cout << "SENDING " << N << " bytes starting with" << data[0] << endl;
+}
+
+int Sender::getTarget()
+{
+    return destination;
 }

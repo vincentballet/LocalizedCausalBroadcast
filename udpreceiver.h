@@ -9,6 +9,7 @@
 
 #include <string>
 #include "receiver.h"
+#include "membership.h"
 
 using std::string;
 
@@ -16,16 +17,14 @@ using std::string;
 class UDPReceiver : public Receiver
 {
 private:
+    /// @brief The socket file descriptor
     int fd;
-public:
-    /**
-     * @brief Create new receiver
-     * @param host Host to listen on
-     * @param port Port to listen on
-     */
-    UDPReceiver(string host, int port);
 
-    ~UDPReceiver();
+    /// @brief Memberships
+    Membership* membership;
+
+    /// @brief Receive thread
+    pthread_t thread;
 
     /**
      * @brief Receive a datagram (blocking call)
@@ -35,8 +34,27 @@ public:
      */
     virtual int receive(char* data, int maxlen);
 
-    /** @todo Add onMessage() method and use it in other classes
-     * It's logical to start the receiving thread here and not anywhere else */
+    /**
+     * @brief receiveLoop Starts the receive thread
+     * @param args The UDPReceiver* as void*
+     * @return nullptr
+     */
+    static void *receiveLoop(void *args);
+
+    /**
+     * @brief MAXLEN Maximal buffer length
+     */
+    static const unsigned MAXLEN = 1000;
+public:
+    /**
+     * @brief Create new receiver
+     * @param target The target object to relay messages to
+     * @param membership The membership mapping
+     * @param n The parameters of current process
+     */
+    UDPReceiver(Membership* membership, int n, Target* target = nullptr);
+
+    ~UDPReceiver();
 };
 
 #endif // UDPRECEIVER_H

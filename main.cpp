@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 
     // listening on our port
     /// @todo Shouldn't we SEND to another process, not this one again (n)?
-    UDPReceiver r(members.getIP(n), members.getPort(n));
+    UDPReceiver r(&members, n);
 
     log->log("Waiting for SIGUSR1");
 
@@ -147,15 +147,16 @@ int main(int argc, char** argv)
     other = n;
 
     // initializing sender
-    UDPSender s(members.getIP(other), members.getPort(other));
+    UDPSender s(&members, other);
 
     // initializing perfect link
-    PerfectLink p0(&s, &r, m);
+    PerfectLink p0(&s, &r);
 
     log->log("Sending data");
 
-    // sending messages
-    p0.send();
+    for(int i = 0; i < m; i++)
+        // sending messages
+        p0.send(nullptr, 0);
 
     // Waiting to be killed
     while(true)
@@ -163,6 +164,5 @@ int main(int argc, char** argv)
         usleep(10000);
     }
 
-    // exiting
-    return 0;
+    // no return here
 }

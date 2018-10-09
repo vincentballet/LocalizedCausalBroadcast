@@ -6,8 +6,10 @@
 #include <string.h>
 #include <unistd.h>
 
-UDPSender::UDPSender(std::string host, int port)
+UDPSender::UDPSender(Membership *membership, int n) : Sender(n)
 {
+    this->membership = membership;
+
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 
     if(fd < 0)
@@ -19,8 +21,8 @@ UDPSender::UDPSender(std::string host, int port)
     bzero(&servaddr, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = inet_addr(host.c_str());
-    servaddr.sin_port = htons(port);
+    servaddr.sin_addr.s_addr = inet_addr(membership->getIP(n).c_str());
+    servaddr.sin_port = htons(membership->getPort(n));
 }
 
 UDPSender::~UDPSender()

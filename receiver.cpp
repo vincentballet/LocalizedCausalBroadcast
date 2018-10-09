@@ -1,11 +1,17 @@
 #include "receiver.h"
 
-Receiver::Receiver()
+Receiver::Receiver(int this_process, Target *target)
 {
-
+    this->target = target;
+    this->this_process = this_process;
 }
 
-int Receiver::receive(char *data, int maxlen)
+int Receiver::getThis()
 {
-    return 0;
+    return this_process;
+}
+
+void Receiver::setTarget(Target *target)
+{
+    this->target = target;
 }

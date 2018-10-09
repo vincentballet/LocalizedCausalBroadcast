@@ -7,8 +7,10 @@ using std::string;
 
 class Sender
 {
+private:
+    int destination;
 public:
-    Sender();
+    Sender(int destination);
     virtual ~Sender() {}
 
     /**
@@ -29,6 +31,9 @@ public:
      * @param N length of the array
      */
     virtual void send(char* data, int N);
+
+    /** @brief Get target ID */
+    int getTarget();
 };
 
 #endif // SENDER_H
