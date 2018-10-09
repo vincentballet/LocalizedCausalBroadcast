@@ -1,3 +1,9 @@
+/** @file sender.h
+ * @brief Sender interface
+ * @author Volodin Sergei, EPFL
+ * @date October 2018
+ */
+
 #ifndef SENDER_H
 #define SENDER_H
 
