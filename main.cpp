@@ -149,8 +149,11 @@ int main(int argc, char** argv)
     // initializing sender
     UDPSender s(&members, other);
 
+    // Target for messages
+    Target t;
+
     // initializing perfect link
-    PerfectLink p0(&s, &r);
+    PerfectLink p0(&s, &r, &t);
 
     log->log("Sending data");
 

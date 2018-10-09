@@ -1,3 +1,9 @@
+/** @file receiver.h
+ * @brief Receiver interface
+ * @author Volodin Sergei, EPFL
+ * @date October 2018
+ */
+
 #ifndef RECEIVER_H
 #define RECEIVER_H
 

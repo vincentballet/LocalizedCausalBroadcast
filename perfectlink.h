@@ -1,10 +1,9 @@
-//
-//  perfectlink.h
-//  DA_PaymentSystem
-//
-//  Created by Vincent Ballet on 02/10/2018.
-//  Copyright © 2018 Vincent Ballet. All rights reserved.
-//
+/** @file perfectlink.h
+ * @brief Perfect Link
+ * @author Vincent Ballet
+ * @date 02/10/2018
+ * Copyright © 2018 Vincent Ballet. All rights reserved.
+ */
 
 #ifndef perfectlink_h
 #define perfectlink_h
@@ -33,9 +32,6 @@ private:
 
     /** @brief Current sequence number? Receive or send? */
     int seqnum;
-
-    /** @brief ??? */
-    int window;
 
     /** @brief Add message to send loop */
     void craftAndStoreMsg(char *buffer, int length);

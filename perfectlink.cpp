@@ -54,28 +54,44 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     this->s = s;
     this->r = r;
     this->seqnum = 0;
-    this->window = 10;
 }
 
 void PerfectLink::send(char* buffer, int length)
 {
+    // filling the buffer
     craftAndStoreMsg(buffer, length);
 
     // Send all messages if ACK missing
     map<int, pair<int, char*> >::iterator it;
+
+    // start of critical section
     mtx.lock();
-    for (it = this->msgs.begin(); it != this->msgs.end(); it++) {
+    for (it = this->msgs.begin(); it != this->msgs.end(); it++)
+    {
+        // seq number
         int tmp = (*it).first;
+
+        // data
         char* sdata = (*it).second.second;
+
+        // data length
         int len = (*it).second.first;
+
+        // sending message
         s->send(sdata, 4 + len);
-        cout << "> Sending " << tmp << endl;
     }
+
+    // end of critical section
     mtx.unlock();
+
+    // waiting if there are messages left
+    // WARNING: no retransmission after failure
     waitForAcksOrTimeout();
 }
 
-void PerfectLink::waitForAcksOrTimeout(){
+void PerfectLink::waitForAcksOrTimeout()
+{
+    // waiting until all messages are sent
     steady_clock::time_point begin = steady_clock::now();
     while(this->msgs.size() != 0 ) {
         long a = chrono::duration_cast<chrono::microseconds>(steady_clock::now() - begin).count();
@@ -94,14 +110,18 @@ void PerfectLink::craftAndStoreMsg(char* buffer, int length)
 
     // adding the message to the list
     mtx.lock();
+
     // adding the sequence number
     int32ToChars(this->seqnum, data);
 
+    // saving the message
     this->msgs[this->seqnum] = make_pair(length, data);
 
     // IMPORTANT: incrementing the sequence number
     // Otherwise another thread could send a message with SAME
     // sequence number
     this->seqnum++;
+
+    // finished critical section
     mtx.unlock();
 }

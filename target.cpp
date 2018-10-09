@@ -11,5 +11,5 @@ Target::Target()
 
 void Target::onMessage(unsigned source, char *buffer, unsigned length)
 {
-    cerr << "onMessage(" << source << " " << (void*) buffer << " " << length << endl;
+    cerr << "onMessage(" << source << " " << (void*) buffer << " " << length << ")" << endl;
 }

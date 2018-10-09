@@ -1,5 +1,7 @@
 /** @file target.h
  * @brief This file implements the interface for all objects which have onMessage() method
+ * @author Volodin Sergei, EPFL
+ * @date October 2018
  */
 
 #ifndef TARGET_H

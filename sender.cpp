@@ -22,7 +22,7 @@ void Sender::send(char *data)
 
 void Sender::send(char *data, int N)
 {
-    cout << "SENDING " << N << " bytes starting with" << data[0] << endl;
+    cout << "SENDING " << N << " bytes starting with" << data[0] << ")" << endl;
 }
 
 int Sender::getTarget()
