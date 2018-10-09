@@ -7,9 +7,6 @@
 using std::cout;
 using std::endl;
 
-/** @macro minimal of two numbers */
-#define min(x, y) ((x) > (y) ? (y) : (x))
-
 void FIFOBroadcast::onMessage(char *buffer, unsigned length)
 {
     // must have 8 bytes at least

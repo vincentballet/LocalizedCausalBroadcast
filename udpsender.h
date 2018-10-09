@@ -27,6 +27,9 @@ private:
     /// @brief IP-ID mapping
     Membership* membership;
 
+    /// @brief Buffer size
+    static const int MAXLEN = 1000;
+
     /// @brief This process ID
     int this_process;
 public:
@@ -34,8 +37,9 @@ public:
      * @brief Initialize sender
      * @param membership The membership mapping
      * @param n The destination process
+     * @param this_process This process ID (sender ID)
      */
-    UDPSender(Membership* membership, int n);
+    UDPSender(Membership* membership, int n, int this_process);
 
     virtual ~UDPSender();
 

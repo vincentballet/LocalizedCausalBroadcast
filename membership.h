@@ -15,6 +15,7 @@
 using std::string;
 using std::ifstream;
 using std::map;
+using std::pair;
 
 /** @brief Parser for membership file */
 class Membership
@@ -44,17 +45,13 @@ public:
      */
     int getPort(int process);
 	
-	/**
-	 * @brief Get IDs of membership
-	 * @return IDs as a map
-	 */
-	map<int, string> getIPs();
-	
-	/**
-	 * @brief Get Ports of membership
-	 * @return Ports as a map
-	 */
-	map<int, int> getPorts();
+    /**
+     * @brief getID Of a process with IP and port
+     * @param IP IP address of a process
+     * @param port Port of a process
+     * @return -1 on failure or membership ID
+     */
+    int getID(string IP, int port);
 };
 
 #endif // MEMBERSHIP_H

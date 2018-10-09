@@ -7,12 +7,15 @@
 
 #ifndef perfectlink_h
 #define perfectlink_h
-#include "sender.h"
-#include "receiver.h"
+
 #include <stdio.h>
 #include <list>
 #include <mutex>
 #include <map>
+
+#include "sender.h"
+#include "receiver.h"
+#include "failuredetector.h"
 
 using std::mutex;
 using std::map;
@@ -45,6 +48,7 @@ private:
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;
 
+    /** @brief Called on message */
     void onMessage(unsigned source, char* buffer, unsigned length);
 public:
     /**

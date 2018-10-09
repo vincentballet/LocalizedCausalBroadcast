@@ -48,16 +48,16 @@ int Membership::getPort(int process)
     return ports[process];
 }
 
-map<int, string> Membership::getIPs()
+int Membership::getID(std::string IP, int port)
 {
-	map<int, string> ips_return;
-	ips_return.insert(ips.begin(), ips.end());
-	return ips_return;
-}
-
-map<int, int> Membership::getPorts()
-{
-	map<int, int> ports_return;
-	ports_return.insert(ports.begin(), ports.end());
-	return ports_return;
+    map<int, string>::iterator it;
+    for(it = ips.begin(); it != ips.end(); it++)
+    {
+        int id = (*it).first;
+        string ip_ = (*it).second;
+        int port_ = ports[id];
+        if(ip_ == IP && port_ == port)
+            return id;
+    }
+    return -1;
 }

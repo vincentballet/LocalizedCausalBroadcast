@@ -7,13 +7,13 @@
 //
 
 #include "perfectlink.h"
-#include "common.h"
 #include <unistd.h>
 #include <pthread.h>
 #include <iostream>
 #include <cstring>
 #include <chrono>
 #include <cassert>
+#include "common.h"
 
 using namespace std;
 using chrono::steady_clock;
@@ -21,11 +21,13 @@ using std::make_pair;
 
 void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 {
-    assert(len >= 4);
+    // parsing messages
+    if(len < 4 || buf[0] != 0x01) return;
+
     // receiving an ACK from a sent message
-    if(len == 7 && memmem(buf + 4, 3, "ACK", 3))
+    if(len == 8 && memmem(buf + 5, 3, "ACK", 3))
     {
-        int seqnumack = charsToInt32(buf);
+        int seqnumack = charsToInt32(buf + 1);
         cout << "** Received ACK " << seqnumack << endl;
 
         mtx.lock();
@@ -35,22 +37,22 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 
     } // receiving content from another process => we send an ACK
     else {
-        int tmp = charsToInt32(buf);
+        int tmp = charsToInt32(buf + 1);
         cout << "** Received content " << tmp << endl;
-        if(target)
-            target->onMessage(source, buf + 4, len - 4);
-        char sdata[7];
-        memcpy(sdata, buf, 4);
-        memcpy(sdata + 4, "ACK", 3);
+        deliverToAll(source, buf + 4, len - 4);
+        char sdata[8];
+        memcpy(sdata + 1, buf + 1, 4);
+        memcpy(sdata + 5, "ACK", 3);
         cout << "** Sending ACK for " << tmp << endl;
-        s->send(sdata, 7);
+        sdata[0] = 0x01;
+        s->send(sdata, 8);
     }
 }
 
 PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     Sender(s->getTarget()), Receiver(r->getThis(), target)
 {
-    r->setTarget(this);
+    r->addTarget(this);
     this->s = s;
     this->r = r;
     this->seqnum = 0;
@@ -78,7 +80,7 @@ void PerfectLink::send(char* buffer, int length)
         int len = (*it).second.first;
 
         // sending message
-        s->send(sdata, 4 + len);
+        s->send(sdata, len);
     }
 
     // end of critical section
@@ -106,16 +108,22 @@ void PerfectLink::waitForAcksOrTimeout()
 void PerfectLink::craftAndStoreMsg(char* buffer, int length)
 {
     // allocating new memory
-    char* data = static_cast<char*>(malloc(length + 4));
+    char* data = static_cast<char*>(malloc(length + 5));
 
     // adding the message to the list
     mtx.lock();
 
     // adding the sequence number
-    int32ToChars(this->seqnum, data);
+    int32ToChars(this->seqnum, data + 1);
+
+    // filling in first byte
+    data[0] = 0x01;
+
+    // copying data
+    memcpy(data + 5, buffer, length);
 
     // saving the message
-    this->msgs[this->seqnum] = make_pair(length, data);
+    this->msgs[this->seqnum] = make_pair(length + 5, data);
 
     // IMPORTANT: incrementing the sequence number
     // Otherwise another thread could send a message with SAME

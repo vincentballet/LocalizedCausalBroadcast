@@ -5,10 +5,12 @@
 #include <strings.h>
 #include <string.h>
 #include <unistd.h>
+#include "common.h"
 
-UDPSender::UDPSender(Membership *membership, int n) : Sender(n)
+UDPSender::UDPSender(Membership *membership, int n, int this_process) : Sender(n)
 {
     this->membership = membership;
+    this->this_process = this_process;
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -32,7 +34,15 @@ UDPSender::~UDPSender()
 
 void UDPSender::send(char *data, int N)
 {
-    if(sendto(fd, data, N, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
+    char buf[MAXLEN];
+
+    buf[0] = this_process;
+
+    int len1 = min(N, MAXLEN - 1);
+
+    memcpy(buf + 1, data, len1);
+
+    if(sendto(fd, buf, len1 + 1, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
     {
         perror("Cannot send message");
         close(fd);

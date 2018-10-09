@@ -1,7 +1,7 @@
 #include "target.h"
 #include <iostream>
 
-using std::cerr;
+using std::cout;
 using std::endl;
 
 Target::Target()
@@ -11,5 +11,5 @@ Target::Target()
 
 void Target::onMessage(unsigned source, char *buffer, unsigned length)
 {
-    cerr << "onMessage(" << source << " " << (void*) buffer << " " << length << ")" << endl;
+    cout << "onMessage(" << source << " " << (void*) buffer << " " << length << ")" << endl;
 }

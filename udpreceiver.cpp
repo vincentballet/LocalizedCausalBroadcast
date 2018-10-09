@@ -6,6 +6,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "udpreceiver.h"
+#include <iostream>
+
+using namespace std;
 
 UDPReceiver::UDPReceiver(Membership *membership, int n, Target *target) : Receiver(n, target)
 {
@@ -53,7 +56,7 @@ int UDPReceiver::receive(char *data, int maxlen)
     {
         perror("Error in recvfrom");
         exit(-1);
-    }
+    };
 
     return recv_len;
 }
@@ -62,15 +65,17 @@ void* UDPReceiver::receiveLoop(void *args)
 {
     UDPReceiver* instance = (UDPReceiver*) args;
 
+    // buffer for receiving
     char buffer[MAXLEN];
 
     while(true)
     {
         /// @todo: get source from recvfrom() data and match it with membership
         int len = instance->receive(buffer, MAXLEN);
-        if(instance->target)
-            instance->target->onMessage(-1, buffer, len);
+        int source = buffer[0];
+        if(source >= 0)
+            instance->deliverToAll(buffer[0], buffer + 1, len - 1);
     }
 
-    return nullptr;
+    // no return
 }

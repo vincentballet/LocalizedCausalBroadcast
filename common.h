@@ -9,6 +9,9 @@
 
 #include <inttypes.h>
 
+/** @macro minimal of two numbers */
+#define min(x, y) ((x) > (y) ? (y) : (x))
+
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
  * @param input int

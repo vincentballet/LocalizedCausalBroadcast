@@ -8,16 +8,22 @@
 #define RECEIVER_H
 
 #include "target.h"
+#include <vector>
+
+using std::vector;
 
 /** @class Receiver interface */
 class Receiver
 {
 protected:
     /// @brief The target for delivering messages to
-    Target* target;
+    vector<Target*> targets;
 
     /// @brief This process ID
     int this_process;
+
+    /// @brief Deliver a message to all targets
+    void deliverToAll(unsigned source, char* message, unsigned length);
 public:
     /**
      * @brief Receiver constructor
@@ -31,7 +37,7 @@ public:
     int getThis();
 
     /** @brief Set target manually */
-    void setTarget(Target* target);
+    void addTarget(Target* target);
 };
 
 #endif // RECEIVER_H

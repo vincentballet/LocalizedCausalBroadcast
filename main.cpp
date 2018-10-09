@@ -18,8 +18,8 @@
 #include <time.h>
 #include "common.h"
 #include <list>
-#include "common.h"
 #include "inmemorylog.h"
+#include "byteprinter.h"
 
 using std::string;
 using std::cout;
@@ -141,19 +141,28 @@ int main(int argc, char** argv)
     }
 
     // send to another host
-    //other = n == 1 ? 2 : 1;
+    other = n == 1 ? 2 : 1;
 
     // send to myself
-    other = n;
+    //other = n;
 
     // initializing sender
-    UDPSender s(&members, other);
+    UDPSender s(&members, other, n);
 
     // Target for messages
     Target t;
+    BytePrinter p;
+
+    r.addTarget(&p);
 
     // initializing perfect link
     PerfectLink p0(&s, &r, &t);
+
+    // setting up failure detector
+
+    // initializing failure detector
+    FailureMonitor monitor;
+    FailureDetector detector(&s, &r, 1000, &monitor);
 
     log->log("Sending data");
 

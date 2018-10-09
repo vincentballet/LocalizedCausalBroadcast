@@ -15,6 +15,9 @@ udpsender.o \
 fifobroadcast.o \
 inmemorylog.o \
 target.o \
+failuredetector.o \
+failuremonitor.o \
+byteprinter.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 

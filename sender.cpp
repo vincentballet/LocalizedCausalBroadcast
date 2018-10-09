@@ -12,7 +12,7 @@ Sender::Sender(int destination)
 
 void Sender::send(std::string data)
 {
-    send(data.c_str());
+    send((char*) data.c_str());
 }
 
 void Sender::send(char *data)
