@@ -12,9 +12,10 @@
 #include "receiver.h"
 #include <stdio.h>
 #include <list>
+#include <mutex>
 #include <map>
 
-using std::string;
+using std::mutex;
 using std::map;
 using std::pair;
 
@@ -41,6 +42,12 @@ private:
 
     /** @brief Wait for an ACK */
     void waitForAcksOrTimeout();
+
+    /** @brief Timeout for 1 message in microseconds (1e-6 sec) */
+    unsigned const TIMEOUT = 5000000;
+
+    /** @brief A mutex to be used by the PerfectLink class */
+    mutex mtx;
 
     void onMessage(unsigned source, char* buffer, unsigned length);
 public:
