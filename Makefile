@@ -13,7 +13,9 @@ sender.o \
 udpreceiver.o \
 udpsender.o \
 fifobroadcast.o \
-inmemorylog.o
+inmemorylog.o \
+target.o \
+
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 
 %.o : %.cpp %.h
