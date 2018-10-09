@@ -158,6 +158,8 @@ int main(int argc, char** argv)
     // initializing perfect link
     PerfectLink p0(&s, &r, &t);
 
+    p0.addTarget(&p);
+
     // setting up failure detector
 
     // initializing failure detector
@@ -168,7 +170,7 @@ int main(int argc, char** argv)
 
     for(int i = 0; i < m; i++)
         // sending messages
-        p0.send(nullptr, 0);
+        p0.send((const char*) "WORLD", 6);
 
     // Waiting to be killed
     while(true)

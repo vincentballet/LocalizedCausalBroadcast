@@ -42,7 +42,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     else if(buf[0] == 0x01) {
         int tmp = charsToInt32(buf + 1);
         cout << "** Received content " << tmp << endl;
-        deliverToAll(source, buf + 4, len - 4);
+        deliverToAll(source, buf + 5, len - 5);
         char sdata[5];
         sdata[0] = 0x02;
         memcpy(sdata + 1, buf + 1, 4);

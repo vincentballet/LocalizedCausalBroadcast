@@ -10,5 +10,8 @@ BytePrinter::BytePrinter()
 
 void BytePrinter::onMessage(unsigned source, char *buffer, unsigned length)
 {
-    cerr << "UDP message from ID " << source << " Len " << length << " First byte " << (int) buffer[1] << endl;
+    cerr << "Message from ID " << source << " len=" << length << " data=";
+    for(unsigned i = 0; i < length; i++)
+        cerr << buffer[i];
+    cerr << endl;
 }
