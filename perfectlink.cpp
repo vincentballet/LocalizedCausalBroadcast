@@ -19,13 +19,16 @@ using namespace std;
 using chrono::steady_clock;
 using std::make_pair;
 
+// Protocol: <0x01> <SEQ 4 bytes> <Content>
+//           <0x02> <SEQ 4 bytes> -- means ACK
+
 void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 {
     // parsing messages
-    if(len < 4 || buf[0] != 0x01) return;
+    if(len < 4) return;
 
     // receiving an ACK from a sent message
-    if(len == 8 && memmem(buf + 5, 3, "ACK", 3))
+    if(len == 5 && buf[0] == 0x02)
     {
         int seqnumack = charsToInt32(buf + 1);
         cout << "** Received ACK " << seqnumack << endl;
@@ -36,16 +39,15 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         mtx.unlock();
 
     } // receiving content from another process => we send an ACK
-    else {
+    else if(buf[0] == 0x01) {
         int tmp = charsToInt32(buf + 1);
         cout << "** Received content " << tmp << endl;
         deliverToAll(source, buf + 4, len - 4);
-        char sdata[8];
+        char sdata[5];
+        sdata[0] = 0x02;
         memcpy(sdata + 1, buf + 1, 4);
-        memcpy(sdata + 5, "ACK", 3);
         cout << "** Sending ACK for " << tmp << endl;
-        sdata[0] = 0x01;
-        s->send(sdata, 8);
+        s->send(sdata, 5);
     }
 }
 

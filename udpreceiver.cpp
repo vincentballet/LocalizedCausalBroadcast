@@ -10,6 +10,8 @@
 
 using namespace std;
 
+// protocol: <first byte == source ID> <Data bytes...>
+
 UDPReceiver::UDPReceiver(Membership *membership, int n, Target *target) : Receiver(n, target)
 {
     fd = -1;
@@ -70,7 +72,6 @@ void* UDPReceiver::receiveLoop(void *args)
 
     while(true)
     {
-        /// @todo: get source from recvfrom() data and match it with membership
         int len = instance->receive(buffer, MAXLEN);
         int source = buffer[0];
         if(source >= 0)
