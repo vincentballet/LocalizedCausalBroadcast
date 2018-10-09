@@ -16,12 +16,13 @@
 
 using std::string;
 using std::map;
+using std::pair;
 
 /** @class This class implements the Perfect Link */
 class PerfectLink : public Sender, public Receiver, public Target
 {
 private:
-    map<int, char *> msgs;
+    map<int, pair<int, char*> > msgs;
 
     /** @brief Object for sending data to other host */
     Sender* s;
@@ -36,7 +37,7 @@ private:
     int window;
 
     /** @brief Add message to send loop */
-    void craftAndStoreMsg();
+    void craftAndStoreMsg(char *buffer, int length);
 
     /** @brief Wait for an ACK */
     void waitForAcksOrTimeout();

@@ -14,9 +14,11 @@
 #include <mutex>
 #include <cstring>
 #include <chrono>
+#include <cassert>
 
 using namespace std;
 using chrono::steady_clock;
+using std::make_pair;
 
 /** @brief ??? */
 unsigned const MSG_SIZE = 1000;
@@ -33,6 +35,7 @@ mutex mtx;
 
 void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 {
+    assert(len >= 4);
     // receiving an ACK from a sent message
     if(len == 7 && memmem(buf + 4, 3, "ACK", 3))
     {
@@ -40,6 +43,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         cout << "** Received ACK " << seqnumack << endl;
 
         mtx.lock();
+        free(msgs[seqnumack].second);
         msgs.erase(seqnumack);
         mtx.unlock();
 
@@ -48,13 +52,12 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         int tmp = charsToInt32(buf);
         cout << "** Received content " << tmp << endl;
         if(target)
-            target->onMessage(source, buf, len);
-        char* sdata = static_cast<char*>(malloc(7));
+            target->onMessage(source, buf + 4, len - 4);
+        char sdata[7];
         memcpy(sdata, buf, 4);
         memcpy(sdata + 4, "ACK", 3);
         cout << "** Sending ACK for " << tmp << endl;
         s->send(sdata, 7);
-        free(sdata);
     }
 }
 
@@ -70,15 +73,16 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
 
 void PerfectLink::send(char* buffer, int length)
 {
-    craftAndStoreMsg();
+    craftAndStoreMsg(buffer, length);
 
     // Send all messages if ACK missing
-    map<int, char*>::iterator it;
+    map<int, pair<int, char*> >::iterator it;
     mtx.lock();
     for (it = this->msgs.begin(); it != this->msgs.end(); it++) {
         int tmp = (*it).first;
-        char* sdata = (*it).second;
-        s->send(sdata, MSG_SIZE + 4);
+        char* sdata = (*it).second.second;
+        int len = (*it).second.first;
+        s->send(sdata, 4 + len);
         cout << "> Sending " << tmp << endl;
     }
     mtx.unlock();
@@ -97,17 +101,17 @@ void PerfectLink::waitForAcksOrTimeout(){
     }
 }
 
-void PerfectLink::craftAndStoreMsg(){
+void PerfectLink::craftAndStoreMsg(char* buffer, int length)
+{
     // allocating new memory
-    /// @todo Where is it freed? Is there a memory leak?
-    char* data = static_cast<char*>(malloc(MSG_SIZE + 4));
-    
-    // adding the sequence number
-    int32ToChars(this->seqnum, data);
+    char* data = static_cast<char*>(malloc(length + 4));
 
     // adding the message to the list
     mtx.lock();
-    this->msgs[this->seqnum] = data;
+    // adding the sequence number
+    int32ToChars(this->seqnum, data);
+
+    this->msgs[this->seqnum] = make_pair(length, data);
 
     // IMPORTANT: incrementing the sequence number
     // Otherwise another thread could send a message with SAME
