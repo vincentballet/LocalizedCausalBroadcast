@@ -36,7 +36,7 @@ struct FIFOMessage {
  * @todo Make methods thread-safe
  * @todo Fix send() call
  * @todo Test the class */
-class FIFOBroadcast
+class FIFOBroadcast : public Receiver
 {
 private:
     /// @brief A vector of Perfect Links (destinations)
@@ -88,13 +88,6 @@ public:
      * @param length The length of the message in bytes
      */
     void broadcast(char* message, unsigned length);
-
-    /**
-     * @brief deliver
-     * @param message Payload
-     * @param len Length
-     */
-    virtual void deliver(char* message, unsigned len);
 };
 
 #endif // FIFOBROADCAST_H

@@ -50,7 +50,7 @@ bool FIFOBroadcast::tryDeliver(FIFOMessage m)
     if(recv_seq_num[m.source] + 1 == m.seq_num)
     {
         // delivering
-        deliver(m.buffer, m.length);
+        deliverToAll(m.source, m.buffer, m.length);
 
         // increasing seq num
         recv_seq_num[m.source] += 1;
@@ -111,7 +111,7 @@ void FIFOBroadcast::onMessage(FIFOMessage m)
     }
 }
 
-FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> links)
+FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> links) : Receiver(this_process_id)
 {
     // saving current id
     this->this_process_id = this_process_id;
@@ -140,7 +140,7 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     // delivering the message locally?
     /// @todo How to ensure it's not delivered twice?
     /// Need to add content check?
-    deliver(message, length);
+    deliverToAll(source, message, length);
 
     // buffer for sending
     char buffer[MAXLEN];
@@ -164,11 +164,4 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
 
     // incrementing sequence number
     send_seq_num++;
-}
-
-
-void FIFOBroadcast::deliver(char *message, unsigned len)
-{
-    // some dummy code for showing the delivered message
-    cout << "Got message of " << len << "bytes; pointer address is " << message << endl;
 }
