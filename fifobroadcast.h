@@ -36,7 +36,7 @@ struct FIFOMessage {
  * @todo Make methods thread-safe
  * @todo Fix send() call
  * @todo Test the class */
-class FIFOBroadcast : public Receiver
+class FIFOBroadcast : public Receiver, public Target
 {
 private:
     /// @brief A vector of Perfect Links (destinations)
@@ -54,11 +54,8 @@ private:
     /// @brief React on a message with parsed source
     void onMessage(unsigned source, char* buffer, unsigned length);
 
-    /// @brief React on a message with unparsed source
-    void onMessage(char *buffer, unsigned length);
-
     /// @brief React on a parsed message
-    void onMessage(FIFOMessage m);
+    void onMessage1(FIFOMessage m);
 
     /**
      * @brief tryDeliver Try delivering a message

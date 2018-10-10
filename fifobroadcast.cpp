@@ -7,18 +7,6 @@
 using std::cout;
 using std::endl;
 
-void FIFOBroadcast::onMessage(char *buffer, unsigned length)
-{
-    // must have 8 bytes at least
-    assert(length >= 8);
-
-    // source is first 4 bytes
-    unsigned source = charsToInt32(buffer);
-
-    // continuing message parsing
-    onMessage(source, buffer + 4, length - 4);
-}
-
 void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
     // resulting parsed message
@@ -40,7 +28,7 @@ void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
     msg.source = source;
 
     // processing message further
-    onMessage(msg);
+    onMessage1(msg);
 }
 
 bool FIFOBroadcast::tryDeliver(FIFOMessage m)
@@ -63,7 +51,7 @@ bool FIFOBroadcast::tryDeliver(FIFOMessage m)
     return false;
 }
 
-void FIFOBroadcast::onMessage(FIFOMessage m)
+void FIFOBroadcast::onMessage1(FIFOMessage m)
 {
     // source is an index of a perfect link in links vector
     assert(m.source < links.size());
