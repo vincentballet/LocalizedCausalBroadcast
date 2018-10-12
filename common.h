@@ -26,4 +26,7 @@ void int32ToChars(uint32_t input, char* dest);
  */
 uint32_t charsToInt32(char* input);
 
+/** @brief Maximal buffer size */
+const int MAXLEN = 1000;
+
 #endif // COMMON_H

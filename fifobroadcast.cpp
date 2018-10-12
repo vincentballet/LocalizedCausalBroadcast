@@ -81,10 +81,6 @@ void FIFOBroadcast::onMessage1(FIFOMessage m)
             // trying to deliver current message
             if(tryDeliver(*it)) // SUCCESS
             {
-                // sending this data again on delivery to ensure RB4
-                /// @todo Currently can have an issue that process crashes right here and then the message is delivered by this process but not any other
-                broadcast((*it).buffer, (*it).length, (*it).source);
-
                 // after delivering the message it's no longer required
                 buffer.erase(it);
 
@@ -99,25 +95,17 @@ void FIFOBroadcast::onMessage1(FIFOMessage m)
     }
 }
 
-FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> links) : Receiver(this_process_id)
+FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> links, int timeout_ms) : Broadcast(this_process_id, links)
 {
-    // saving current id
-    this->this_process_id = this_process_id;
-
-    // saving perfect links
-    this->links = links;
-
     // sending sequence number is initially 0
     send_seq_num = 0;
 
     // expecting to receive 0
     recv_seq_num.assign(links.size(), -1);
-}
 
-void FIFOBroadcast::broadcast(char *message, unsigned length)
-{
-    // sending a message from this process
-    broadcast(message, length, this_process_id);
+    // creating rb broadcast
+    rb_broadcast = new ReliableBroadcast(this_process_id, links, timeout_ms);
+    rb_broadcast->addTarget(this);
 }
 
 void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
@@ -125,30 +113,16 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     // for loop over links
     vector<PerfectLink*>::iterator it;
 
-    // delivering the message locally?
-    /// @todo How to ensure it's not delivered twice?
-    /// Need to add content check?
-    deliverToAll(source, message, length);
-
     // buffer for sending
     char buffer[MAXLEN];
 
-    // copying source
-    int32ToChars(source, buffer);
-
     // copying sequence number
-    int32ToChars(send_seq_num, buffer + 4);
+    int32ToChars(send_seq_num, buffer);
 
     // copying payload
-    memcpy(buffer + 8, message, min(length, MAXLEN - 8));
+    memcpy(buffer + 4, message, min(length, MAXLEN - 4));
 
-    // sending data to all perfect links
-    for(it = links.begin(); it != links.end(); it++)
-    {
-        PerfectLink* link = (*it);
-
-        link->send(buffer, length + 8);
-    }
+    rb_broadcast->broadcast(message, length, source);
 
     // incrementing sequence number
     send_seq_num++;

@@ -18,6 +18,9 @@ target.o \
 failuredetector.o \
 failuremonitor.o \
 byteprinter.o \
+broadcast.o \
+besteffortbroadcast.o \
+reliablebroadcast.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 

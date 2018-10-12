@@ -27,9 +27,6 @@ private:
     /// @brief IP-ID mapping
     Membership* membership;
 
-    /// @brief Buffer size
-    static const int MAXLEN = 1000;
-
     /// @brief This process ID
     int this_process;
 public:

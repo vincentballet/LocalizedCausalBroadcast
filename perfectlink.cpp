@@ -60,6 +60,16 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     this->seqnum = 0;
 }
 
+Sender *PerfectLink::getSender()
+{
+    return s;
+}
+
+Receiver *PerfectLink::getReceiver()
+{
+    return r;
+}
+
 void PerfectLink::send(char* buffer, int length)
 {
     /// @todo: Now retransmission only happens on send()

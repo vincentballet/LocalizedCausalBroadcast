@@ -58,6 +58,18 @@ public:
      */
     PerfectLink(Sender *s, Receiver *r, Target *target = nullptr);
 
+    /**
+     * @brief getSender Get the sender in the perfect link
+     * @return Sender* pointer
+     */
+    Sender* getSender();
+
+    /**
+     * @brief getReceiver Get the receiver in this perfect link
+     * @return Receiver* pointer
+     */
+    Receiver* getReceiver();
+
     /** @brief Send data */
     void send(char *buffer, int length);
 };

@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "udpreceiver.h"
+#include "common.h"
 #include <iostream>
 
 using namespace std;

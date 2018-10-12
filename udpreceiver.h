@@ -40,11 +40,6 @@ private:
      * @return nullptr
      */
     static void *receiveLoop(void *args);
-
-    /**
-     * @brief MAXLEN Maximal buffer length
-     */
-    static const unsigned MAXLEN = 1000;
 public:
     /**
      * @brief Create new receiver

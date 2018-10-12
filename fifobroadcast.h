@@ -14,14 +14,12 @@
 #include <list>
 #include "membership.h"
 #include "udpreceiver.h"
-#include "perfectlink.h"
+#include "broadcast.h"
+#include "reliablebroadcast.h"
 #include "common.h"
 
 using std::vector;
 using std::list;
-
-/** @brief Maximal buffer size */
-const int MAXLEN = 100;
 
 /** @class Contains a single FIFO message (internal data structure) */
 struct FIFOMessage {
@@ -36,11 +34,11 @@ struct FIFOMessage {
  * @todo Make methods thread-safe
  * @todo Fix send() call
  * @todo Test the class */
-class FIFOBroadcast : public Receiver, public Target
+class FIFOBroadcast : public Broadcast
 {
 private:
-    /// @brief A vector of Perfect Links (destinations)
-    vector<PerfectLink*> links;
+    /// @brief Reliable broadcast instance
+    ReliableBroadcast* rb_broadcast;
 
     /// @brief Receiving sequence numbers
     vector<int> recv_seq_num;
@@ -66,25 +64,16 @@ private:
 
     /** @brief Broadcast a message with source other than this process */
     void broadcast(char* message, unsigned length, unsigned source);
-
-    /** @brief Identificator of current process */
-    unsigned this_process_id;
 public:
     /**
      * @brief FIFOBroadcast initialization
      * @param this_process_id ID of the current process
      * @param links Vector of PerfectLink pointers connected to members     
+     * @param timeout_ms Timeout for failure detector
      */
-    FIFOBroadcast(unsigned this_process_id, vector<PerfectLink*> links);
+    FIFOBroadcast(unsigned this_process_id, vector<PerfectLink*> links, int timeout_ms);
 
     virtual ~FIFOBroadcast() {}
-
-    /**
-     * @brief Send a message using FIFO Broadcast algorithm
-     * @param message A string to be sent
-     * @param length The length of the message in bytes
-     */
-    void broadcast(char* message, unsigned length);
 };
 
 #endif // FIFOBROADCAST_H
