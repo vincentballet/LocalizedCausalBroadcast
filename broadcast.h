@@ -38,7 +38,7 @@ public:
      * @param message A string to be sent
      * @param length The length of the message in bytes
      */
-    void broadcast(char* message, unsigned length);
+    void broadcastPublic(char* message, unsigned length);
 public:
     Broadcast();
 };

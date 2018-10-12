@@ -1,4 +1,9 @@
+#include <iostream>
 #include "inmemorylog.h"
+#include "common.h"
+
+using std::cout;
+using std::endl;
 
 InMemoryLog::InMemoryLog(std::string destination_filename)
 {
@@ -8,6 +13,9 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 
 void InMemoryLog::log(std::string content)
 {
+#ifdef INMEMORY_PRINT
+    cout << content << endl;
+#endif
     // adding content to vector
     buffer.push_back(content);
 }

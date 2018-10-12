@@ -22,6 +22,9 @@ Membership::Membership(std::string file)
         // number of process, IP address, port
         handle >> idx >> s >> n;
 
+        // adding process id
+        processes.push_back(idx);
+
         cout << "ID " << idx << " IP " << s << " PORT " << n << endl;
 
         // storing data
@@ -46,6 +49,20 @@ int Membership::getPort(int process)
         exit(0);
     }
     return ports[process];
+}
+
+vector<int> Membership::getProcesses()
+{
+    cout << processes[0] << endl;
+    return processes;
+}
+
+bool Membership::validProcess(int process)
+{
+    vector<int>::iterator it;
+    for(it = processes.begin(); it != processes.end(); it++)
+        if(*it == process) return true;
+    return false;
 }
 
 int Membership::getID(std::string IP, int port)

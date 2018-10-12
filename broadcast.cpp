@@ -16,7 +16,7 @@ Broadcast::Broadcast(unsigned this_process, vector<PerfectLink *> links) : Recei
     this->links = links;
 }
 
-void Broadcast::broadcast(char *message, unsigned length)
+void Broadcast::broadcastPublic(char *message, unsigned length)
 {
     // send message from this process
     broadcast(message, length, this_process);

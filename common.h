@@ -8,9 +8,13 @@
 #define COMMON_H
 
 #include <inttypes.h>
+#include "inmemorylog.h"
 
 /** @macro minimal of two numbers */
 #define min(x, y) ((x) > (y) ? (y) : (x))
+
+/** @macro Print messages stored in memory */
+#define INMEMORY_PRINT 1
 
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
@@ -28,5 +32,10 @@ uint32_t charsToInt32(char* input);
 
 /** @brief Maximal buffer size */
 const int MAXLEN = 1000;
+
+/**
+ * @brief memorylog In Memory Log
+ */
+extern InMemoryLog* memorylog;
 
 #endif // COMMON_H

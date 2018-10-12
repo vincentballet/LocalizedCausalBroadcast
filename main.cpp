@@ -16,16 +16,17 @@
 #include "udpsender.h"
 #include "perfectlink.h"
 #include <time.h>
-#include "common.h"
+#include <sstream>
 #include <list>
-#include "inmemorylog.h"
+#include "common.h"
 #include "byteprinter.h"
+#include "besteffortbroadcast.h"
+#include "fifobroadcast.h"
 
 using std::string;
 using std::cout;
 using std::endl;
-
-InMemoryLog* log;
+using std::stringstream;
 
 int m = 10;
 bool sigusr_received = false;
@@ -54,7 +55,7 @@ void writeOutputAndHalt()
     // stop networking
 	
     // writing output file
-    log->dump();
+    memorylog->dump();
 
     exit(0);
 }
@@ -108,69 +109,71 @@ int main(int argc, char** argv)
     // obtaining n and membership file
     int n = atoi(argv[1]);
 
-    log = new InMemoryLog(string(argv[1]).append(".log"));
+    memorylog = new InMemoryLog(string(argv[1]).append(".log"));
 
 	string membership = argv[2];
 	
 	// extra params (expected to be the # of messages)
 	if (argc > 2){ m = atoi(argv[3]); }
 
-	// check the parameters
-	assert(1 <= n && n <= 5 && m > 0);
-
 	std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
 	std::cout << "INFO  | Running process " << n << std::endl;
 
-    log->log("Loading membership");
+    cout << "Loading membership" << endl;
 
     // parsing membership file
 	Membership members(membership);
 
+    // list of processes
+    vector<int> processes = members.getProcesses();
+
+    // checking if process is valid
+    assert(members.validProcess(n));
+
     std::cout << "INFO | Waiting for SIGUSR1 signal" << std::endl;
 
     // listening on our port
-    /// @todo Shouldn't we SEND to another process, not this one again (n)?
     UDPReceiver r(&members, n);
 
-    log->log("Waiting for SIGUSR1");
+    memorylog->log("Waiting for SIGUSR1");
 
     // Waiting for sigusr1
-    while(sigusr_received == false)
+//    while(sigusr_received == false)
+//    {
+//        usleep(10000);
+//    }
+
+    vector<UDPSender*> senders;
+    vector<PerfectLink*> links;
+    vector<int>::iterator it;
+    for(it = processes.begin(); it != processes.end(); it++)
     {
-        usleep(10000);
+        // not sending to myself
+        if((*it) != n)
+        {
+            cout << "Creating sender for " << *it << endl;
+            UDPSender* sender = new UDPSender(&members, *it, n);
+            PerfectLink* link = new PerfectLink(sender, &r);
+            senders.push_back(sender);
+            links.push_back(link);
+        }
     }
 
-    // send to another host
-    other = n == 1 ? 2 : 1;
+    // creating broadcast object
+    FIFOBroadcast broadcast(n, links, 1000);
 
-    // send to myself
-    //other = n;
+    memorylog->log("Sending data");
 
-    // initializing sender
-    UDPSender s(&members, other, n);
-
-    // Target for messages
-    Target t;
-    BytePrinter p;
-
-    r.addTarget(&p);
-
-    // initializing perfect link
-    PerfectLink p0(&s, &r, &t);
-
-    p0.addTarget(&p);
-
-    // setting up failure detector
-
-    // initializing failure detector
-    FailureMonitor monitor;
-    FailureDetector detector(&s, &r, 1000, &monitor);
-
-    log->log("Sending data");
-
+    // broadcasting messages
+    char buf[4];
     for(int i = 0; i < m; i++)
-        // sending messages
-        p0.send((char*) "WORLD", 6);
+    {
+        stringstream ss;
+        int32ToChars(i, buf);
+        ss << "b " << i;
+        memorylog->log(ss.str());
+        broadcast.broadcastPublic(buf, 4);
+    }
 
     // Waiting to be killed
     while(true)

@@ -21,6 +21,7 @@ byteprinter.o \
 broadcast.o \
 besteffortbroadcast.o \
 reliablebroadcast.o \
+seqtarget.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 

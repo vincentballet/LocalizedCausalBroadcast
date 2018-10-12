@@ -1,5 +1,7 @@
 #include "common.h"
 
+InMemoryLog* memorylog = nullptr;
+
 void int32ToChars(uint32_t input, char *dest_)
 {
     uint8_t* dest = (uint8_t*) dest_;

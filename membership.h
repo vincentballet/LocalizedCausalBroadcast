@@ -16,6 +16,7 @@ using std::string;
 using std::ifstream;
 using std::map;
 using std::pair;
+using std::vector;
 
 /** @brief Parser for membership file */
 class Membership
@@ -24,6 +25,7 @@ private:
     ifstream handle;
     map<int, string> ips;
     map<int, int> ports;
+    vector<int> processes;
 public:
     /**
      * @brief Load membership file
@@ -44,6 +46,18 @@ public:
      * @return Port as an int
      */
     int getPort(int process);
+
+    /**
+     * @brief getProcesses List of processes
+     * @return Vector with processes
+     */
+    vector<int> getProcesses();
+
+    /**
+     * @brief validProcess Checks if process ID is valid
+     * @return True if valid
+     */
+    bool validProcess(int process);
 	
     /**
      * @brief getID Of a process with IP and port
