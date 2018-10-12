@@ -9,6 +9,7 @@ using std::endl;
 
 void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
+    mtx.lock();
     // resulting parsed message
     FIFOMessage msg;
 
@@ -29,6 +30,7 @@ void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 
     // processing message further
     onMessage1(msg);
+    mtx.unlock();
 }
 
 bool FIFOBroadcast::tryDeliver(FIFOMessage m)
@@ -110,6 +112,13 @@ FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> lin
 
 void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
 {
+    mtx.lock();
+
+    // incrementing sequence number
+    int seqnum = send_seq_num++;
+
+    mtx.unlock();
+
     // for loop over links
     vector<PerfectLink*>::iterator it;
 
@@ -117,13 +126,10 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     char buffer[MAXLEN];
 
     // copying sequence number
-    int32ToChars(send_seq_num, buffer);
+    int32ToChars(seqnum, buffer);
 
     // copying payload
     memcpy(buffer + 4, message, min(length, MAXLEN - 4));
 
     rb_broadcast->broadcast(message, length, source);
-
-    // incrementing sequence number
-    send_seq_num++;
 }

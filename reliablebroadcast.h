@@ -14,10 +14,12 @@
 #include <set>
 #include <map>
 #include <list>
+#include <mutex>
 
 using std::set;
 using std::map;
 using std::list;
+using std::mutex;
 
 class FIFOBroadcast;
 
@@ -26,6 +28,9 @@ class ReliableBroadcast : public Broadcast, public FailureMonitor
 {
     friend class FIFOBroadcast;
 private:
+    /// @brief mutex for the object
+    mutex mtx;
+
     /// @brief from array (Algo 3.2)
     map<int, set<string> > from;
 

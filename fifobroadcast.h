@@ -17,9 +17,11 @@
 #include "broadcast.h"
 #include "reliablebroadcast.h"
 #include "common.h"
+#include <mutex>
 
 using std::vector;
 using std::list;
+using std::mutex;
 
 /** @class Contains a single FIFO message (internal data structure) */
 struct FIFOMessage {
@@ -37,6 +39,9 @@ struct FIFOMessage {
 class FIFOBroadcast : public Broadcast
 {
 private:
+    /// @brief Mutex for the object
+    mutex mtx;
+
     /// @brief Reliable broadcast instance
     ReliableBroadcast* rb_broadcast;
 

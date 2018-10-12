@@ -2,6 +2,7 @@
 
 void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
+    mtx.lock();
     // checking if source is valid
     if(from.find(source) == from.end())
     {
@@ -27,6 +28,7 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
     {
         beb_broadcast->broadcast(buffer, length, source);
     }
+    mtx.unlock();
 }
 
 void ReliableBroadcast::broadcast(char *message, unsigned length, unsigned source)
@@ -37,6 +39,7 @@ void ReliableBroadcast::broadcast(char *message, unsigned length, unsigned sourc
 
 void ReliableBroadcast::onFailure(int process)
 {
+    mtx.lock();
     // removing process from correct list
     list<int>::iterator it;
     for(it = correct.begin(); it != correct.end(); it++)
@@ -55,6 +58,7 @@ void ReliableBroadcast::onFailure(int process)
         string s = (*it1);
         beb_broadcast->broadcast((char*) s.c_str(), s.length(), process);
     }
+    mtx.unlock();
 }
 
 bool ReliableBroadcast::isCorrect(int process)
