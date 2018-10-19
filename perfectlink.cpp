@@ -31,7 +31,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     if(len == 5 && buf[0] == 0x02)
     {
         int seqnumack = charsToInt32(buf + 1);
-        cout << "** Received ACK " << seqnumack << endl;
+        //cout << "** Received ACK " << seqnumack << endl;
 
         mtx.lock();
         free(msgs[seqnumack].second);
@@ -40,13 +40,13 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 
     } // receiving content from another process => we send an ACK
     else if(buf[0] == 0x01) {
-        int tmp = charsToInt32(buf + 1);
-        cout << "** Received content " << tmp << endl;
+        //int tmp = charsToInt32(buf + 1);
+        //cout << "** Received content " << tmp << endl;
         deliverToAll(source, buf + 5, len - 5);
         char sdata[5];
         sdata[0] = 0x02;
         memcpy(sdata + 1, buf + 1, 4);
-        cout << "** Sending ACK for " << tmp << endl;
+        //cout << "** Sending ACK for " << tmp << endl;
         s->send(sdata, 5);
     }
 }

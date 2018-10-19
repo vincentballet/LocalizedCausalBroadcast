@@ -51,7 +51,7 @@ void *FailureDetector::pingLoop(void *arg)
         long delta = now - begin;
         if (delta > ping_interval)
         {
-            cerr << "Ping" << endl;
+            //cerr << "Ping" << endl;
             detector->s->send(heartbeat_ping);
             begin = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
         }

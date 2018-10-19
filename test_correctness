@@ -13,7 +13,7 @@ time_to_finish=2
 init_time=2
 
 #configure lossy network simulation
-sudo tc qdisc change dev lo root netem delay 50ms 200ms loss 10% 25% reorder 25% 50%
+#sudo tc qdisc change dev lo root netem delay 50ms 200ms loss 10% 25% reorder 25% 50%
 
 
 echo "5
@@ -21,7 +21,7 @@ echo "5
 127.0.0.1 11002
 127.0.0.1 11003
 127.0.0.1 11004
-127.0.0.1 11005" >> membership
+127.0.0.1 11005" > membership
 
 #start 5 processes, each broadcasting 1000 messages
 for i in `seq 1 5`

@@ -2,6 +2,13 @@
 
 void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
+    if(source == this_process)
+    {
+        // delivering locally
+        deliverToAll(source, buffer, length);
+        return;
+    }
+
     mtx.lock();
     // checking if source is valid
     if(from.find(source) == from.end())

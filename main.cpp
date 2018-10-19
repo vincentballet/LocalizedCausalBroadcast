@@ -22,6 +22,7 @@
 #include "byteprinter.h"
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
+#include "seqtarget.h"
 
 using std::string;
 using std::cout;
@@ -119,7 +120,7 @@ int main(int argc, char** argv)
 	std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
 	std::cout << "INFO  | Running process " << n << std::endl;
 
-    cout << "Loading membership" << endl;
+    //cout << "Loading membership" << endl;
 
     // parsing membership file
 	Membership members(membership);
@@ -130,7 +131,7 @@ int main(int argc, char** argv)
     // checking if process is valid
     assert(members.validProcess(n));
 
-    std::cout << "INFO | Waiting for SIGUSR1 signal" << std::endl;
+    //std::cout << "INFO | Waiting for SIGUSR1 signal" << std::endl;
 
     // listening on our port
     UDPReceiver r(&members, n);
@@ -151,7 +152,7 @@ int main(int argc, char** argv)
         // not sending to myself
         if((*it) != n)
         {
-            cout << "Creating sender for " << *it << endl;
+            //cout << "Creating sender for " << *it << endl;
             UDPSender* sender = new UDPSender(&members, *it, n);
             PerfectLink* link = new PerfectLink(sender, &r);
             senders.push_back(sender);
@@ -161,6 +162,10 @@ int main(int argc, char** argv)
 
     // creating broadcast object
     FIFOBroadcast broadcast(n, links, 1000);
+
+    // printing sequence numbers
+    SeqTarget t;
+    broadcast.addTarget(&t);
 
     memorylog->log("Sending data");
 

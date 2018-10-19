@@ -131,5 +131,5 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     // copying payload
     memcpy(buffer + 4, message, min(length, MAXLEN - 4));
 
-    rb_broadcast->broadcast(message, length, source);
+    rb_broadcast->broadcast(buffer, min(length + 4, MAXLEN), source);
 }
