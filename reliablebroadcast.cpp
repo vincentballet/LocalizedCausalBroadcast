@@ -13,6 +13,7 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
     // checking if source is valid
     if(from.find(source) == from.end())
     {
+        mtx.unlock();
         return;
     }
 
@@ -22,6 +23,7 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
     // if message already in from, doing nothing
     if(from[source].find(message) != from[source].end())
     {
+        mtx.unlock();
         return;
     }
 
@@ -31,11 +33,12 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
     // adding message to from
     from[source].insert(message);
 
+    mtx.unlock();
+
     if(!isCorrect(source))
     {
         beb_broadcast->broadcast(buffer, length, source);
     }
-    mtx.unlock();
 }
 
 void ReliableBroadcast::broadcast(char *message, unsigned length, unsigned source)
@@ -65,6 +68,7 @@ void ReliableBroadcast::onFailure(int process)
         string s = (*it1);
         beb_broadcast->broadcast((char*) s.c_str(), s.length(), process);
     }
+
     mtx.unlock();
 }
 

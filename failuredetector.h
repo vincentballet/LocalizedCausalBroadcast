@@ -44,6 +44,16 @@ private:
      * @return nullptr
      */
     static void* pingLoop(void* arg);
+
+    /**
+     * @brief first_byte First byte for PING
+     */
+    static const int first_byte_ping = 0xAA;
+
+    /**
+     * @brief first_byte First byte for PONG
+     */
+    static const int first_byte_pong = 0xAB;
 public:
     /**
      * @brief FailureDetector Constructs a failure detector

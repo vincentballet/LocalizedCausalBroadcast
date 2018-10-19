@@ -46,7 +46,7 @@ private:
     ReliableBroadcast* rb_broadcast;
 
     /// @brief Receiving sequence numbers
-    vector<int> recv_seq_num;
+    map<int, int> recv_seq_num;
 
     /// @brief The buffer for not yet delivered messages
     list<FIFOMessage> buffer;

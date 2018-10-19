@@ -21,3 +21,14 @@ void Broadcast::broadcastPublic(char *message, unsigned length)
     // send message from this process
     broadcast(message, length, this_process);
 }
+
+bool Broadcast::validSource(int source)
+{
+    vector<PerfectLink*>::iterator it;
+    for(it = links.begin(); it != links.end(); it++)
+    {
+        if((*it)->getTarget() == source)
+            return true;
+    }
+    return false;
+}

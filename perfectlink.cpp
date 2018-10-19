@@ -104,7 +104,7 @@ void PerfectLink::send(char* buffer, int length)
     // waiting if there are messages left
     /// @todo What is the point of waiting here? If this function returns, it's not clear
     /// if the message was sent or if there was a timeout...
-    waitForAcksOrTimeout();
+    //waitForAcksOrTimeout();
 }
 
 void PerfectLink::waitForAcksOrTimeout()

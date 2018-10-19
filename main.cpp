@@ -29,6 +29,9 @@ using std::cout;
 using std::endl;
 using std::stringstream;
 
+// wait for SIGUSR?
+bool do_wait = false;
+
 int m = 10;
 bool sigusr_received = false;
 
@@ -139,10 +142,10 @@ int main(int argc, char** argv)
     memorylog->log("Waiting for SIGUSR1");
 
     // Waiting for sigusr1
-//    while(sigusr_received == false)
-//    {
-//        usleep(10000);
-//    }
+    while(do_wait && sigusr_received == false)
+    {
+        usleep(10000);
+    }
 
     vector<UDPSender*> senders;
     vector<PerfectLink*> links;

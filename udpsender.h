@@ -29,6 +29,9 @@ private:
 
     /// @brief This process ID
     int this_process;
+
+    /// @brief Target process ID
+    int target;
 public:
     /**
      * @brief Initialize sender

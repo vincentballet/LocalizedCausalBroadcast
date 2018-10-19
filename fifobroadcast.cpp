@@ -35,6 +35,11 @@ void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 
 bool FIFOBroadcast::tryDeliver(FIFOMessage m)
 {
+    if(m.source == 5)
+    {
+        cout << "a" << endl;
+    }
+
     // if current sequence number if 1 + old sequence number
     // from this sender, to ensure FRB5
     if(recv_seq_num[m.source] + 1 == m.seq_num)
@@ -55,9 +60,6 @@ bool FIFOBroadcast::tryDeliver(FIFOMessage m)
 
 void FIFOBroadcast::onMessage1(FIFOMessage m)
 {
-    // source is an index of a perfect link in links vector
-    assert(m.source < links.size());
-
     // message payload length must be > 0
     assert(m.length > 0);
 
@@ -103,7 +105,10 @@ FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> lin
     send_seq_num = 0;
 
     // expecting to receive 0
-    recv_seq_num.assign(links.size(), -1);
+    vector<PerfectLink*>::iterator it;
+    for(it = links.begin(); it != links.end(); it++)
+        recv_seq_num[(*it)->getTarget()] = -1;
+    recv_seq_num[this_process_id] = -1;
 
     // creating rb broadcast
     rb_broadcast = new ReliableBroadcast(this_process_id, links, timeout_ms);

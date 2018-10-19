@@ -7,20 +7,19 @@
 using std::cerr;
 using std::endl;
 
-string FailureDetector::heartbeat_ping = "HEARTBEAT_PING";
-string FailureDetector::heartbeat_pong = "HEARTBEAT_PONG";
-
 void FailureDetector::onMessage(unsigned source, char *buffer, unsigned length)
 {
     // checking if the source is correct
     if(source != s->getTarget()) return;
 
-    // replying to PING
-    if(length == heartbeat_ping.length() + 1
-            && !strncmp(buffer, heartbeat_ping.c_str(),
-                        heartbeat_ping.length()))
+    // length must be 1
+    if(length != 1) return;
+
+    if(buffer[0] == (char) first_byte_ping)
     {
-        s->send(heartbeat_pong);
+        char buffer1[1];
+        buffer1[0] = (char) first_byte_pong;
+        s->send(buffer1, 1);
     }
 
     // in any case, registering the response
@@ -52,7 +51,9 @@ void *FailureDetector::pingLoop(void *arg)
         if (delta > ping_interval)
         {
             //cerr << "Ping" << endl;
-            detector->s->send(heartbeat_ping);
+            char buf[1];
+            buf[0] = (char) first_byte_ping;
+            detector->s->send(buf, 1);
             begin = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
         }
 

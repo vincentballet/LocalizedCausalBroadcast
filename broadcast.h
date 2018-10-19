@@ -39,6 +39,13 @@ public:
      * @param length The length of the message in bytes
      */
     void broadcastPublic(char* message, unsigned length);
+
+    /**
+     * @brief validSource Check if a source is valid
+     * @param source The source to check
+     * @return True if valid
+     */
+    bool validSource(int source);
 public:
     Broadcast();
 };

@@ -5,7 +5,8 @@
 void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
     // just delivering the data
-    deliverToAll(source, buffer, length);
+    // WARNING: the logical sender is lost
+    deliverToAll(source, buffer + 4, length - 4);
 }
 
 void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned source)
@@ -37,5 +38,7 @@ void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned sou
 BestEffortBroadcast::BestEffortBroadcast(unsigned this_process, vector<PerfectLink *> links) :
     Broadcast (this_process, links)
 {
-
+    vector<PerfectLink*>::iterator it;
+    for(it = links.begin(); it != links.end(); it++)
+        (*it)->addTarget(this);
 }

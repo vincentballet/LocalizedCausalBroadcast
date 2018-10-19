@@ -20,7 +20,9 @@ Membership::Membership(std::string file)
         int n, idx;
 
         // number of process, IP address, port
-        handle >> idx >> s >> n;
+        //handle >> idx >> s >> n;
+        handle >> s >> n;
+        idx = i + 1;
 
         // adding process id
         processes.push_back(idx);
@@ -53,7 +55,6 @@ int Membership::getPort(int process)
 
 vector<int> Membership::getProcesses()
 {
-    cout << processes[0] << endl;
     return processes;
 }
 
