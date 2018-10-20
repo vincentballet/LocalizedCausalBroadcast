@@ -5,16 +5,17 @@
 //  Created by Vincent Ballet on 20/10/2018.
 //  Copyright © 2018 Vincent Ballet. All rights reserved.
 //
-#define private public
 
+#include "common.h"
 #include "test.h"
+#include <string>
+#include <iostream>
+#include <cassert>
+#define private public
 #include "perfectlink.h"
 #include "udpsender.h"
 #include "udpreceiver.h"
 #include "membership.h"
-#include "common.h"
-#include <string>
-#include <iostream>
 
 using std::cout;
 using std::endl;
