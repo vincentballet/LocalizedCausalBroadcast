@@ -23,6 +23,7 @@
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
 #include "seqtarget.h"
+#include "test.h"
 
 using std::string;
 using std::cout;
@@ -110,6 +111,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    // if last argument is test, run tests
+    string test = argv[argc];
+    if (test.compare("test") == 0){
+        testPerfectLink();
+        return 0;
+    }
+    
     // obtaining n and membership file
     int n = atoi(argv[1]);
 
@@ -119,14 +127,14 @@ int main(int argc, char** argv)
 	
 	// extra params (expected to be the # of messages)
 	if (argc > 2){ m = atoi(argv[3]); }
-
-	std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
-	std::cout << "INFO  | Running process " << n << std::endl;
+    
+    std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
+    std::cout << "INFO  | Running process " << n << std::endl;
 
     //cout << "Loading membership" << endl;
 
     // parsing membership file
-	Membership members(membership);
+    Membership members(membership);
 
     // list of processes
     vector<int> processes = members.getProcesses();
