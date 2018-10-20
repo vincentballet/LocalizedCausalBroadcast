@@ -47,9 +47,6 @@ private:
     /** @brief Current sequence number? Receive or send? */
     int seqnum;
 
-    /** @brief Add message to send loop */
-    void craftAndStoreMsg(char *buffer, int length);
-
     /** @brief Wait for an ACK */
     void waitForAcksOrTimeout();
 

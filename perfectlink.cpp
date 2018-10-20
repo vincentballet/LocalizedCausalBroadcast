@@ -112,13 +112,34 @@ Receiver *PerfectLink::getReceiver()
     return r;
 }
 
+/// @todo bad name, does not send but adds message to send list
 void PerfectLink::send(char* buffer, int length)
 {
-    /// @todo: Now retransmission only happens on send()
-    /// How to make it work if noone sends more data and just wants to send what's in the buffer?
-
-    // filling the buffer
-    craftAndStoreMsg(buffer, length);
+    // allocating new memory
+    char* data = static_cast<char*>(malloc(length + 5));
+    
+    // adding the message to the list
+    mtx.lock();
+    
+    // adding the sequence number
+    int32ToChars(this->seqnum, data + 1);
+    
+    // filling in first byte
+    data[0] = 0x01;
+    
+    // copying data
+    memcpy(data + 5, buffer, length);
+    
+    // saving the message
+    this->msgs[this->seqnum] = make_pair(length + 5, data);
+    
+    // IMPORTANT: incrementing the sequence number
+    // Otherwise another thread could send a message with SAME
+    // sequence number
+    this->seqnum++;
+    
+    // finished critical section
+    mtx.unlock();
 }
 
 void PerfectLink::waitForAcksOrTimeout()
@@ -133,33 +154,4 @@ void PerfectLink::waitForAcksOrTimeout()
         /// Drastically reduces CPU load (thread sleep instead of busy wait)
         usleep(1000);
     }
-}
-
-void PerfectLink::craftAndStoreMsg(char* buffer, int length)
-{
-    // allocating new memory
-    char* data = static_cast<char*>(malloc(length + 5));
-
-    // adding the message to the list
-    mtx.lock();
-
-    // adding the sequence number
-    int32ToChars(this->seqnum, data + 1);
-
-    // filling in first byte
-    data[0] = 0x01;
-
-    // copying data
-    memcpy(data + 5, buffer, length);
-
-    // saving the message
-    this->msgs[this->seqnum] = make_pair(length + 5, data);
-
-    // IMPORTANT: incrementing the sequence number
-    // Otherwise another thread could send a message with SAME
-    // sequence number
-    this->seqnum++;
-
-    // finished critical section
-    mtx.unlock();
 }
