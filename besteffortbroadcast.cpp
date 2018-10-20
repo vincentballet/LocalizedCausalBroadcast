@@ -4,9 +4,8 @@
 
 void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
-    // just delivering the data
-    // WARNING: the logical sender is lost
-    deliverToAll(source, buffer + 4, length - 4);
+    // just delivering the data using logical sender
+    deliverToAll(charsToInt32(buffer), buffer + 4, length - 4);
 
     // log BEB deliver
     stringstream ss;
