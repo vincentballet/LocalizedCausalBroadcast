@@ -14,7 +14,7 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 void InMemoryLog::log(std::string content)
 {
 #ifdef INMEMORY_PRINT
-    cout << content << endl;
+    cout << "LOG   | " << content << endl;
 #endif
 
     // beginning of critical section

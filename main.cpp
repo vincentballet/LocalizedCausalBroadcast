@@ -92,9 +92,6 @@ void onSignalTerm(int signal_num)
  */
 int main(int argc, char** argv)
 {
-    // other host to send data to
-    int other = 0;
-
     // map signals to their handlers
     signal(SIGTERM, onSignalTerm);
     signal(SIGINT, onSignalInt);
@@ -113,8 +110,10 @@ int main(int argc, char** argv)
     // obtaining n and membership file
     int n = atoi(argv[1]);
 
+    // creating in-memory log
     memorylog = new InMemoryLog(string(argv[1]).append(".log"));
 
+    // copying membership filename
 	string membership = argv[2];
 	
 	// extra params (expected to be the # of messages)
@@ -122,8 +121,6 @@ int main(int argc, char** argv)
 
 	std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
 	std::cout << "INFO  | Running process " << n << std::endl;
-
-    //cout << "Loading membership" << endl;
 
     // parsing membership file
 	Membership members(membership);
@@ -134,12 +131,10 @@ int main(int argc, char** argv)
     // checking if process is valid
     assert(members.validProcess(n));
 
-    //std::cout << "INFO | Waiting for SIGUSR1 signal" << std::endl;
+    std::cout << "INFO  | Waiting for SIGUSR1 signal" << std::endl;
 
     // listening on our port
     UDPReceiver r(&members, n);
-
-    std::cout << "Waiting for SIGUSR1" << std::endl;
 
     // Waiting for sigusr1
     while(do_wait && sigusr_received == false)
@@ -147,15 +142,19 @@ int main(int argc, char** argv)
         usleep(10000);
     }
 
+    // array of senders
     vector<UDPSender*> senders;
+
+    // array with perfect links
     vector<PerfectLink*> links;
+
+    // creating links and senders
     vector<int>::iterator it;
     for(it = processes.begin(); it != processes.end(); it++)
     {
         // not sending to myself
         if((*it) != n)
         {
-            //cout << "Creating sender for " << *it << endl;
             UDPSender* sender = new UDPSender(&members, *it, n);
             PerfectLink* link = new PerfectLink(sender, &r);
             senders.push_back(sender);
@@ -170,7 +169,7 @@ int main(int argc, char** argv)
     SeqTarget t;
     broadcast.addTarget(&t);
 
-    std::cout << "Sending data" << std::endl;
+    std::cout << "INFO  | Sending data" << std::endl;
 
     // broadcasting messages
     char buf[4];
