@@ -7,10 +7,20 @@ void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned leng
     // just delivering the data
     // WARNING: the logical sender is lost
     deliverToAll(source, buffer + 4, length - 4);
+
+    // log BEB deliver
+    stringstream ss;
+    ss << "bebd " << source << " " << charsToInt32(buffer + 8);
+    memorylog->log(ss.str());
 }
 
 void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned source)
 {
+    // log BEB broadcast
+    stringstream ss;
+    ss << "bebb " << charsToInt32(message + 4);
+    memorylog->log(ss.str());
+
     // for loop over links
     vector<PerfectLink*>::iterator it;
 
