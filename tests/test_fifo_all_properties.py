@@ -74,6 +74,7 @@ def check_send_recv(prefix):
       A = delivered_by_from[(dst, src)]
       B = range(expected_messages)
       if prefix == "beb": # not care about repetitions/order
+        if dst == src: continue
         A = set(A)
         B = set(B)
       soft_assert(A == B, "Process %d should receive all messages in correct order from %d; Got array %s; Prefix %s" % (dst, src, str(delivered_by_from[(dst, src)]), prefix))
