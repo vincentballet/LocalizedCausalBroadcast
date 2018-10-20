@@ -28,18 +28,41 @@ for key, value in logs.items():
 # how many messages should have been sent by each process?
 expected_messages = 10
 
-# messages broadcast by a process
+# messages broadcast by a process. idx -> array
 broadcast_by = {i: [] for i in range(1, n + 1)}
 
-# Filling in broadcast_by
+# messages delivered by a process. (idx, idx) -> array
+delivered_by_from = {(i, j): [] for i in range(1, n + 1) for j in range(1, n + 1)}
+
+# Filling in broadcast_by and delivered_by
 for process in range(1, n + 1):
   for entry in logs[process]:
     if entry.startswith("b "):
       broadcast_by[process] += [int(entry[2:])]
+    elif entry.startswith("d "):
+      by = process
+      from_ = int(entry.split()[1])
+      content = int(entry.split()[2])
+      delivered_by_from[(by, from_)] += [content]
 
+# Were there errors?
+were_errors = False
+
+def soft_assert(condition, message):
+    """ Print message if there was an error without exiting """
+    global were_errors
+    if not condition:
+        print("ASSERT failed " + message)
+        were_errors = True
+
+# Checking that each process has sent its messages
 for process in range(1, n + 1):
-  assert()
-print(broadcast_by)
+  soft_assert(broadcast_by[process] == range(expected_messages), "Process %d should send all messages" % process)
 
-# messages delivered by a process
-delivered_by = {}
+# Checking if messages are correct
+for dst in range(1, n + 1):
+  for src in range(1, n + 1):
+    soft_assert(delivered_by_from[(dst, src)] == range(expected_messages), "Process %d should receive all messages in correct order from %d; Got array %s" % (dst, src, str(delivered_by_from[(dst, src)])))
+
+# printing the last line with status
+print("INCORRECT" if were_errors else "CORRECT")
