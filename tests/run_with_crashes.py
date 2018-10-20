@@ -20,8 +20,11 @@ max_send_time_ms = 5000
 # Obtaining directory name
 d = sys.argv[1]
 
+# Going to that directory
+os.chdir(d)
+
 # Reading membership file
-membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open(d + '/membership', 'r').read().split('\n')[1:]))
+membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:]))
 
 # Counting processes
 n = len(membership)
@@ -51,7 +54,7 @@ os.system("killall -9 da_proc")
 
 # creating processes
 for i in range(n):
-  pids += [os.spawnlp(os.P_NOWAIT, d + '/da_proc', 'da_proc', str(i + 1), 'membership')]
+  pids += [os.spawnlp(os.P_NOWAIT, './da_proc', 'da_proc', str(i + 1), 'membership')]
 
 print("Created processes %s" % pids)
 
