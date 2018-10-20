@@ -30,7 +30,7 @@ using std::endl;
 using std::stringstream;
 
 // wait for SIGUSR?
-bool do_wait = false;
+bool do_wait = true;
 
 int m = 10;
 bool sigusr_received = false;
@@ -139,7 +139,7 @@ int main(int argc, char** argv)
     // listening on our port
     UDPReceiver r(&members, n);
 
-    memorylog->log("Waiting for SIGUSR1");
+    std::cout << "Waiting for SIGUSR1" << std::endl;
 
     // Waiting for sigusr1
     while(do_wait && sigusr_received == false)
@@ -170,7 +170,7 @@ int main(int argc, char** argv)
     SeqTarget t;
     broadcast.addTarget(&t);
 
-    memorylog->log("Sending data");
+    std::cout << "Sending data" << std::endl;
 
     // broadcasting messages
     char buf[4];
