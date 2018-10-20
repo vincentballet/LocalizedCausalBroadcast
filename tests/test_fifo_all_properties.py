@@ -29,11 +29,17 @@ for key, value in logs.items():
 expected_messages = 10
 
 # messages broadcast by a process
-broadcast_by = {}
+broadcast_by = {i: [] for i in range(1, n + 1)}
 
+# Filling in broadcast_by
 for process in range(1, n + 1):
   for entry in logs[process]:
-    print("[%s]" % entry)
+    if entry.startswith("b "):
+      broadcast_by[process] += [int(entry[2:])]
+
+for process in range(1, n + 1):
+  assert()
+print(broadcast_by)
 
 # messages delivered by a process
 delivered_by = {}
