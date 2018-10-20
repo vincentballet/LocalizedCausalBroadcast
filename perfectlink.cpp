@@ -8,7 +8,6 @@
 
 #include "perfectlink.h"
 #include <unistd.h>
-#include <pthread.h>
 #include <iostream>
 #include <cstring>
 #include <chrono>
@@ -51,6 +50,45 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     }
 }
 
+void *PerfectLink::sendLoop(void *arg)
+{
+    // pointer to failure detector
+    PerfectLink* link = (PerfectLink*) arg;
+    
+    // Sending loop
+    while(true){
+        
+        if(link->msgs.size() > 0){
+            // Send all messages if ACK missing
+            map<int, pair<int, char*> >::iterator it;
+            
+            // start of critical section
+            link->mtx.lock();
+            for (it = link->msgs.begin(); it != link->msgs.end(); it++)
+            {
+                // seq number
+                int tmp = (*it).first;
+
+                // data
+                char* sdata = (*it).second.second;
+
+                // data length
+                int len = (*it).second.first;
+
+                // sending message
+                link->s->send(sdata, len);
+            }
+
+            // end of critical section
+            link->mtx.unlock();
+        
+            link->waitForAcksOrTimeout();
+        }
+    }
+    
+}
+
+
 PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     Sender(s->getTarget()), Receiver(r->getThis(), target)
 {
@@ -58,6 +96,10 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     this->s = s;
     this->r = r;
     this->seqnum = 0;
+    
+    // starting sending thread
+    pthread_create(&thread, nullptr, &PerfectLink::sendLoop, this);
+    
 }
 
 Sender *PerfectLink::getSender()
@@ -70,41 +112,34 @@ Receiver *PerfectLink::getReceiver()
     return r;
 }
 
+/// @todo bad name, does not send but adds message to send list
 void PerfectLink::send(char* buffer, int length)
 {
-    /// @todo: Now retransmission only happens on send()
-    /// How to make it work if noone sends more data and just wants to send what's in the buffer?
-
-    // filling the buffer
-    craftAndStoreMsg(buffer, length);
-
-    // Send all messages if ACK missing
-    map<int, pair<int, char*> >::iterator it;
-
-    // start of critical section
+    // allocating new memory
+    char* data = static_cast<char*>(malloc(length + 5));
+    
+    // adding the message to the list
     mtx.lock();
-    for (it = this->msgs.begin(); it != this->msgs.end(); it++)
-    {
-        // seq number
-        int tmp = (*it).first;
-
-        // data
-        char* sdata = (*it).second.second;
-
-        // data length
-        int len = (*it).second.first;
-
-        // sending message
-        s->send(sdata, len);
-    }
-
-    // end of critical section
+    
+    // adding the sequence number
+    int32ToChars(this->seqnum, data + 1);
+    
+    // filling in first byte
+    data[0] = 0x01;
+    
+    // copying data
+    memcpy(data + 5, buffer, length);
+    
+    // saving the message
+    this->msgs[this->seqnum] = make_pair(length + 5, data);
+    
+    // IMPORTANT: incrementing the sequence number
+    // Otherwise another thread could send a message with SAME
+    // sequence number
+    this->seqnum++;
+    
+    // finished critical section
     mtx.unlock();
-
-    // waiting if there are messages left
-    /// @todo What is the point of waiting here? If this function returns, it's not clear
-    /// if the message was sent or if there was a timeout...
-    //waitForAcksOrTimeout();
 }
 
 void PerfectLink::waitForAcksOrTimeout()
@@ -119,33 +154,4 @@ void PerfectLink::waitForAcksOrTimeout()
         /// Drastically reduces CPU load (thread sleep instead of busy wait)
         usleep(1000);
     }
-}
-
-void PerfectLink::craftAndStoreMsg(char* buffer, int length)
-{
-    // allocating new memory
-    char* data = static_cast<char*>(malloc(length + 5));
-
-    // adding the message to the list
-    mtx.lock();
-
-    // adding the sequence number
-    int32ToChars(this->seqnum, data + 1);
-
-    // filling in first byte
-    data[0] = 0x01;
-
-    // copying data
-    memcpy(data + 5, buffer, length);
-
-    // saving the message
-    this->msgs[this->seqnum] = make_pair(length + 5, data);
-
-    // IMPORTANT: incrementing the sequence number
-    // Otherwise another thread could send a message with SAME
-    // sequence number
-    this->seqnum++;
-
-    // finished critical section
-    mtx.unlock();
 }

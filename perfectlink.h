@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <list>
+#include <pthread.h>
 #include <mutex>
 #include <map>
 
@@ -33,11 +34,18 @@ private:
     /** @brief Object for receiving data from the other host */
     Receiver* r;
 
+    /// @brief Send Thread
+    pthread_t thread;
+
+    /**
+     * @brief sendLoop Runs the sending loop
+     * @param arg PerfectLink instance
+     * @return nullptr
+     */
+    static void* sendLoop(void* arg);
+    
     /** @brief Current sequence number? Receive or send? */
     int seqnum;
-
-    /** @brief Add message to send loop */
-    void craftAndStoreMsg(char *buffer, int length);
 
     /** @brief Wait for an ACK */
     void waitForAcksOrTimeout();
