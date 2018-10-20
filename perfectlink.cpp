@@ -134,6 +134,10 @@ Receiver *PerfectLink::getReceiver()
 /// @todo bad name, does not send but adds message to send list
 void PerfectLink::send(char* buffer, int length)
 {
+    if (!(buffer && length > 0)){
+        return;
+    }
+
     // allocating new memory
     char* data = static_cast<char*>(malloc(length + 5));
     
