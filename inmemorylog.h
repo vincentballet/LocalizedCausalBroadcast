@@ -10,10 +10,12 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <mutex>
 
 using std::vector;
 using std::string;
 using std::ofstream;
+using std::mutex;
 
 /** @class This class implements the In Memory Log */
 class InMemoryLog
@@ -24,6 +26,9 @@ private:
 
     /// Output in-memory buffer
     vector<string> buffer;
+
+    /// Mutex for buffer access
+    mutex m;
 public:
     /**
      * @brief InMemoryLog initializer

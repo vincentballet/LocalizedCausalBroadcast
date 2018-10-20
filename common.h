@@ -9,6 +9,9 @@
 
 #include <inttypes.h>
 #include "inmemorylog.h"
+#include <sstream>
+
+using std::stringstream;
 
 /** @macro minimal of two numbers */
 #define min(x, y) ((x) > (y) ? (y) : (x))

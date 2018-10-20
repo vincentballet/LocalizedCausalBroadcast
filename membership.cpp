@@ -27,7 +27,7 @@ Membership::Membership(std::string file)
         // adding process id
         processes.push_back(idx);
 
-        cout << "ID " << idx << " IP " << s << " PORT " << n << endl;
+        //cout << "ID " << idx << " IP " << s << " PORT " << n << endl;
 
         // storing data
         ips[idx] = string(s);

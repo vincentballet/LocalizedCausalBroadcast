@@ -77,16 +77,16 @@ void* UDPReceiver::receiveLoop(void *args)
         // <first byte sender 1> <0x01 1> <PF seq number 4 bytes> <logical sender 4> <fifo sequence number 4> <data 4>
         int source = buffer[0];
 
-        int type = buffer[1];
-        int pk_seq = charsToInt32(buffer + 2);
-        int log_sender = charsToInt32(buffer + 6);
-        int fifo_seq = charsToInt32(buffer + 10);
-        int payload = charsToInt32(buffer + 14);
+//        int type = buffer[1];
+//        int pk_seq = charsToInt32(buffer + 2);
+//        int log_sender = charsToInt32(buffer + 6);
+//        int fifo_seq = charsToInt32(buffer + 10);
+//        int payload = charsToInt32(buffer + 14);
 
-        if(type == 0x01)
-        cout << "Source " << source << " type " << type
-             << " pkseq " << pk_seq << " log_sender " << log_sender
-             << " fifo_seq " << fifo_seq << " payload " << payload << endl;
+//        if(type == 0x01)
+//        cout << "Source " << source << " type " << type
+//             << " pkseq " << pk_seq << " log_sender " << log_sender
+//             << " fifo_seq " << fifo_seq << " payload " << payload << endl;
 
         if(source >= 0)
             instance->deliverToAll(buffer[0], buffer + 1, len - 1);

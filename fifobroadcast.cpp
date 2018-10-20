@@ -35,11 +35,6 @@ void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 
 bool FIFOBroadcast::tryDeliver(FIFOMessage m)
 {
-    if(m.source == 5)
-    {
-        cout << "a" << endl;
-    }
-
     // if current sequence number if 1 + old sequence number
     // from this sender, to ensure FRB5
     if(recv_seq_num[m.source] + 1 == m.seq_num)
