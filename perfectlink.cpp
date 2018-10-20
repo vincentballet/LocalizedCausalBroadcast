@@ -8,7 +8,6 @@
 
 #include "perfectlink.h"
 #include <unistd.h>
-#include <pthread.h>
 #include <iostream>
 #include <cstring>
 #include <chrono>
@@ -51,6 +50,45 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     }
 }
 
+void *PerfectLink::sendLoop(void *arg)
+{
+    // pointer to failure detector
+    PerfectLink* link = (PerfectLink*) arg;
+    
+    // Sending loop
+    while(true){
+        
+        if(link->msgs.size() > 0){
+            // Send all messages if ACK missing
+            map<int, pair<int, char*> >::iterator it;
+            
+            // start of critical section
+            link->mtx.lock();
+            for (it = link->msgs.begin(); it != link->msgs.end(); it++)
+            {
+                // seq number
+                int tmp = (*it).first;
+
+                // data
+                char* sdata = (*it).second.second;
+
+                // data length
+                int len = (*it).second.first;
+
+                // sending message
+                link->s->send(sdata, len);
+            }
+
+            // end of critical section
+            link->mtx.unlock();
+        
+            link->waitForAcksOrTimeout();
+        }
+    }
+    
+}
+
+
 PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     Sender(s->getTarget()), Receiver(r->getThis(), target)
 {
@@ -58,6 +96,10 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     this->s = s;
     this->r = r;
     this->seqnum = 0;
+    
+    // starting sending thread
+    pthread_create(&thread, nullptr, &PerfectLink::sendLoop, this);
+    
 }
 
 Sender *PerfectLink::getSender()
@@ -77,34 +119,6 @@ void PerfectLink::send(char* buffer, int length)
 
     // filling the buffer
     craftAndStoreMsg(buffer, length);
-
-    // Send all messages if ACK missing
-    map<int, pair<int, char*> >::iterator it;
-
-    // start of critical section
-    mtx.lock();
-    for (it = this->msgs.begin(); it != this->msgs.end(); it++)
-    {
-        // seq number
-        int tmp = (*it).first;
-
-        // data
-        char* sdata = (*it).second.second;
-
-        // data length
-        int len = (*it).second.first;
-
-        // sending message
-        s->send(sdata, len);
-    }
-
-    // end of critical section
-    mtx.unlock();
-
-    // waiting if there are messages left
-    /// @todo What is the point of waiting here? If this function returns, it's not clear
-    /// if the message was sent or if there was a timeout...
-    //waitForAcksOrTimeout();
 }
 
 void PerfectLink::waitForAcksOrTimeout()
