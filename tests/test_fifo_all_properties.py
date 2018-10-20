@@ -66,7 +66,12 @@ def check_send_recv(prefix):
 
   # Checking that each process has sent its messages
   for process in range(1, n + 1):
-    soft_assert(broadcast_by[process] == range(expected_messages), "Process %d should send all messages; Prefix %s" % (process, prefix))
+    A = broadcast_by[process]
+    B = range(expected_messages)
+    if prefix == "beb": # not care about repetitions/order
+      A = set(A)
+      B = set(B)
+    soft_assert(A == B, "Process %d should send all messages; Got array %s; Prefix %s" % (process, broadcast_by[process], prefix))
 
   # Checking if messages are correct
   for dst in range(1, n + 1):

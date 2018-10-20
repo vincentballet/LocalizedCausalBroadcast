@@ -12,7 +12,7 @@ if len(sys.argv) < 2:
 wait_time = 2
 
 # maximal time of crash in ms
-max_crash_time_ms = 2000
+max_crash_time_ms = 50
 
 # maximal time to send stuff
 max_send_time_ms = 5000
@@ -45,6 +45,9 @@ crashed_processes = np.random.choice(range(n), n_crashed, replace = False)
 crash_times = list(map(int, np.random.rand(n_crashed) * max_crash_time_ms))
 
 print("Crashing %d processes: %s at times %s" % (n_crashed, crashed_processes, crash_times))
+
+# writing down crashed processes
+open('crashed.log', 'w').write(' '.join(map(lambda x : str(x + 1), crashed_processes)))
 
 # array for PIDs
 pids = []
