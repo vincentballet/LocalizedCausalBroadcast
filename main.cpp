@@ -108,6 +108,9 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    // creating in-memory log
+    memorylog = new InMemoryLog(string(argv[1]).append(".log"));
+
     // if last argument is test, run tests
     string test = argv[argc];
     if (test.compare("test") == 0){
@@ -117,9 +120,6 @@ int main(int argc, char** argv)
     
     // obtaining n and membership file
     int n = atoi(argv[1]);
-
-    // creating in-memory log
-    memorylog = new InMemoryLog(string(argv[1]).append(".log"));
 
     // copying membership filename
 	string membership = argv[2];
