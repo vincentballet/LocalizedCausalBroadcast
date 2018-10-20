@@ -19,7 +19,7 @@ n = len(membership)
 print('There are %d processes' % n)
 
 # Reading logs
-logs = {i: open(d + '/%d.log' % i, 'r').read().split('\n') for i in range(1, n + 1)}
+logs = {i: filter(lambda x : len(x) > 0, open(d + '/%d.log' % i, 'r').read().split('\n')) for i in range(1, n + 1)}
 
 # Printing how many log messages are in the dict
 for key, value in logs.items():
@@ -27,3 +27,13 @@ for key, value in logs.items():
 
 # how many messages should have been sent by each process?
 expected_messages = 10
+
+# messages broadcast by a process
+broadcast_by = {}
+
+for process in range(1, n + 1):
+  for entry in logs[process]:
+    print("[%s]" % entry)
+
+# messages delivered by a process
+delivered_by = {}
