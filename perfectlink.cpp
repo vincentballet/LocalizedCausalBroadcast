@@ -23,6 +23,9 @@ using std::make_pair;
 
 void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 {
+    // ignoring foreign messages
+    if(source != s->getTarget()) return;
+
     // parsing messages
     if(len < 4) return;
 
@@ -32,13 +35,24 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         int seqnumack = charsToInt32(buf + 1);
         //cout << "** Received ACK " << seqnumack << endl;
 
+        stringstream ss;
+        ss << "plack " << s->getTarget() << " " << charsToInt32(buf + 5 + 8);
+        memorylog->log(ss.str());
+
         mtx.lock();
-        free(msgs[seqnumack].second);
-        msgs.erase(seqnumack);
+        if(msgs.find(seqnumack) != msgs.end())
+        {
+            free(msgs[seqnumack].second);
+            msgs.erase(seqnumack);
+        }
         mtx.unlock();
 
     } // receiving content from another process => we send an ACK
     else if(buf[0] == 0x01) {
+        stringstream ss;
+        ss << "pld " << s->getTarget() << " " << charsToInt32(buf + 5 + 8);
+        memorylog->log(ss.str());
+
         //int tmp = charsToInt32(buf + 1);
         //cout << "** Received content " << tmp << endl;
         deliverToAll(source, buf + 5, len - 5);
@@ -77,6 +91,11 @@ void *PerfectLink::sendLoop(void *arg)
 
                 // sending message
                 link->s->send(sdata, len);
+
+                // logging message
+                stringstream ss;
+                ss << "pls " << link->s->getTarget() << " " << charsToInt32(sdata + 5 + 8);
+                memorylog->log(ss.str());
             }
 
             // end of critical section

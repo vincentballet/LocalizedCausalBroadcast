@@ -59,6 +59,13 @@ void UDPSender::send(char *data, int N)
 //         << " pkseq " << pk_seq << " log_sender " << log_sender
 //         << " fifo_seq " << fifo_seq << " payload " << payload << endl;
 
+    if(buf[1] == 0x01)
+    {
+        stringstream ss;
+        ss << "udps " << target << " " << charsToInt32(data + 5 + 8);
+        memorylog->log(ss.str());
+    }
+
     if(sendto(fd, buf, len1 + 1, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
     {
         perror("Cannot send message");
