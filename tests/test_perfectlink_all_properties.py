@@ -56,13 +56,13 @@ for key, value in logs.items():
 for key, value in logs.items():
     logs_pld = list(filter(lambda l: l[0] == 'pld' in l, value))
     for d in logs_pld:
-        assert(['pls', d[1], d[2], d[3]] in logs[int(d[2])])
+        soft_assert(['pls', d[1], d[2], d[3]] in logs[int(d[2])], "Message {} is delivered while not sent ".format(d))
         
 # ### Validity - If pi and pj are correct, then every message sent by pi to pj is eventually delivered by pj
 for key, value in logs.items():
     logs_pls = list(filter(lambda l: l[0] == 'pls' in l, value))
     for m in logs_pls:
-        assert(['pld', d[1], d[2], d[3]] in logs[int(d[1])])
+        soft_assert(['pld', d[1], d[2], d[3]] in logs[int(d[1])], "Message {} is never delivered".format(m))
 
 # printing the last line with status
 print("INCORRECT" if were_errors else "CORRECT")

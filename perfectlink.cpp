@@ -12,11 +12,14 @@
 #include <cstring>
 #include <chrono>
 #include <cassert>
+#include <set>
 #include "common.h"
 
 using namespace std;
 using chrono::steady_clock;
 using std::make_pair;
+using std::set;
+using std::string;
 
 // Protocol: <0x01> <SEQ 4 bytes> <Content>
 //           <0x02> <SEQ 4 bytes> -- means ACK
@@ -49,12 +52,21 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
 
     } // receiving content from another process => we send an ACK
     else if(buf[0] == 0x01) {
+        // creating message as a string
+        string message(buf, len);
+        
+        // no need for mutex as only 1 thread is calling this function
+        if (delivered.find(string(message)) != delivered.end()){
+            return;
+        }
+        
         stringstream ss;
         ss << "< pld\t" << r->getThis() << " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
         memorylog->log(ss.str());
 
         //int tmp = charsToInt32(buf + 1);
         //cout << "** Received content " << tmp << endl;
+        delivered.insert(message);
         deliverToAll(source, buf + 5, len - 5);
         char sdata[5];
         sdata[0] = 0x02;

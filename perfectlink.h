@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <mutex>
 #include <map>
+#include <set>
 
 #include "sender.h"
 #include "receiver.h"
@@ -20,6 +21,7 @@
 
 using std::mutex;
 using std::map;
+using std::set;
 using std::pair;
 
 /** @class This class implements the Perfect Link */
@@ -44,6 +46,9 @@ private:
      */
     static void* sendLoop(void* arg);
     
+    /** @brief List of delivered messages (not to get no-duplication violated) */
+    set<string> delivered;
+    
     /** @brief Current sequence number? Receive or send? */
     int seqnum;
 
@@ -51,7 +56,7 @@ private:
     void waitForAcksOrTimeout();
 
     /** @brief Timeout for 1 message in microseconds (1e-6 sec) */
-    unsigned const TIMEOUT = 1000000;
+    unsigned const TIMEOUT = 10000;
 
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;
