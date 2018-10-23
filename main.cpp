@@ -37,12 +37,12 @@ int m = 10;
 bool sigusr_received = false;
 
 /**
- * @brief Handle the SIGUSR1 signal
- * @param signal_num must be SIGUSR1
+ * @brief Handle the SIGUSR2 signal
+ * @param signal_num must be SIGUSR2
  */
 void onSignalUsr1(int signal_num)
 {
-    if(signal_num != SIGUSR1) return;
+    if(signal_num != SIGUSR2) return;
 	
     // Start broadcasting messages
     sigusr_received = true;
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     // map signals to their handlers
     signal(SIGTERM, onSignalTerm);
     signal(SIGINT, onSignalInt);
-    signal(SIGUSR1, onSignalUsr1);
+    signal(SIGUSR2, onSignalUsr1);
 
     // argument processing
     argc--;
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     // checking if process is valid
     assert(members.validProcess(n));
 
-    std::cout << "INFO  | Waiting for SIGUSR1 signal" << std::endl;
+    std::cout << "INFO  | Waiting for SIGUSR2 signal" << std::endl;
 
     // listening on our port
     UDPReceiver r(&members, n);
