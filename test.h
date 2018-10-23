@@ -10,7 +10,8 @@
 #define test_h
 
 #include <stdio.h>
+#include "perfectlink.h"
 
-void testPerfectLink();
+void testPerfectLink(int n, vector<PerfectLink*> links);
 
 #endif /* test_h */

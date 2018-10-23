@@ -62,7 +62,7 @@ void UDPSender::send(char *data, int N)
     if(buf[1] == 0x01)
     {
         stringstream ss;
-        ss << "udps " << target << " " << charsToInt32(data + 5 + 8);
+        ss << "> udps\t" << int(buf[0])<< " " <<target;// << " "  << charsToInt32(data + 5 + 8);
         memorylog->log(ss.str());
     }
 

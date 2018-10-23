@@ -11,6 +11,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <unistd.h>
 #define private public
 #include "perfectlink.h"
 #include "udpsender.h"
@@ -20,42 +21,41 @@
 using std::cout;
 using std::endl;
 
-void testPerfectLinkSend1(PerfectLink* l)
-{
-    //empty list at the beggining
-    assert(l->msgs.size() == 0);
+//test if msgs is empty at the beginning
+//and if sending empty buffers or nullptr
+//is ignored
+//void testPerfectLinkSend1(PerfectLink* l)
+//{
+//    assert(l->msgs.size() == 0);
+//
+//    char buffer[MAXLEN];
+//    l->send(buffer, 0);
+//    l->send(nullptr, 0);
+//
+//    assert(l->msgs.size() == 0 && l->seqnum == 0);
+//
+//}
+
+//Sending some messages through a perfect link
+//to be tested in log file afterwards
+void runPerfectLink(PerfectLink* l, int nbr){
     
-    char buffer[MAXLEN];
-    l->send(buffer, 0);
-    l->send(nullptr, 0);
-
-    assert(l->msgs.size() == 0 && l->seqnum == 0);
-
-}
-
-void testPerfectLinkSend2(PerfectLink* l){
-    
-    char buffer[MAXLEN];
-    for (int i = 0; i < 20; i++){
-        int32ToChars(i, buffer);
-        l->send(buffer, sizeof(i));
-//        cout << "SIZE OF MSGS : " << l->msgs.size() << endl;
+    char buffer[16];
+    for (int i = 0; i < nbr; i++){
+        l->send(buffer, 16);
     }
 }
 
 
-void testPerfectLink()
+void testPerfectLink(int n, vector<PerfectLink*> links)
 {
-    int p1 = 1;
-    int p2 = 1;
-    Membership members("membership");
-    UDPReceiver* r = new UDPReceiver(&members, p1);
-    UDPSender* s = new UDPSender(&members, p2, p1);
-    PerfectLink* l = new PerfectLink(s, r);
+        
+    int nMessages = 23;
 
-//    testPerfectLinkSend1(l);
-    testPerfectLinkSend2(l);
+    vector<PerfectLink*>::iterator it;
+    for(it = links.begin(); it != links.end(); it++)
+    {
+        runPerfectLink(*it, nMessages);
+    }
+
 }
-
-
-
