@@ -39,6 +39,9 @@ UDPSender::~UDPSender()
 
 void UDPSender::send(char *data, int N)
 {
+#ifdef UDPSENDER_DELAY_MS
+    mtx.lock();
+#endif
     char buf[MAXLEN];
 
     buf[0] = this_process;
@@ -69,7 +72,10 @@ void UDPSender::send(char *data, int N)
     if(sendto(fd, buf, len1 + 1, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
     {
         perror("Cannot send message");
-        close(fd);
-        exit(0);
     }
+
+#ifdef UDPSENDER_DELAY_MS
+    usleep(1000 * UDPSENDER_DELAY_MS);
+    mtx.unlock();
+#endif
 }

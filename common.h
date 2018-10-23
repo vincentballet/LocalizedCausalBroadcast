@@ -41,4 +41,7 @@ const int MAXLEN = 1000;
  */
 extern InMemoryLog* memorylog;
 
+/// @macro Delay after each UDPSender::send
+#define UDPSENDER_DELAY_MS 2
+
 #endif // COMMON_H

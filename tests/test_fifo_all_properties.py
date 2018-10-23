@@ -18,6 +18,15 @@ membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open(d + '/m
 n = len(membership)
 print('There are %d processes' % n)
 
+# reading list of crashed processes
+crashed = map(int, open(d + '/crashed.log', 'r').read().split())
+
+# creating list of correct processes
+correct = [x for x in range(1, n + 1) if x not in crashed]
+
+# correct / crashed
+print("Processes %s were correct and processes %s were crashed" % (correct, crashed))
+
 # Reading logs
 logs = {i: filter(lambda x : len(x) > 0, open(d + '/da_proc_%d.out' % i, 'r').read().split('\n')) for i in range(1, n + 1)}
 
@@ -38,57 +47,66 @@ def soft_assert(condition, message):
         print("ASSERT failed " + message)
         were_errors = True
 
-def get_send_recv(prefix):
-  """ Return pair (broadcast_by, delivered_by_from) for a prefix """
-  # messages broadcast by a process. idx -> array
-  broadcast_by = {i: [] for i in range(1, n + 1)}
+# messages broadcast by a process. idx -> array
+broadcast_by = {i: [] for i in range(1, n + 1)}
 
-  # messages delivered by a process. (idx, idx) -> array
-  delivered_by_from = {(i, j): [] for i in range(1, n + 1) for j in range(1, n + 1)}
+# messages delivered by a process. idx -> array
+delivered_by = {i: [] for i in range(1, n + 1)}
 
-  # Filling in broadcast_by and delivered_by
-  for process in range(1, n + 1):
-    for entry in logs[process]:
-      if entry.startswith(prefix + "b "):
-        broadcast_by[process] += [int(entry[2 + len(prefix):])]
-      elif entry.startswith(prefix + "d "):
-        by = process
-        from_ = int(entry.split()[1])
-        content = int(entry.split()[2])
-        delivered_by_from[(by, from_)] += [content]
+# messages delivered by a process. (idx, idx) -> array
+delivered_by_from = {(i, j): [] for i in range(1, n + 1) for j in range(1, n + 1)}
 
-  return broadcast_by, delivered_by_from
+# Filling in broadcast_by and delivered_by
+for process in range(1, n + 1):
+  for entry in logs[process]:
+    if entry.startswith("b "):
+      broadcast_by[process] += [int(entry[2:])]
+    elif entry.startswith("d "):
+      by = process
+      from_ = int(entry.split()[1])
+      content = int(entry.split()[2])
+      delivered_by_from[(by, from_)] += [content]
+      delivered_by[by] += [content]
 
-def check_send_recv(prefix):
-  """ Check that all messages were sent and received in correct order """
-  # obtain messages
-  broadcast_by, delivered_by_from = get_send_recv(prefix)
+# BEB1 Validity: If a correct process broadcasts a message m, then every correct process eventually delivers m.
+for p in correct:
+  for msg in broadcast_by[p]:
+    for p1 in correct:
+      soft_assert(msg in delivered_by[p1], "BEB1 Violated. Correct %d broadcasted %s and correct %d did not receive it" % (p, msg, p1))
 
-  # Checking that each process has sent its messages
-  for process in range(1, n + 1):
-    A = broadcast_by[process]
-    B = range(expected_messages)
-    if prefix == "beb": # not care about repetitions/order
-      A = set(A)
-      B = set(B)
-    soft_assert(A == B, "Process %d should send all messages; Got array %s; Prefix %s" % (process, broadcast_by[process], prefix))
+# BEB2: No duplication
+for p in range(1, n + 1):
+    delivered_by_p = delivered_by[p]
+    soft_assert(len(delivered_by_p) == len(set(delivered_by_p)), "BEB2 Violated. Process %d delivered some messages twice" % p)
 
-  # Checking if messages are correct
-  for dst in range(1, n + 1):
-    for src in range(1, n + 1):
-      A = delivered_by_from[(dst, src)]
-      B = range(expected_messages)
-      if prefix == "beb": # not care about repetitions/order
-        if dst == src: continue
-        A = set(A)
-        B = set(B)
-      soft_assert(A == B, "Process %d should receive all messages in correct order from %d; Got array %s; Prefix %s" % (dst, src, str(delivered_by_from[(dst, src)]), prefix))
+# BEB3: No creation
+for p in range(1, n + 1):
+  for p1 in range(1, n + 1):
+    sent = broadcast_by[p]
+    delivered = delivered_by_from[(p1, p)]
+    for msg in delivered:
+      soft_assert(msg in sent, "BEB3 violated. Message %d was NOT send from %d and WAS delivered by %d" % (msg, p, p1))
 
-# check FIFO
-check_send_recv("")
+# RB4: Agreement. If a message m is delivered by some correct process, then m is eventually delivered by every correct process.
+for p in correct:
+  delivered_by_p = delivered_by[p]
+  for p1 in correct:
+    delivered_by_p1 = delivered_by[p1]
+    for msg in delivered_by_p:
+      soft_assert(msg in delivered_by_p1, "RB4 Violated. Correct %d delivered %d and correct %d did not deliver it" % (p, msg, p1))
 
-# check BestEffortBroadcast
-check_send_recv("beb")
+# FRB5: FIFO delivery: If some process broadcasts message m1 before it broadcasts message m2 , then no correct process delivers m2 unless it has already delivered m1
+for p in range(1, n + 1):
+  for i, msg1 in enumerate(broadcast_by[p]):
+    for j, msg2 in enumerate(broadcast_by[p]):
+      if i < j:
+        for p1 in correct:
+          have_msg1 = False
+          have_msg2 = False
+          for msg in broadcast_by[p]:
+            if msg == msg1: have_msg1 = True
+            if msg == msg2: have_msg2 = True
+            soft_assert(not(have_msg2 and not have_msg1), "FRB5 violated: Process %d sent %d before %d and correct process %d delivered %d before %d" % (p, msg1, msg2, p1, msg2, msg1))
 
 # printing the last line with status
 print("INCORRECT" if were_errors else "CORRECT")
