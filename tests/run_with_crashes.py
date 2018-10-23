@@ -71,7 +71,7 @@ sleep(wait_time)
 print("Starting processes")
 
 for pid in pids:
-  os.kill(pid, signal.SIGUSR1)
+  os.kill(pid, signal.SIGUSR2)
 
 # was this process crashed already?
 did_crash = []
