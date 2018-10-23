@@ -28,7 +28,7 @@ private:
     vector<string> buffer;
 
     /// Mutex for buffer access
-    mutex m;
+    mutex m, m_dump;
 public:
     /**
      * @brief InMemoryLog initializer

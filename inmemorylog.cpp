@@ -25,14 +25,12 @@ void InMemoryLog::log(std::string content)
 
     // end of critical section
     m.unlock();
-
-    /// @todo What if signal happens at the moment when THIS EXACT thread is inside the critical section?
 }
 
 void InMemoryLog::dump()
 {
     // locking the buffer
-    m.lock();
+    m_dump.lock();
 
     // loop over buffer
     vector<string>::iterator it;
@@ -46,5 +44,5 @@ void InMemoryLog::dump()
     buffer.clear();
 
     // unlocking the buffer
-    m.unlock();
+    m_dump.unlock();
 }
