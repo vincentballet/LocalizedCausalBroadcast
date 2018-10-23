@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     }
 
     // creating in-memory log
-    memorylog = new InMemoryLog(string(argv[1]).append(".log"));
+    memorylog = new InMemoryLog("da_proc_" + string(argv[1]) + ".out");
     
     // obtaining n and membership file
     int n = atoi(argv[1]);

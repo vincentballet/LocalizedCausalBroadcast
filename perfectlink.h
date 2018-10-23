@@ -56,7 +56,7 @@ private:
     void waitForAcksOrTimeout();
 
     /** @brief Timeout for 1 message in microseconds (1e-6 sec) */
-    unsigned const TIMEOUT = 10000;
+    unsigned const TIMEOUT = 100000;
 
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;
