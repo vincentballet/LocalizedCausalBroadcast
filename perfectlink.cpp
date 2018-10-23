@@ -36,7 +36,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         //cout << "** Received ACK " << seqnumack << endl;
 
         stringstream ss;
-        ss << "plack " << s->getTarget() << " " << charsToInt32(buf + 5 + 8);
+        ss << "< plack\t" << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
         memorylog->log(ss.str());
 
         mtx.lock();
@@ -50,7 +50,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     } // receiving content from another process => we send an ACK
     else if(buf[0] == 0x01) {
         stringstream ss;
-        ss << "pld " << s->getTarget() << " " << charsToInt32(buf + 5 + 8);
+        ss << "< pld\t" << r->getThis() << " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
         memorylog->log(ss.str());
 
         //int tmp = charsToInt32(buf + 1);
@@ -94,7 +94,7 @@ void *PerfectLink::sendLoop(void *arg)
 
                 // logging message
                 stringstream ss;
-                ss << "pls " << link->s->getTarget() << " " << charsToInt32(sdata + 5 + 8);
+                ss << "> pls\t" << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
                 memorylog->log(ss.str());
             }
 

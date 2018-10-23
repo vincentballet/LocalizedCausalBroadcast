@@ -110,22 +110,15 @@ int main(int argc, char** argv)
 
     // creating in-memory log
     memorylog = new InMemoryLog(string(argv[1]).append(".log"));
-
-    // if last argument is test, run tests
-    string test = argv[argc];
-    if (test.compare("test") == 0){
-        testPerfectLink();
-        return 0;
-    }
     
     // obtaining n and membership file
     int n = atoi(argv[1]);
 
     // copying membership filename
-	string membership = argv[2];
-	
-	// extra params (expected to be the # of messages)
-	if (argc > 2){ m = atoi(argv[3]); }
+    string membership = argv[2];
+    
+    // extra params (expected to be the # of messages)
+    if (argc > 2){ m = atoi(argv[3]); }
     
     std::cout << "DEBUG | Process id: " << ::getpid() << " (parent: " << ::getppid() << ")" << std::endl;
     std::cout << "INFO  | Running process " << n << std::endl;
@@ -143,12 +136,6 @@ int main(int argc, char** argv)
 
     // listening on our port
     UDPReceiver r(&members, n);
-
-    // Waiting for sigusr1
-    while(do_wait && sigusr_received == false)
-    {
-        usleep(10000);
-    }
 
     // array of senders
     vector<UDPSender*> senders;
@@ -170,6 +157,23 @@ int main(int argc, char** argv)
         }
     }
 
+    
+    // if last argument is test, run tests
+    string test = argv[argc];
+    if (test.compare("test") == 0){
+        testPerfectLink(n, links);
+        sleep(3);
+        writeOutputAndHalt();
+        return 0;
+        
+    }
+    
+    // Waiting for sigusr1
+    while(do_wait && sigusr_received == false)
+    {
+        usleep(10000);
+    }
+    
     // creating broadcast object
     FIFOBroadcast broadcast(n, links, 1000);
 
