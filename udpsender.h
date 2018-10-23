@@ -9,9 +9,12 @@
 
 #include <netinet/in.h>
 #include <string>
+#include <mutex>
+#include "common.h"
 #include "sender.h"
 #include "membership.h"
 
+using std::mutex;
 using std::string;
 
 /** @brief Send UDP packets */
@@ -32,6 +35,9 @@ private:
 
     /// @brief Target process ID
     int target;
+
+    /// @brief Mutex for testing
+    mutex mtx;
 public:
     /**
      * @brief Initialize sender

@@ -188,8 +188,9 @@ int main(int argc, char** argv)
     for(int i = 0; i < m; i++)
     {
         stringstream ss;
-        int32ToChars(i, buf);
-        ss << "b " << i;
+        int payload = 1000 * n + i;
+        int32ToChars(payload, buf);
+        ss << "b " << payload;
         memorylog->log(ss.str());
         broadcast.broadcastPublic(buf, 4);
     }
