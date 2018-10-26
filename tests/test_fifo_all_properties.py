@@ -19,7 +19,7 @@ n = len(membership)
 print('There are %d processes' % n)
 
 # reading list of crashed processes
-crashed = map(int, open(d + '/crashed.log', 'r').read().split())
+crashed = list(map(int, open(d + '/crashed.log', 'r').read().split()))
 
 # creating list of correct processes
 correct = [x for x in range(1, n + 1) if x not in crashed]
