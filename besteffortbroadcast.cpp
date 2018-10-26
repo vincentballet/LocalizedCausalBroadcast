@@ -4,13 +4,13 @@
 
 void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
-    // just delivering the data using logical sender
-    deliverToAll(charsToInt32(buffer), buffer + 4, length - 4);
-
     // log BEB deliver
     stringstream ss;
     ss << "bebd " << source << " " << charsToInt32(buffer + 8);
     memorylog->log(ss.str());
+
+    // just delivering the data using logical sender
+    deliverToAll(charsToInt32(buffer), buffer + 4, length - 4);
 }
 
 void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned source)

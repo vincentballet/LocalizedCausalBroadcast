@@ -36,6 +36,12 @@ bool do_wait = true;
 int m = 10;
 bool sigusr_received = false;
 
+// listening on our port
+UDPReceiver *global_receiver;
+
+// array of senders
+vector<UDPSender*> *global_senders;
+
 /**
  * @brief Handle the SIGUSR2 signal
  * @param signal_num must be SIGUSR2
@@ -58,6 +64,10 @@ void writeOutputAndHalt()
     signal(SIGINT, SIG_DFL);
 
     // stop networking
+    global_receiver->halt();
+    vector<UDPSender*>::iterator it;
+    for(it = global_senders->begin(); it != global_senders->end(); it++)
+        (*it)->halt();
 	
     // writing output file
     memorylog->dump();
@@ -93,6 +103,9 @@ void onSignalTerm(int signal_num)
  */
 int main(int argc, char** argv)
 {
+    // creating in-memory log
+    memorylog = new InMemoryLog("da_proc_" + string(argv[1]) + ".out");
+
     // map signals to their handlers
     signal(SIGTERM, onSignalTerm);
     signal(SIGINT, onSignalInt);
@@ -107,9 +120,6 @@ int main(int argc, char** argv)
         cout << "Usage: " << argv[0] << " n membership [extra params...]" << endl;
         return 1;
     }
-
-    // creating in-memory log
-    memorylog = new InMemoryLog("da_proc_" + string(argv[1]) + ".out");
     
     // obtaining n and membership file
     int n = atoi(argv[1]);
@@ -143,6 +153,10 @@ int main(int argc, char** argv)
     // array with perfect links
     vector<PerfectLink*> links;
 
+    // saving global sender/receiver
+    global_receiver = &r;
+    global_senders = &senders;
+
     // creating links and senders
     vector<int>::iterator it;
     for(it = processes.begin(); it != processes.end(); it++)
@@ -168,18 +182,21 @@ int main(int argc, char** argv)
         
     }
     
-    // Waiting for sigusr1
-    while(do_wait && sigusr_received == false)
-    {
-        usleep(10000);
-    }
-    
+    // WARNING: MUST set up everything BEFORE waiting
+    // for SIGUSR2. Otherwise can lose messages!
+
     // creating broadcast object
     FIFOBroadcast broadcast(n, links, 1000);
 
     // printing sequence numbers
     SeqTarget t;
     broadcast.addTarget(&t);
+
+    // Waiting for sigusr1
+    while(do_wait && sigusr_received == false)
+    {
+        usleep(10000);
+    }
 
     std::cout << "INFO  | Sending data" << std::endl;
 
@@ -198,7 +215,7 @@ int main(int argc, char** argv)
     // Waiting to be killed
     while(true)
     {
-        usleep(10000);
+        usleep(100000);
     }
 
     // no return here

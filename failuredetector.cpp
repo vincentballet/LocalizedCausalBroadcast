@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <iostream>
+#include "common.h"
 
 using std::cerr;
 using std::endl;
@@ -64,6 +65,12 @@ void *FailureDetector::pingLoop(void *arg)
             // reporting failure (only once)
             if(detector->monitor)
             {
+                // logging the crash
+                stringstream ss;
+                ss << "crash " << detector->s->getTarget();
+                memorylog->log(ss.str());
+
+                // reporting failure downstream
                 detector->monitor->onFailure(detector->s->getTarget());
                 reported = true;
             }

@@ -24,11 +24,14 @@ private:
     /// Output file
     ofstream file;
 
+    /// Output file (immediate)
+    ofstream file_immediate;
+
     /// Output in-memory buffer
     vector<string> buffer;
 
     /// Mutex for buffer access
-    mutex m, m_dump;
+    mutex m;
 public:
     /**
      * @brief InMemoryLog initializer

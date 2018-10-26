@@ -56,6 +56,11 @@ public:
      * @param N length of the array
      */
     virtual void send(char* data, int N);
+
+    /**
+     * @brief halt Stop the sender
+     */
+    void halt();
 };
 
 #endif // UDPSENDER_H

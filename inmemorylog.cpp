@@ -9,12 +9,21 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 {
     // opening the file
     file.open(destination_filename, std::ios::out);
+
+#ifdef INMEMORY_PRINT
+    // opening the immediate file output
+    file_immediate.open(destination_filename + ".nowait", std::ios::out);
+#endif
+
+    // Logging the beginning
+    log("BEGINNING");
 }
 
 void InMemoryLog::log(std::string content)
 {
 #ifdef INMEMORY_PRINT
     cout << "LOG   | " << content << endl;
+    file_immediate << content << endl;
 #endif
 
     // beginning of critical section
@@ -29,8 +38,11 @@ void InMemoryLog::log(std::string content)
 
 void InMemoryLog::dump()
 {
+    // end of the log
+    log("END");
+
     // locking the buffer
-    m_dump.lock();
+    m.lock();
 
     // loop over buffer
     vector<string>::iterator it;
@@ -44,5 +56,5 @@ void InMemoryLog::dump()
     buffer.clear();
 
     // unlocking the buffer
-    m_dump.unlock();
+    m.unlock();
 }

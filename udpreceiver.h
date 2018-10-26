@@ -49,6 +49,11 @@ public:
      */
     UDPReceiver(Membership* membership, int n, Target* target = nullptr);
 
+    /**
+     * @brief halt Stop the receiver
+     */
+    void halt();
+
     ~UDPReceiver();
 };
 

@@ -50,17 +50,21 @@ void UDPSender::send(char *data, int N)
 
     memcpy(buf + 1, data, len1);
 
-//    int source = buf[0];
-//    int type = buf[1];
-//    int pk_seq = charsToInt32(buf + 2);
-//    int log_sender = charsToInt32(buf + 6);
-//    int fifo_seq = charsToInt32(buf + 10);
-//    int payload = charsToInt32(buf + 14);
+    int source = buf[0];
+    int type = buf[1];
+    int pk_seq = charsToInt32(buf + 2);
+    int log_sender = charsToInt32(buf + 6);
+    int fifo_seq = charsToInt32(buf + 10);
+    int payload = charsToInt32(buf + 14);
 
-//    if(type == 0x01)
-//    cout << "Destination " << target << " source " << source << " type " << type
-//         << " pkseq " << pk_seq << " log_sender " << log_sender
-//         << " fifo_seq " << fifo_seq << " payload " << payload << endl;
+    if(type == 0x01)
+    {
+        stringstream ss;
+        ss << "Destination " << target << " source " << source << " type " << type
+           << " pkseq " << pk_seq << " log_sender " << log_sender
+           << " fifo_seq " << fifo_seq << " payload " << payload;
+        memorylog->log(ss.str());
+    }
 
     if(buf[1] == 0x01)
     {
@@ -78,4 +82,9 @@ void UDPSender::send(char *data, int N)
     usleep(1000 * UDPSENDER_DELAY_MS);
     mtx.unlock();
 #endif
+}
+
+void UDPSender::halt()
+{
+    close(fd);
 }

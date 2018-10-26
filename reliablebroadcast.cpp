@@ -1,4 +1,5 @@
 #include "reliablebroadcast.h"
+#include "common.h"
 
 void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
@@ -10,6 +11,7 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
     }
 
     mtx.lock();
+
     // checking if source is valid
     if(from.find(source) == from.end())
     {
@@ -61,15 +63,22 @@ void ReliableBroadcast::onFailure(int process)
         }
     }
 
+    // need to copy data INSIDE the critical section
+    set<string> relay = set<string>(from[process].begin(), from[process].end());
+
+    // but send data outside, otherwise deadlock will happen
+    // since bebBroadcast will trigger bebDeliver which will call rbDeliver
+    mtx.unlock();
+
     // sending messages from failed process
     set<string>::iterator it1;
-    for(it1 = from[process].begin(); it1 != from[process].end(); it1++)
+    for(it1 = relay.begin(); it1 != relay.end(); it1++)
     {
         string s = (*it1);
         beb_broadcast->broadcast((char*) s.c_str(), s.length(), process);
     }
 
-    mtx.unlock();
+
 }
 
 bool ReliableBroadcast::isCorrect(int process)
