@@ -7,12 +7,10 @@
 #ifndef INMEMORYLOG_H
 #define INMEMORYLOG_H
 
-#include <vector>
 #include <string>
 #include <fstream>
 #include <mutex>
 
-using std::vector;
 using std::string;
 using std::ofstream;
 using std::mutex;
@@ -27,11 +25,17 @@ private:
     /// Output file (immediate)
     ofstream file_immediate;
 
-    /// Output in-memory buffer
-    vector<string> buffer;
+    /// Maximal number of messages
+    static const int MAX_MESSAGES = 10000;
+
+    /// Current number of messages in the buffer
+    int messages = 0;
+
+    /// Buffer for data
+    string buffer[MAX_MESSAGES];
 
     /// Mutex for buffer access
-    mutex m;
+    mutex m, m_dump;
 public:
     /**
      * @brief InMemoryLog initializer

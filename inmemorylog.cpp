@@ -29,8 +29,17 @@ void InMemoryLog::log(std::string content)
     // beginning of critical section
     m.lock();
 
-    // adding content to vector
-    buffer.push_back(content);
+    if(messages < MAX_MESSAGES)
+    {
+        // adding content to vector
+        buffer[messages] = content;
+        messages++;
+    }
+    else
+    {
+        // WARNING: dropping message
+        cout << "Message Dropped: " << content << endl;
+    }
 
     // end of critical section
     m.unlock();
@@ -38,23 +47,23 @@ void InMemoryLog::log(std::string content)
 
 void InMemoryLog::dump()
 {
-    // end of the log
-    log("END");
-
     // locking the buffer
-    m.lock();
+    m_dump.lock();
+
+    // getting current number of messages
+    // DONT CARE if there are writers right now
+    int current_messages = messages;
 
     // loop over buffer
-    vector<string>::iterator it;
-    for(it = buffer.begin(); it != buffer.end(); it++)
+    for(int i = 0; i < current_messages; i++)
     {
         // writing data
-        file << (*it) << std::endl;
+        file << buffer[i] << std::endl;
     }
 
-    // erasing dumped content from the buffer
-    buffer.clear();
+    // logging end
+    file << "END" << std::endl;
 
     // unlocking the buffer
-    m.unlock();
+    m_dump.unlock();
 }
