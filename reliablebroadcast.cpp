@@ -63,6 +63,17 @@ void ReliableBroadcast::onFailure(int process)
         }
     }
 
+    // destroying the perfect link
+    vector<PerfectLink*>::iterator pit;
+    for(pit = links.begin(); pit != links.end(); pit++)
+    {
+        if((*pit)->getTarget() == process)
+        {
+            // halting the perfect link on failure
+            (*pit)->halt();
+        }
+    }
+
     // need to copy data INSIDE the critical section
     set<string> relay = set<string>(from[process].begin(), from[process].end());
 

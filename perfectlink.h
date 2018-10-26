@@ -63,6 +63,9 @@ private:
 
     /** @brief Called on message */
     void onMessage(unsigned source, char* buffer, unsigned length);
+
+    /** @brief Set to false to disable */
+    bool running = true;
 public:
     /**
      * @brief Establish a perfect link
@@ -85,6 +88,11 @@ public:
 
     /** @brief Send data */
     void send(char *buffer, int length);
+
+    /**
+     * @brief halt Stop the link (e.g. if destination crashed)
+     */
+    void halt();
 };
 
 #endif /* perfectlink_h */

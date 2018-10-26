@@ -84,7 +84,15 @@ void *PerfectLink::sendLoop(void *arg)
     // Sending loop
     while(true){
         
-        if(link->msgs.size() > 0){
+        // doing nothing if the link is not running anymore
+        if(!link->running)
+        {
+            usleep(10000);
+            continue;
+        }
+
+        if(link->msgs.size() > 0)
+        {
             // Send all messages if ACK missing
             map<int, pair<int, char*> >::iterator it;
             
@@ -113,10 +121,10 @@ void *PerfectLink::sendLoop(void *arg)
             // end of critical section
             link->mtx.unlock();
         
+            // waiting for something to change
             link->waitForAcksOrTimeout();
         }
     }
-    
 }
 
 
@@ -146,9 +154,13 @@ Receiver *PerfectLink::getReceiver()
 /// @todo bad name, does not send but adds message to send list
 void PerfectLink::send(char* buffer, int length)
 {
+    // parameters check
     if (!(buffer && length > 0)){
         return;
     }
+
+    // doing nothing if link is stopped
+    if(!running) return;
 
     // allocating new memory
     char* data = static_cast<char*>(malloc(length + 5));
@@ -175,6 +187,11 @@ void PerfectLink::send(char* buffer, int length)
     
     // finished critical section
     mtx.unlock();
+}
+
+void PerfectLink::halt()
+{
+    running = false;
 }
 
 void PerfectLink::waitForAcksOrTimeout()
