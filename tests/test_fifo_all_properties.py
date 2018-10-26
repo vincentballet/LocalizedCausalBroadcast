@@ -40,11 +40,12 @@ expected_messages = 10
 # Were there errors?
 were_errors = False
 
-def soft_assert(condition, message):
+def soft_assert(condition, message = None):
     """ Print message if there was an error without exiting """
     global were_errors
     if not condition:
-        print("ASSERT failed " + message)
+        if message:
+            print("ASSERT failed " + message)
         were_errors = True
 
 # messages broadcast by a process. idx -> array
@@ -88,12 +89,18 @@ for p in range(1, n + 1):
       soft_assert(msg in sent, "BEB3 violated. Message %d was NOT send from %d and WAS delivered by %d" % (msg, p, p1))
 
 # RB4: Agreement. If a message m is delivered by some correct process, then m is eventually delivered by every correct process.
+all_delivered = [x for p in correct for x in delivered_by[p]]
+for msg in all_delivered:
+  delivered_correct = [p for p in correct if msg in delivered_by[p]]
+  notdelivered_correct = [p for p in correct if msg not in delivered_by[p]]
+  soft_assert(len(delivered_correct) == 0 or len(notdelivered_correct) == 0, "RB4 Violated. Correct %s delivered %d and correct %s did not deliver it" % (delivered_correct, msg, notdelivered_correct))
+  
 for p in correct:
   delivered_by_p = delivered_by[p]
   for p1 in correct:
     delivered_by_p1 = delivered_by[p1]
     for msg in delivered_by_p:
-      soft_assert(msg in delivered_by_p1, "RB4 Violated. Correct %d delivered %d and correct %d did not deliver it" % (p, msg, p1))
+      soft_assert(msg in delivered_by_p1)#, "RB4 Violated. Correct %d delivered %d and correct %d did not deliver it" % (p, msg, p1))
 
 # FRB5: FIFO delivery: If some process broadcasts message m1 before it broadcasts message m2 , then no correct process delivers m2 unless it has already delivered m1
 for p in range(1, n + 1):

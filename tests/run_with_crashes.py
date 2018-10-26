@@ -93,18 +93,24 @@ while True:
             did_crash += [process]
             os.kill(pids[process], signal.SIGINT)
 
+    # checking that all processes are alive
+    for pid in pids:
+        assert os.path.exists("/proc/" + str(pid))
+
     # exiting loop at the end
     if delta >= max_send_time_ms: break
             
     # sleep for one ms
     sleep(1e-3)
 
+# waiting for log to be written
+sleep(wait_time)
+
 # stopping all processes
 print("Stopping processes")
 for pid in pids:
-  os.kill(pid, signal.SIGTERM)
+  os.kill(pid, signal.SIGINT)
 
-# waiting for log to be written
-sleep(1)
+sleep(wait_time)
 
 print("All done")
