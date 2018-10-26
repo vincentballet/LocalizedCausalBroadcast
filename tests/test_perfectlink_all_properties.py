@@ -25,14 +25,14 @@ d = sys.argv[1]
 os.chdir(d)
 
 # Reading membership file
-membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:]))
+membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('./membership', 'r').read().split('\n')[1:]))
 
 # Counting processes
 n = len(list(membership))
 print('There are %d processes' % n)
 
 # Reading logs
-logs = {i: list(filter(lambda x : len(x) > 0, open(d + '/da_proc_%d.out' % i, 'r').read().split('\n'))) for i in range(1, n + 1)}
+logs = {i: list(filter(lambda x : len(x) > 0, open('./da_proc_%d.out' % i, 'r').read().split('\n'))) for i in range(1, n + 1)}
 
 
 # Note : form of the logs is
