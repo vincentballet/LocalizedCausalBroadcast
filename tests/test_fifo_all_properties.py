@@ -28,7 +28,7 @@ correct = [x for x in range(1, n + 1) if x not in crashed]
 print("Processes %s were correct and processes %s were crashed" % (correct, crashed))
 
 # Reading logs
-logs = {i: filter(lambda x : len(x) > 0, open(d + '/da_proc_%d.out' % i, 'r').read().split('\n')) for i in range(1, n + 1)}
+logs = {i: list(filter(lambda x : len(x) > 0, open(d + '/da_proc_%d.out' % i, 'r').read().split('\n'))) for i in range(1, n + 1)}
 
 # Printing how many log messages are in the dict
 for key, value in logs.items():
