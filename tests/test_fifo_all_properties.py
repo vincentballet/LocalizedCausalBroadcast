@@ -12,7 +12,7 @@ if len(sys.argv) < 2:
 d = sys.argv[1]
 
 # Reading membership file
-membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open(d + '/membership', 'r').read().split('\n')[1:]))
+membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open(d + '/membership', 'r').read().split('\n')[1:])))
 
 # Counting processes
 n = len(membership)

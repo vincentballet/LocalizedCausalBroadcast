@@ -24,7 +24,7 @@ d = sys.argv[1]
 os.chdir(d)
 
 # Reading membership file
-membership = map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:]))
+membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:])))
 
 # Counting processes
 n = len(membership)
