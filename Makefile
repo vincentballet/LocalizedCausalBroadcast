@@ -1,6 +1,6 @@
 MYPROGRAM=da_proc
 CC=g++
-CXXFLAGS=-O0 -g
+CXXFLAGS=-O0 -g -std=gnu++11
 
 all: $(MYPROGRAM)
 
