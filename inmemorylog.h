@@ -29,13 +29,13 @@ private:
     static const int MAX_MESSAGES = 10000;
 
     /// Current number of messages in the buffer
-    int messages = 0;
+    volatile int messages = 0;
 
     /// Buffer for data
     string buffer[MAX_MESSAGES];
 
     /// Mutex for buffer access
-    mutex m, m_dump;
+    mutex m;
 public:
     /**
      * @brief InMemoryLog initializer
@@ -51,6 +51,7 @@ public:
 
     /**
      * @brief Dump all data to file from memory
+     * Call from ONE thread only!
      */
     void dump();
 };

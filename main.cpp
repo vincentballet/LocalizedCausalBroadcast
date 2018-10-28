@@ -24,6 +24,7 @@
 #include "fifobroadcast.h"
 #include "seqtarget.h"
 #include "test.h"
+#include "pthread.h"
 
 using std::string;
 using std::cout;
@@ -34,7 +35,7 @@ using std::stringstream;
 bool do_wait = true;
 
 int m = 10;
-bool sigusr_received = false;
+volatile bool sigusr_received = false;
 
 // listening on our port
 UDPReceiver *global_receiver;
@@ -59,10 +60,7 @@ void onSignalUsr1(int signal_num)
  */
 void writeOutputAndHalt()
 {
-    //reset signal handlers to default
-    signal(SIGTERM, SIG_DFL);
-    signal(SIGINT, SIG_DFL);
-
+    cout << "Stopping networking..." << endl;
     // stop networking
     global_receiver->halt();
     vector<UDPSender*>::iterator it;
@@ -73,6 +71,8 @@ void writeOutputAndHalt()
     // TODO: replace sleep with a more reliable alternative
     sleep(1);
 	
+    cout << "Writing output..." << endl;
+
     // writing output file
     memorylog->dump();
 
@@ -85,10 +85,11 @@ void writeOutputAndHalt()
  */
 void onSignalInt(int signal_num)
 {
+    cout << "SIGINT received" << endl;
     if(signal_num != SIGINT) return;
+    cout << "writeOutputAndHalt" << endl;
     writeOutputAndHalt();
 }
-
 
 /**
  * @brief Handle the SIGTERM signal
@@ -98,6 +99,28 @@ void onSignalTerm(int signal_num)
 {
     if(signal_num != SIGTERM) return;
     writeOutputAndHalt();
+}
+
+/// @brief Signal handler thread
+// See man pthread_sigmask
+static void *sig_thread(void *arg)
+{
+    // obtaining set of signals
+    sigset_t *set = (sigset_t*) arg;
+    int s, sig;
+
+    for (;;) {
+        // waiting for a signal...
+        s = sigwait(set, &sig);
+
+        // reacting on signal
+        printf("Signal handling thread got signal %d\n", sig);
+
+        // if signal is not for this function, it should ignore it
+        onSignalUsr1(sig);
+        onSignalInt(sig);
+        onSignalTerm(sig);
+    }
 }
 
 /**
@@ -111,9 +134,28 @@ int main(int argc, char** argv)
     memorylog = new InMemoryLog("da_proc_" + string(argv[1]) + ".out");
 
     // map signals to their handlers
-    signal(SIGTERM, onSignalTerm);
-    signal(SIGINT, onSignalInt);
-    signal(SIGUSR2, onSignalUsr1);
+
+    // temp variable
+    int s;
+
+    // set of signals
+    sigset_t set;
+
+    // thread which handles signals
+    pthread_t signal_thread;
+
+    // set := []
+    sigemptyset(&set);
+
+    // set += [USR2, INT, TERM]
+    sigaddset(&set, SIGUSR2);
+    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGTERM);
+
+    // all threads don't care about signals from the set
+    s = pthread_sigmask(SIG_BLOCK, &set, NULL);
+
+    // apart from the newly created signal thread (see below)
 
     // argument processing
     argc--;
@@ -174,7 +216,6 @@ int main(int argc, char** argv)
             links.push_back(link);
         }
     }
-
     
     // if last argument is test, run tests
     string test = argv[argc];
@@ -195,6 +236,9 @@ int main(int argc, char** argv)
     // printing sequence numbers
     SeqTarget t;
     broadcast.addTarget(&t);
+
+    // starting listening to signals
+    s = pthread_create(&signal_thread, NULL, &sig_thread, (void *) &set);
 
     // Waiting for sigusr1
     while(do_wait && sigusr_received == false)

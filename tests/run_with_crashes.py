@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # time to initialize
-wait_time = 2
+wait_time = 5
 
 # maximal time of crash in ms
 max_crash_time_ms = 50

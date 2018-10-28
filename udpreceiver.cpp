@@ -63,7 +63,8 @@ int UDPReceiver::receive(char *data, int maxlen)
     if((recv_len = recvfrom(fd, data, maxlen, 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
         perror("Error in recvfrom");
-        exit(-1);
+        usleep(50000);
+        return 0;
     };
 
     return recv_len;
@@ -79,6 +80,7 @@ void* UDPReceiver::receiveLoop(void *args)
     while(true)
     {
         int len = instance->receive(buffer, MAXLEN);
+        if(len == 0) continue;
         // <first byte sender 1> <0x01 1> <PF seq number 4 bytes> <logical sender 4> <fifo sequence number 4> <data 4>
         int source = buffer[0];
 

@@ -47,9 +47,6 @@ void InMemoryLog::log(std::string content)
 
 void InMemoryLog::dump()
 {
-    // locking the buffer
-    m_dump.lock();
-
     // getting current number of messages
     // DONT CARE if there are writers right now
     int current_messages = messages;
@@ -62,8 +59,8 @@ void InMemoryLog::dump()
     }
 
     // logging end
+    cout << "END" << std::endl;
     file << "END" << std::endl;
 
-    // unlocking the buffer
-    m_dump.unlock();
+    file.close();
 }
