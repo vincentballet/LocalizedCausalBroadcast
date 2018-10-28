@@ -31,6 +31,9 @@ private:
     /// Current number of messages in the buffer
     volatile int messages = 0;
 
+    /// Is function log() working now?
+    volatile bool active;
+
     /// Buffer for data
     string buffer[MAX_MESSAGES];
 

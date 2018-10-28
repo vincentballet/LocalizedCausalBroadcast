@@ -7,6 +7,9 @@ using std::endl;
 
 InMemoryLog::InMemoryLog(std::string destination_filename)
 {
+    // currently, active
+    active = true;
+
     // opening the file
     file.open(destination_filename, std::ios::out);
 
@@ -21,6 +24,7 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 
 void InMemoryLog::log(std::string content)
 {
+    if(!active) return;
 #ifdef INMEMORY_PRINT
     cout << "LOG   | " << content << endl;
     file_immediate << content << endl;
@@ -47,6 +51,9 @@ void InMemoryLog::log(std::string content)
 
 void InMemoryLog::dump()
 {
+    // not active (so there are no new messages)
+    active = false;
+
     // getting current number of messages
     // DONT CARE if there are writers right now
     int current_messages = messages;
