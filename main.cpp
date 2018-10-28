@@ -68,6 +68,10 @@ void writeOutputAndHalt()
     vector<UDPSender*>::iterator it;
     for(it = global_senders->begin(); it != global_senders->end(); it++)
         (*it)->halt();
+
+    // waiting so that no log messages are lost
+    // TODO: replace sleep with a more reliable alternative
+    sleep(1);
 	
     // writing output file
     memorylog->dump();
