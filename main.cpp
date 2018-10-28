@@ -67,10 +67,6 @@ void writeOutputAndHalt()
     for(it = global_senders->begin(); it != global_senders->end(); it++)
         (*it)->halt();
 
-    // waiting so that no log messages are lost
-    // TODO: replace sleep with a more reliable alternative
-    sleep(1);
-	
     cout << "Writing output..." << endl;
 
     // writing output file
