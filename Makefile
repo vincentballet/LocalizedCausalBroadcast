@@ -23,6 +23,7 @@ besteffortbroadcast.o \
 reliablebroadcast.o \
 seqtarget.o \
 test.o \
+uniformreliablebroadcast.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 

@@ -12,11 +12,13 @@
 #include "perfectlink.h"
 
 class FIFOBroadcast;
+class UniformReliableBroadcast;
 
 /** @class Broadcast interface used in the project */
 class Broadcast : public Receiver, public Target
 {
     friend class FIFOBroadcast;
+    friend class UniformReliableBroadcast;
 protected:
     /// @brief A vector of Perfect Links (destinations)
     vector<PerfectLink*> links;
