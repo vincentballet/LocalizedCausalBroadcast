@@ -94,7 +94,7 @@ void FIFOBroadcast::onMessage1(FIFOMessage m)
     }
 }
 
-FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> links, int timeout_ms) : Broadcast(this_process_id, links)
+FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->links)
 {
     // sending sequence number is initially 0
     send_seq_num = 0;
@@ -103,11 +103,13 @@ FIFOBroadcast::FIFOBroadcast(unsigned this_process_id, vector<PerfectLink *> lin
     vector<PerfectLink*>::iterator it;
     for(it = links.begin(); it != links.end(); it++)
         recv_seq_num[(*it)->getTarget()] = -1;
-    recv_seq_num[this_process_id] = -1;
+    recv_seq_num[this_process] = -1;
 
-    // creating rb broadcast
-    rb_broadcast = new ReliableBroadcast(this_process_id, links, timeout_ms);
-    rb_broadcast->addTarget(this);
+    // saving broadcast object
+    this->b = broadcast;
+
+    // initializing broadcast
+    b->addTarget(this);
 }
 
 void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
@@ -131,5 +133,5 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     // copying payload
     memcpy(buffer + 4, message, min(length, MAXLEN - 4));
 
-    rb_broadcast->broadcast(buffer, min(length + 4, MAXLEN), source);
+    b->broadcast(buffer, min(length + 4, MAXLEN), source);
 }

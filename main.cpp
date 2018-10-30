@@ -22,6 +22,7 @@
 #include "byteprinter.h"
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
+#include "reliablebroadcast.h"
 #include "seqtarget.h"
 #include "test.h"
 #include "pthread.h"
@@ -227,7 +228,10 @@ int main(int argc, char** argv)
     // for SIGUSR2. Otherwise can lose messages!
 
     // creating broadcast object
-    FIFOBroadcast broadcast(n, links, 5000);
+    ReliableBroadcast broadcast1(n, links, 5000);
+
+    // creating fifo broadcast
+    FIFOBroadcast broadcast(&broadcast1);
 
     // printing sequence numbers
     SeqTarget t;

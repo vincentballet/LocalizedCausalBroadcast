@@ -43,7 +43,7 @@ private:
     mutex mtx;
 
     /// @brief Reliable broadcast instance
-    ReliableBroadcast* rb_broadcast;
+    Broadcast* b;
 
     /// @brief Receiving sequence numbers
     map<int, int> recv_seq_num;
@@ -76,7 +76,7 @@ public:
      * @param links Vector of PerfectLink pointers connected to members     
      * @param timeout_ms Timeout for failure detector
      */
-    FIFOBroadcast(unsigned this_process_id, vector<PerfectLink*> links, int timeout_ms);
+    FIFOBroadcast(Broadcast* broadcast);
 
     virtual ~FIFOBroadcast() {}
 };

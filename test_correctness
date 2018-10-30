@@ -73,7 +73,6 @@ done
 #wait until all processes stop
 for i in `seq 1 5`
 do
-        echo ${da_proc_id[$i]}
 	wait "${da_proc_id[$i]}" 2>&1>/dev/null
 done
 
