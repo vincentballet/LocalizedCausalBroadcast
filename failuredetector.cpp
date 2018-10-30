@@ -67,7 +67,7 @@ void *FailureDetector::pingLoop(void *arg)
             {
                 // logging the crash
                 stringstream ss;
-                ss << "crash " << detector->s->getTarget();
+                ss << "crash " << detector->s->getTarget() << " to " << detector->timeout_ms;
                 memorylog->log(ss.str());
 
                 // reporting failure downstream

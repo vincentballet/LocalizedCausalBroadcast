@@ -8,7 +8,7 @@
 
 #time to wait for correct processes to broadcast all messages (in seconds)
 #(should be adapted to the number of messages to send)
-time_to_finish=2
+time_to_finish=6
 
 init_time=2
 
@@ -43,6 +43,8 @@ kill -TERM "${da_proc_id[2]}" #crash process 2
 da_proc_id[2]=""
 kill -CONT "${da_proc_id[3]}" #resume process 3
 
+echo "2 4">crashed.log
+
 #start broadcasting
 for i in `seq 1 5`
 do
@@ -71,10 +73,11 @@ done
 #wait until all processes stop
 for i in `seq 1 5`
 do
-	wait "${da_proc_id[$i]}"
+        echo ${da_proc_id[$i]}
+	wait "${da_proc_id[$i]}" 2>&1>/dev/null
 done
 
 #check logs for correctness
-#... (not implemented here)
+python tests/test_fifo_all_properties.py .
 
 echo "Correctness test done."

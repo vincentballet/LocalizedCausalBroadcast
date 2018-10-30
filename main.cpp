@@ -81,8 +81,8 @@ void writeOutputAndHalt()
  */
 void onSignalInt(int signal_num)
 {
-    cout << "SIGINT received" << endl;
     if(signal_num != SIGINT) return;
+    cout << "SIGINT received" << endl;
     cout << "writeOutputAndHalt" << endl;
     writeOutputAndHalt();
 }
@@ -227,7 +227,7 @@ int main(int argc, char** argv)
     // for SIGUSR2. Otherwise can lose messages!
 
     // creating broadcast object
-    FIFOBroadcast broadcast(n, links, 1000);
+    FIFOBroadcast broadcast(n, links, 5000);
 
     // printing sequence numbers
     SeqTarget t;

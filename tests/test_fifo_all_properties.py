@@ -88,12 +88,12 @@ for p in range(1, n + 1):
     for msg in delivered:
       soft_assert(msg in sent, "BEB3 violated. Message %d was NOT send from %d and WAS delivered by %d" % (msg, p, p1))
 
-# RB4: Agreement. If a message m is delivered by some correct process, then m is eventually delivered by every correct process.
+# URB4: Agreement. If a message m is delivered by some (correct/faulty) process, then m is eventually delivered by every correct process.
 all_delivered = [x for p in correct for x in delivered_by[p]]
 for msg in all_delivered:
-  delivered_correct = [p for p in correct if msg in delivered_by[p]]
+  delivered_all = [p for p in range(1, n + 1) if msg in delivered_by[p]]
   notdelivered_correct = [p for p in correct if msg not in delivered_by[p]]
-  soft_assert(len(delivered_correct) == 0 or len(notdelivered_correct) == 0, "RB4 Violated. Correct %s delivered %d and correct %s did not deliver it" % (delivered_correct, msg, notdelivered_correct))
+  soft_assert(len(delivered_all) == 0 or len(notdelivered_correct) == 0, "URB4 Violated. Process %s delivered %d and correct %s did not deliver it" % (delivered_all, msg, notdelivered_correct))
   
 for p in correct:
   delivered_by_p = delivered_by[p]
