@@ -23,11 +23,13 @@ using std::mutex;
 using std::map;
 using std::set;
 using std::pair;
+using std::string;
 
 /** @class This class implements the Perfect Link */
 class PerfectLink : public Sender, public Receiver, public Target
 {
 private:
+    /// @brief Map seq number -> message, timestamp
     map<int, pair<int, char*> > msgs;
 
     /** @brief Object for sending data to other host */
@@ -53,7 +55,7 @@ private:
     int seqnum;
 
     /** @brief Wait for an ACK */
-    void waitForAcksOrTimeout();
+    void waitForNewMessagesOrTimeout();
 
     /** @brief Timeout for 1 message in microseconds (1e-6 sec) */
     unsigned const TIMEOUT = 100000;

@@ -125,7 +125,7 @@ void *PerfectLink::sendLoop(void *arg)
             link->mtx.unlock();
         
             // waiting for something to change
-            link->waitForAcksOrTimeout();
+            link->waitForNewMessagesOrTimeout();
         }
 
         usleep(10000);
@@ -140,7 +140,7 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     this->s = s;
     this->r = r;
     this->seqnum = 0;
-    
+
     // starting sending thread
     pthread_create(&thread, nullptr, &PerfectLink::sendLoop, this);
     
@@ -189,7 +189,7 @@ void PerfectLink::send(char* buffer, int length)
     // Otherwise another thread could send a message with SAME
     // sequence number
     this->seqnum++;
-    
+
     // finished critical section
     mtx.unlock();
 }
@@ -204,13 +204,16 @@ bool PerfectLink::isClean()
     return clean;
 }
 
-void PerfectLink::waitForAcksOrTimeout()
+void PerfectLink::waitForNewMessagesOrTimeout()
 {
     // waiting until all messages are sent
     steady_clock::time_point begin = steady_clock::now();
+    int seq = this->seqnum;
     while(this->msgs.size() != 0 ) {
         long a = chrono::duration_cast<chrono::microseconds>(steady_clock::now() - begin).count();
         if (a > TIMEOUT) break;
+
+        if(this->seqnum > seq) return;
 
         /// Sleep 1 millisecond
         /// Drastically reduces CPU load (thread sleep instead of busy wait)

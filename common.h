@@ -22,6 +22,9 @@ using std::stringstream;
 /** @macro Print messages stored in memory */
 //#define INMEMORY_PRINT 1
 
+/// @macro Dump to a separate file immediately
+//#define IMMEDIATE_FILE 1
+
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
  * @param input int
@@ -46,8 +49,5 @@ extern InMemoryLog* memorylog;
 
 /// @macro Delay after each UDPSender::send
 //#define UDPSENDER_DELAY_MS 0.5
-
-/// @macro Dump to a separate file immediately
-#define IMMEDIATE_FILE 1
 
 #endif // COMMON_H

@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # messages to send
-m = 20
+m = 200
 
 # time to initialize
 wait_time = 5
@@ -50,6 +50,9 @@ sleep(wait_time)
 # starting processes
 print("Starting processes")
 
+# get start time
+time_start = time()
+
 for pid in pids:
   os.kill(pid, signal.SIGUSR2)
 
@@ -61,9 +64,16 @@ while True:
   if finished: break
   sleep(0.1)
 
+# get end time
+time_end = time()
+
+# killing processes
 for pid in pids:
   os.kill(pid, signal.SIGINT)
 
+# waiting to finish
 sleep(wait_time)
 
-print("All done")
+# printing stats
+time_delta = time_end - time_start
+print("Sent %d messages over %d machines and received all in %.1f seconds, throughput = %.1f" % (m, n, time_delta, (m * n) / time_delta))
