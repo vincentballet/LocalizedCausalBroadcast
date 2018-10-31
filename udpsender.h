@@ -10,9 +10,9 @@
 #include <netinet/in.h>
 #include <string>
 #include <mutex>
-#include "common.h"
 #include "sender.h"
 #include "membership.h"
+#include "common.h"
 
 using std::mutex;
 using std::string;

@@ -271,14 +271,19 @@ int main(int argc, char** argv)
     }
 
     // Waiting to be killed
-    // or until received all messages
     while(true)
     {
         usleep(100000);
         if(t.isFull())
         {
+            cout << "Received ALL messages" << endl;
+
+            // writing a file
+            stringstream ss;
+            ss << "da_proc_" << n << ".recvall";
+            ofstream(ss.str(), std::ios::out) << "done";
+
             memorylog->log("Received ALL messages");
-            kill(getpid(), SIGINT);
             while(true)
             {
                 usleep(100000);

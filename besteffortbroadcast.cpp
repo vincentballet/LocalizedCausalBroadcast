@@ -51,3 +51,12 @@ BestEffortBroadcast::BestEffortBroadcast(unsigned this_process, vector<PerfectLi
     for(it = links.begin(); it != links.end(); it++)
         (*it)->addTarget(this);
 }
+
+bool BestEffortBroadcast::isClean()
+{
+    bool clean = true;
+    vector<PerfectLink*>::iterator it;
+    for(it = links.begin(); it != links.end(); it++)
+        clean &= (*it)->isClean();
+    return clean;
+}

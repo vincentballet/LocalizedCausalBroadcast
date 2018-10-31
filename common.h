@@ -47,4 +47,7 @@ extern InMemoryLog* memorylog;
 /// @macro Delay after each UDPSender::send
 //#define UDPSENDER_DELAY_MS 0.5
 
+/// @macro Dump to a separate file immediately
+#define IMMEDIATE_FILE 1
+
 #endif // COMMON_H

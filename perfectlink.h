@@ -66,6 +66,9 @@ private:
 
     /** @brief Set to false to disable */
     bool running = true;
+
+    /** @brief true if send buffer is empty */
+    volatile bool clean;
 public:
     /**
      * @brief Establish a perfect link
@@ -93,6 +96,12 @@ public:
      * @brief halt Stop the link (e.g. if destination crashed)
      */
     void halt();
+
+    /**
+     * @brief isClean
+     * @return True if no messages in send queue
+     */
+    bool isClean();
 };
 
 #endif /* perfectlink_h */

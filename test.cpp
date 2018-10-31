@@ -6,12 +6,12 @@
 //  Copyright © 2018 Vincent Ballet. All rights reserved.
 //
 
-#include "common.h"
 #include "test.h"
 #include <string>
 #include <iostream>
 #include <cassert>
 #include <unistd.h>
+#include "common.h"
 #define private public
 #include "perfectlink.h"
 #include "udpsender.h"

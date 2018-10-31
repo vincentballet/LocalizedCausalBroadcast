@@ -28,6 +28,12 @@ public:
      * @param links Vector of PerfectLink pointers connected to members
      */
     BestEffortBroadcast(unsigned this_process, vector<PerfectLink*> links);
+
+    /**
+     * @brief isClean
+     * @return True if no messages in the send queue
+     */
+    bool isClean();
 };
 
 #endif // BESTEFFORTBROADCAST_H

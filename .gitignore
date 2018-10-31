@@ -1,3 +1,4 @@
+*.recvall
 *.out.nowait
 *.log
 *.out

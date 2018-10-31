@@ -30,7 +30,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     if(source != s->getTarget()) return;
 
     // parsing messages
-    if(len < 4) return;
+    if(len < 5) return;
 
     // receiving an ACK from a sent message
     if(len == 5 && buf[0] == 0x02)
@@ -39,7 +39,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         //cout << "** Received ACK " << seqnumack << endl;
 
         stringstream ss;
-        ss << "< plack\t" << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
+        ss << "< plack " << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
         memorylog->log(ss.str());
 
         mtx.lock();
@@ -54,25 +54,26 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     else if(buf[0] == 0x01) {
         // creating message as a string
         string message(buf, len);
-        
-        // no need for mutex as only 1 thread is calling this function
-        if (delivered.find(string(message)) != delivered.end()){
-            return;
-        }
-        
-        stringstream ss;
-        ss << "< pld\t" << r->getThis() << " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
-        memorylog->log(ss.str());
 
-        //int tmp = charsToInt32(buf + 1);
-        //cout << "** Received content " << tmp << endl;
-        delivered.insert(message);
-        deliverToAll(source, buf + 5, len - 5);
         char sdata[5];
         sdata[0] = 0x02;
         memcpy(sdata + 1, buf + 1, 4);
         //cout << "** Sending ACK for " << tmp << endl;
         s->send(sdata, 5);
+
+        // WARNING: need to return ONLY after sending the ACK, otherwise can loose the ACK
+        // And the sender will keep sending this message
+        // no need for mutex as only 1 thread is calling this function
+        if (delivered.find(string(message)) != delivered.end()){
+            return;
+        }
+
+        stringstream ss;
+        ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
+        memorylog->log(ss.str());
+
+        delivered.insert(message);
+        deliverToAll(source, buf + 5, len - 5);
     }
 }
 
@@ -83,7 +84,9 @@ void *PerfectLink::sendLoop(void *arg)
     
     // Sending loop
     while(true){
-        
+        // updading clean variable
+        link->clean = link->msgs.size() == 0;
+
         // doing nothing if the link is not running anymore
         if(!link->running)
         {
@@ -114,7 +117,7 @@ void *PerfectLink::sendLoop(void *arg)
 
                 // logging message
                 stringstream ss;
-                ss << "> pls\t" << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
+                ss << "> pls " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
                 memorylog->log(ss.str());
             }
 
@@ -124,6 +127,8 @@ void *PerfectLink::sendLoop(void *arg)
             // waiting for something to change
             link->waitForAcksOrTimeout();
         }
+
+        usleep(10000);
     }
 }
 
@@ -192,6 +197,11 @@ void PerfectLink::send(char* buffer, int length)
 void PerfectLink::halt()
 {
     running = false;
+}
+
+bool PerfectLink::isClean()
+{
+    return clean;
 }
 
 void PerfectLink::waitForAcksOrTimeout()

@@ -1,4 +1,5 @@
 #include "udpsender.h"
+#include "common.h"
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -6,7 +7,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
-#include "common.h"
 
 using std::cout;
 using std::endl;

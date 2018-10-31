@@ -16,7 +16,7 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
     // opening the file
     file.open(destination_filename, std::ios::out);
 
-#ifdef INMEMORY_PRINT
+#ifdef IMMEDIATE_FILE
     // opening the immediate file output
     file_immediate.open(destination_filename + ".nowait", std::ios::out);
 #endif
@@ -28,8 +28,12 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 void InMemoryLog::log(std::string content)
 {
     if(!active) return;
+
 #ifdef INMEMORY_PRINT
     cout << "LOG   | " << content << endl;
+#endif
+
+#ifdef IMMEDIATE_FILE
     file_immediate << content << endl;
 #endif
 
