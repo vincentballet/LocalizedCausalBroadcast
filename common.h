@@ -16,6 +16,9 @@ using std::stringstream;
 /** @macro minimal of two numbers */
 #define min(x, y) ((x) > (y) ? (y) : (x))
 
+/** @macro minimal of two numbers */
+#define max(x, y) ((x) < (y) ? (y) : (x))
+
 /** @macro Print messages stored in memory */
 //#define INMEMORY_PRINT 1
 

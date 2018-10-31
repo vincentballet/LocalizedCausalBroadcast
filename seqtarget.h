@@ -7,23 +7,41 @@
 #ifndef SEQTARGET_H
 #define SEQTARGET_H
 
+#include <vector>
 #include "target.h"
 #include "common.h"
+
+using std::vector;
 
 /** Print sequence numbers and senders */
 class SeqTarget : public Target
 {
+    /// @brief Maximal message
+    int maxSeq;
+
+    /// @brief Current sequence number
+    vector<int> seqs;
 public:
-    SeqTarget();
+    /**
+     * @brief SeqTarget Accepts numbers as messages
+     * @param maxSeq Maximal message to expect
+     */
+    SeqTarget(int n, int maxSeq);
 
     /**
      * @brief onMessage Print message
-     * @param source
-     * @param logical_source
+     * @param source from 1..n
      * @param buffer
      * @param length
      */
     virtual void onMessage(unsigned source, char* buffer, unsigned length);
+
+    /**
+     * @brief isFull Checks if maximal sequence number was reached
+     * for all of the senders
+     * @return True if reached
+     */
+    bool isFull();
 };
 
 #endif // SEQTARGET_H

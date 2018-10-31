@@ -60,8 +60,11 @@ void onSignalUsr1(int signal_num)
 /**
  * @brief Write current state and exit on application crash (SIGINT/SIGTERM)
  */
+bool wasHalted = false;
 void writeOutputAndHalt()
 {
+    if(wasHalted) return;
+    wasHalted = true;
     cout << "Stopping networking..." << endl;
     // stop networking
     global_receiver->halt();
@@ -241,7 +244,7 @@ int main(int argc, char** argv)
     FIFOBroadcast broadcast(&broadcast1);
 
     // printing sequence numbers
-    SeqTarget t;
+    SeqTarget t(processes.size(), m);
     broadcast.addTarget(&t);
 
     // starting listening to signals
@@ -260,7 +263,7 @@ int main(int argc, char** argv)
     for(int i = 0; i < m; i++)
     {
         stringstream ss;
-        int payload = 1000 * n + i;
+        int payload = 1000 * n + i + 1;
         int32ToChars(payload, buf);
         ss << "b " << payload;
         memorylog->log(ss.str());
@@ -268,9 +271,19 @@ int main(int argc, char** argv)
     }
 
     // Waiting to be killed
+    // or until received all messages
     while(true)
     {
         usleep(100000);
+        if(t.isFull())
+        {
+            memorylog->log("Received ALL messages");
+            kill(getpid(), SIGINT);
+            while(true)
+            {
+                usleep(100000);
+            }
+        }
     }
 
     // no return here
