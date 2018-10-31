@@ -1,13 +1,17 @@
 #include "uniformreliablebroadcast.h"
 #include "common.h"
+#include <cstring>
+#include <cassert>
 
-void UniformReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
+// Protocol: first 4 bytes: physical source, then bytes
+
+void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_source, char *buffer, unsigned length)
 {
     // string with the content
     string content(buffer, length);
 
     // pair (message, sender)
-    pair<string, int> pend = make_pair(content, source);
+    pair<string, int> pend = make_pair(content, logical_source);
 
     // need to relay?
     bool need_broadcast = false;
@@ -19,6 +23,10 @@ void UniformReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned
     if(ack.find(content) == ack.end())
         ack[content] = set<int>();
     ack[content].insert(source);
+
+    stringstream ss;
+    ss << "urback " << charsToInt32(buffer + 4) << " " << source;
+    memorylog->log(ss.str());
 
     // if message is not pending, add it there and relay
     if(pending.find(pend) == pending.end())
@@ -32,7 +40,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned
 
     // broadcasting if needed
     if(need_broadcast)
-        b->broadcast(buffer, length, source);
+        b->broadcast(buffer, length, logical_source);
 
     // ack and pending changed, checking if can deliver something now
     tryDeliverAll();
@@ -65,6 +73,20 @@ bool UniformReliableBroadcast::canDeliver(std::string msg)
     return 2 * ack[msg].size() > (links.size() + 1);
 }
 
+void UniformReliableBroadcast::onFailure(int process)
+{
+    // destroying the perfect link
+    vector<PerfectLink*>::iterator pit;
+    for(pit = links.begin(); pit != links.end(); pit++)
+    {
+        if((*pit)->getTarget() == process)
+        {
+            // halting the perfect link on failure
+            (*pit)->halt();
+        }
+    }
+}
+
 bool UniformReliableBroadcast::tryDeliver()
 {
     // message buffer
@@ -85,18 +107,20 @@ bool UniformReliableBroadcast::tryDeliver()
     // loop over pending
     for(it = pending.begin(); it != pending.end(); it++)
     {
+        // filling in the buffers
+        message = (*it).first;
+        source = (*it).second;
+
+//        stringstream ss;
+//        ss << "tryDeliver " << charsToInt32((char*) message.c_str()) << " " << source << " "
+//           << ack[message].size() << " " << canDeliver(message);
+//        memorylog->log(ss.str());
+
         // if not delivered and can deliver
         if(delivered.find(message) == delivered.end() && canDeliver(message))
         {
-            // filling in the buffers
-            message = (*it).first;
-            source = (*it).second;
-
             // marking message as delivered
             delivered.insert(message);
-
-            // message is not pending anymore
-            pending.erase(it);
 
             // buffer is valid now
             found = true;
@@ -135,4 +159,16 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
 {
     // saving the underlying broadcast
     this->b = broadcast;
+
+//    // creating failure detectors
+//    vector<PerfectLink*>::iterator it;
+//    for(it = links.begin(); it != links.end(); it++)
+//    {
+//        PerfectLink* link = *it;
+//        // adding failure detector for a link
+//        FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), 1000, this);
+//    }
+
+    // adding this object as the target
+    b->addTarget(this);
 }

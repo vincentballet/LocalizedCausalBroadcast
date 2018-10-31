@@ -23,6 +23,8 @@ echo "5
 127.0.0.1 11004
 127.0.0.1 11005" > membership
 
+echo  > crashed.log
+
 #start 5 processes, each broadcasting 1000 messages
 for i in `seq 1 5`
 do
@@ -59,6 +61,6 @@ do
 done
 
 #check logs for correctness
-#... (not implemented here)
+python ./tests/test_fifo_all_properties.py .
 
 echo "Correctness test done."

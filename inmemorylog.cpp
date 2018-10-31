@@ -7,6 +7,9 @@ using std::endl;
 
 InMemoryLog::InMemoryLog(std::string destination_filename)
 {
+    // allocating memory
+    buffer = new string[MAX_MESSAGES];
+
     // currently, active
     active = true;
 

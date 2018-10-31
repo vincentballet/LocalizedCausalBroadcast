@@ -23,6 +23,15 @@ public:
     /**
      * @brief onMessage Called when new message is available
      * @param source The sender process ID
+     * @param logical_source The oridinal sender of the message
+     * @param buffer The message in memory
+     * @param length The message length
+     */
+    virtual void onMessage(unsigned source, unsigned logical_source, char* buffer, unsigned length);
+
+    /**
+     * @brief onMessage Called when new message is available
+     * @param source The sender process ID
      * @param buffer The message in memory
      * @param length The message length
      */

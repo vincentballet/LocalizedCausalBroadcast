@@ -21,7 +21,7 @@ using std::set;
 /** @classs This class implements Uniform Reliable Broadcast
  * With an assumption that at least half of the processes is correct
  */
-class UniformReliableBroadcast : public Broadcast
+class UniformReliableBroadcast : public Broadcast, public FailureMonitor
 {
 private:
     /// @brief Delivered messages
@@ -35,10 +35,13 @@ private:
     map<string, set<int> > ack;
 
     /// @brief React on a message with parsed source
-    virtual void onMessage(unsigned source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned source, unsigned logical_source, char* buffer, unsigned length);
 
     /** @brief Broadcast a message with source other than this process */
     virtual void broadcast(char* message, unsigned length, unsigned source);
+
+    /** @brief Called by failure detector */
+    virtual void onFailure(int process);
 
     /// @brief Underlying broadcast object
     Broadcast* b;

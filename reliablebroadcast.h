@@ -41,7 +41,7 @@ private:
     vector<FailureDetector*> detectors;
 
     /// @brief React on a message with parsed source
-    virtual void onMessage(unsigned source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned source, unsigned logical_source, char *buffer, unsigned length);
 
     /** @brief Broadcast a message with source other than this process */
     virtual void broadcast(char* message, unsigned length, unsigned source);

@@ -1,19 +1,19 @@
 #include "reliablebroadcast.h"
 #include "common.h"
 
-void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
+void ReliableBroadcast::onMessage(unsigned source, unsigned logical_source, char *buffer, unsigned length)
 {
-    if(source == this_process)
+    if(logical_source == this_process && source == this_process)
     {
         // delivering locally
-        deliverToAll(source, buffer, length);
+        deliverToAll(logical_source, buffer, length);
         return;
     }
 
     mtx.lock();
 
     // checking if source is valid
-    if(from.find(source) == from.end())
+    if(from.find(logical_source) == from.end())
     {
         mtx.unlock();
         return;
@@ -23,23 +23,23 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
     string message(buffer, length);
 
     // if message already in from, doing nothing
-    if(from[source].find(message) != from[source].end())
+    if(from[logical_source].find(message) != from[logical_source].end())
     {
         mtx.unlock();
         return;
     }
 
     // delivering locally
-    deliverToAll(source, buffer, length);
+    deliverToAll(logical_source, buffer, length);
 
     // adding message to from
-    from[source].insert(message);
+    from[logical_source].insert(message);
 
     mtx.unlock();
 
-    if(!isCorrect(source))
+    if(!isCorrect(logical_source))
     {
-        b->broadcast(buffer, length, source);
+        b->broadcast(buffer, length, logical_source);
     }
 }
 

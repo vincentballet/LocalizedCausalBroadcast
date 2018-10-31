@@ -26,7 +26,7 @@ private:
     ofstream file_immediate;
 
     /// Maximal number of messages
-    static const int MAX_MESSAGES = 10000;
+    static const int MAX_MESSAGES = 100000;
 
     /// Current number of messages in the buffer
     volatile int messages = 0;
@@ -35,7 +35,7 @@ private:
     volatile bool active;
 
     /// Buffer for data
-    string buffer[MAX_MESSAGES];
+    string *buffer;
 
     /// Mutex for buffer access
     mutex m;

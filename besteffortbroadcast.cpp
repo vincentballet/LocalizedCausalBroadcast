@@ -6,11 +6,11 @@ void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned leng
 {
     // log BEB deliver
     stringstream ss;
-    ss << "bebd " << source << " " << charsToInt32(buffer + 8);
+    ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 8);
     memorylog->log(ss.str());
 
     // just delivering the data using logical sender
-    deliverToAll(charsToInt32(buffer), buffer + 4, length - 4);
+    deliverToAll(source, charsToInt32(buffer), buffer + 4, length - 4);
 }
 
 void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned source)
@@ -26,7 +26,7 @@ void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned sou
     // delivering the message locally
     /// @todo How to ensure it's not delivered twice?
     /// Need to add content check?
-    deliverToAll(source, message, length);
+    deliverToAll(source, source, message, length);
 
     // buffer for sending
     char buffer[MAXLEN];

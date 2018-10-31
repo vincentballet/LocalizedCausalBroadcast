@@ -7,7 +7,7 @@
 using std::cout;
 using std::endl;
 
-void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
+void FIFOBroadcast::onMessage(unsigned logical_source, char *buffer, unsigned length)
 {
     mtx.lock();
     // resulting parsed message
@@ -26,7 +26,7 @@ void FIFOBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
     msg.seq_num = charsToInt32(buffer);
 
     // obtaining source
-    msg.source = source;
+    msg.source = logical_source;
 
     // processing message further
     onMessage1(msg);

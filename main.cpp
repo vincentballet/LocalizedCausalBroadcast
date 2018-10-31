@@ -232,10 +232,10 @@ int main(int argc, char** argv)
     BestEffortBroadcast broadcast2(n, links);
 
     // creating broadcast object
-    ReliableBroadcast broadcast1(&broadcast2, 5000);
+    //ReliableBroadcast broadcast1(&broadcast2, 5000);
 
     // creating UR broadcast
-    //UniformReliableBroadcast broadcast1(&broadcast2);
+    UniformReliableBroadcast broadcast1(&broadcast2);
 
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);

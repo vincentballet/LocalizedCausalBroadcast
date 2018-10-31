@@ -55,7 +55,7 @@ private:
     int send_seq_num;
 
     /// @brief React on a message with parsed source
-    void onMessage(unsigned source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned logical_source, char* buffer, unsigned length);
 
     /// @brief React on a parsed message
     void onMessage1(FIFOMessage m);

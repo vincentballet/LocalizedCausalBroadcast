@@ -1,5 +1,15 @@
 #include "receiver.h"
 
+void Receiver::deliverToAll(unsigned source, unsigned logical_source, char *message, unsigned length)
+{
+    vector<Target*>::iterator it;
+    for(it = targets.begin(); it != targets.end(); it++)
+    {
+        Target* t = *it;
+        t->onMessage(source, logical_source, message, length);
+    }
+}
+
 void Receiver::deliverToAll(unsigned source, char *message, unsigned length)
 {
     vector<Target*>::iterator it;
