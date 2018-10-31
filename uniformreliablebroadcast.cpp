@@ -1,4 +1,5 @@
 #include "uniformreliablebroadcast.h"
+#include "common.h"
 
 void UniformReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
@@ -110,7 +111,14 @@ bool UniformReliableBroadcast::tryDeliver()
 
     // if buffer is valid, delivering its content
     if(found)
+    {
+        // log BEB deliver
+        stringstream ss;
+        ss << "urbd " << source << " " << charsToInt32((char*) message.c_str() + 4);
+        memorylog->log(ss.str());
+
         deliverToAll(source, (char*) message.c_str(), message.length());
+    }
 
     // return true if there was a message delivered (therefore one more loop might be required)
     return found;

@@ -37,9 +37,6 @@ private:
     /// @brief Correct processes (Algo 3.2)
     list<int> correct;
 
-    /// @brief BestEffort broadcast instance
-    BestEffortBroadcast* beb_broadcast;
-
     /// @brief Failure detectors for links
     vector<FailureDetector*> detectors;
 
@@ -54,14 +51,16 @@ private:
 
     /** @brief Is the process correct? */
     bool isCorrect(int process);
+
+    /** @brief Underlying broadcast object */
+    Broadcast* b;
 public:
     /**
      * @brief Broadcast initialization
-     * @param this_process_id ID of the current process
-     * @param links Vector of PerfectLink pointers connected to members
+     * @param broadcast Underlying broadcast object
      * @param timeout_ms Timeout in ms for failure detector
      */
-    ReliableBroadcast(unsigned this_process, vector<PerfectLink*> links, int timeout_ms);
+    ReliableBroadcast(Broadcast* broadcast, int timeout_ms);
 
     virtual ~ReliableBroadcast() {}
 };

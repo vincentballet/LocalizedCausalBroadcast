@@ -39,14 +39,14 @@ void ReliableBroadcast::onMessage(unsigned source, char *buffer, unsigned length
 
     if(!isCorrect(source))
     {
-        beb_broadcast->broadcast(buffer, length, source);
+        b->broadcast(buffer, length, source);
     }
 }
 
 void ReliableBroadcast::broadcast(char *message, unsigned length, unsigned source)
 {
     // just running broadcast
-    beb_broadcast->broadcast(message, length, source);
+    b->broadcast(message, length, source);
 }
 
 void ReliableBroadcast::onFailure(int process)
@@ -86,10 +86,8 @@ void ReliableBroadcast::onFailure(int process)
     for(it1 = relay.begin(); it1 != relay.end(); it1++)
     {
         string s = (*it1);
-        beb_broadcast->broadcast((char*) s.c_str(), s.length(), process);
+        b->broadcast((char*) s.c_str(), s.length(), process);
     }
-
-
 }
 
 bool ReliableBroadcast::isCorrect(int process)
@@ -106,8 +104,8 @@ bool ReliableBroadcast::isCorrect(int process)
     return false;
 }
 
-ReliableBroadcast::ReliableBroadcast(unsigned this_process, vector<PerfectLink *> links, int timeout_ms) :
-    Broadcast(this_process, links)
+ReliableBroadcast::ReliableBroadcast(Broadcast *broadcast, int timeout_ms) :
+    Broadcast (broadcast->this_process, broadcast->links)
 {
     // creating failure detectors
     vector<PerfectLink*>::iterator it;
@@ -127,6 +125,6 @@ ReliableBroadcast::ReliableBroadcast(unsigned this_process, vector<PerfectLink *
     }
 
     // creating best effort broadcast instance
-    beb_broadcast = new BestEffortBroadcast(this_process, links);
-    beb_broadcast->addTarget(this);
+    b = broadcast;
+    b->addTarget(this);
 }

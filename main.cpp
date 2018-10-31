@@ -23,6 +23,7 @@
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
 #include "reliablebroadcast.h"
+#include "uniformreliablebroadcast.h"
 #include "seqtarget.h"
 #include "test.h"
 #include "pthread.h"
@@ -227,8 +228,14 @@ int main(int argc, char** argv)
     // WARNING: MUST set up everything BEFORE waiting
     // for SIGUSR2. Otherwise can lose messages!
 
+    // creating the best effort broadcast
+    BestEffortBroadcast broadcast2(n, links);
+
     // creating broadcast object
-    ReliableBroadcast broadcast1(n, links, 5000);
+    ReliableBroadcast broadcast1(&broadcast2, 5000);
+
+    // creating UR broadcast
+    //UniformReliableBroadcast broadcast1(&broadcast2);
 
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);
