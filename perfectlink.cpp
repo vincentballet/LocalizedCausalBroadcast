@@ -20,6 +20,7 @@ using chrono::steady_clock;
 using std::make_pair;
 using std::set;
 using std::string;
+using std::get;
 
 // Protocol: <0x01> <SEQ 4 bytes> <Content>
 //           <0x02> <SEQ 4 bytes> -- means ACK
@@ -45,8 +46,9 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         mtx.lock();
         if(msgs.find(seqnumack) != msgs.end())
         {
-            free(msgs[seqnumack].second);
+            free(get<1>(msgs[seqnumack]));
             msgs.erase(seqnumack);
+            inqueue--;
         }
         mtx.unlock();
 
@@ -97,28 +99,34 @@ void *PerfectLink::sendLoop(void *arg)
         if(link->msgs.size() > 0)
         {
             // Send all messages if ACK missing
-            map<int, pair<int, char*> >::iterator it;
+            map<int, tuple<int, char*, long> >::iterator it;
             
             // start of critical section
             link->mtx.lock();
             for (it = link->msgs.begin(); it != link->msgs.end(); it++)
             {
-                // seq number
-                int tmp = (*it).first;
-
                 // data
-                char* sdata = (*it).second.second;
+                char* sdata = get<1>((*it).second);
 
                 // data length
-                int len = (*it).second.first;
+                int len = get<0>((*it).second);
+
+                // last sent timestamp
+                long last_sent = get<2>((*it).second);
+
+                // doing nothing if message was sent recently already
+                if(TIME_MS_NOW() - last_sent <= TIMEOUT / 1000) continue;
 
                 // sending message
                 link->s->send(sdata, len);
 
                 // logging message
                 stringstream ss;
-                ss << "> pls " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
+                ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
                 memorylog->log(ss.str());
+
+                // filling in last_sent time
+                get<2>((*it).second) = TIME_MS_NOW();
             }
 
             // end of critical section
@@ -127,8 +135,7 @@ void *PerfectLink::sendLoop(void *arg)
             // waiting for something to change
             link->waitForNewMessagesOrTimeout();
         }
-
-        usleep(10000);
+        else usleep(10000);
     }
 }
 
@@ -140,6 +147,9 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     this->s = s;
     this->r = r;
     this->seqnum = 0;
+
+    // currently no messages inside the queue
+    inqueue = 0;
 
     // starting sending thread
     pthread_create(&thread, nullptr, &PerfectLink::sendLoop, this);
@@ -183,12 +193,15 @@ void PerfectLink::send(char* buffer, int length)
     memcpy(data + 5, buffer, length);
     
     // saving the message
-    this->msgs[this->seqnum] = make_pair(length + 5, data);
+    this->msgs[this->seqnum] = make_tuple(length + 5, data, 0);
     
     // IMPORTANT: incrementing the sequence number
     // Otherwise another thread could send a message with SAME
     // sequence number
     this->seqnum++;
+
+    // +1 message in queue
+    inqueue++;
 
     // finished critical section
     mtx.unlock();

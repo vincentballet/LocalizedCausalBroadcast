@@ -22,7 +22,7 @@
 using std::mutex;
 using std::map;
 using std::set;
-using std::pair;
+using std::tuple;
 using std::string;
 
 /** @class This class implements the Perfect Link */
@@ -30,7 +30,7 @@ class PerfectLink : public Sender, public Receiver, public Target
 {
 private:
     /// @brief Map seq number -> message, timestamp
-    map<int, pair<int, char*> > msgs;
+    map<int, tuple<int, char*, long> > msgs;
 
     /** @brief Object for sending data to other host */
     Sender* s;
@@ -58,7 +58,7 @@ private:
     void waitForNewMessagesOrTimeout();
 
     /** @brief Timeout for 1 message in microseconds (1e-6 sec) */
-    unsigned const TIMEOUT = 100000;
+    static unsigned const TIMEOUT = 100000;
 
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;
@@ -71,6 +71,12 @@ private:
 
     /** @brief true if send buffer is empty */
     volatile bool clean;
+
+    /** @brief Maximal window size */
+    int window = 10;
+
+    /** @brief Messages now in queue */
+    volatile int inqueue;
 public:
     /**
      * @brief Establish a perfect link

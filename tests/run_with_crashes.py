@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # messages to send
-m = 20
+m = 100
 
 # time to initialize
 wait_time = 5

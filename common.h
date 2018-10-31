@@ -10,8 +10,10 @@
 #include <inttypes.h>
 #include "inmemorylog.h"
 #include <sstream>
+#include <chrono>
 
 using std::stringstream;
+using std::chrono::steady_clock;
 
 /** @macro minimal of two numbers */
 #define min(x, y) ((x) > (y) ? (y) : (x))
@@ -24,6 +26,8 @@ using std::stringstream;
 
 /// @macro Dump to a separate file immediately
 //#define IMMEDIATE_FILE 1
+
+#define TIME_MS_NOW() (std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count())
 
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
