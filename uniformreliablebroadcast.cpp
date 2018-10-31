@@ -24,6 +24,9 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
         ack[content] = set<int>();
     ack[content].insert(source);
 
+    // adding myself as an acker
+    ack[content].insert(this_process);
+
     stringstream ss;
     ss << "urback " << charsToInt32(buffer + 4) << " " << source;
     memorylog->log(ss.str());

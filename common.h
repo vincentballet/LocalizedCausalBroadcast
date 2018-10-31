@@ -17,7 +17,7 @@ using std::stringstream;
 #define min(x, y) ((x) > (y) ? (y) : (x))
 
 /** @macro Print messages stored in memory */
-#define INMEMORY_PRINT 1
+//#define INMEMORY_PRINT 1
 
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
@@ -42,6 +42,6 @@ const int MAXLEN = 1000;
 extern InMemoryLog* memorylog;
 
 /// @macro Delay after each UDPSender::send
-#define UDPSENDER_DELAY_MS 0.5
+//#define UDPSENDER_DELAY_MS 0.5
 
 #endif // COMMON_H

@@ -75,7 +75,7 @@ void UDPSender::send(char *data, int N)
 
     if(sendto(fd, buf, len1 + 1, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
     {
-        perror("Cannot send message");
+        //perror("Cannot send message");
     }
 
 #ifdef UDPSENDER_DELAY_MS

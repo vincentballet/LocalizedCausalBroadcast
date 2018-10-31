@@ -62,7 +62,7 @@ int UDPReceiver::receive(char *data, int maxlen)
 
     if((recv_len = recvfrom(fd, data, maxlen, 0, (struct sockaddr *) &si_other, &slen)) == -1)
     {
-        perror("Error in recvfrom");
+        //perror("Error in recvfrom");
         usleep(50000);
         return 0;
     };

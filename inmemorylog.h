@@ -26,7 +26,7 @@ private:
     ofstream file_immediate;
 
     /// Maximal number of messages
-    static const int MAX_MESSAGES = 100000;
+    static const int MAX_MESSAGES = 10000000;
 
     /// Current number of messages in the buffer
     volatile int messages = 0;
