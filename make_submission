@@ -10,5 +10,8 @@ make clean
 # removes log files
 rm *.out
 
+# removes executable
+rm da_proc
+
 # zip to submit
-zip -r ${id}.zip .
+zip -r ${id}.zip . -x *.git* *.vscode* *.DS_Store*
