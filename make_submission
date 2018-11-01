@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+# Makes a .zip for submission
+
+id=24
+
+# removes .o
+make clean
+
+# removes log files
+rm *.out
+
+# zip to submit
+zip -r ${id}.zip .
