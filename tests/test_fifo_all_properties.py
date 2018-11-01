@@ -94,7 +94,8 @@ for msg in all_delivered:
   delivered_all = [p for p in range(1, n + 1) if msg in delivered_by[p]]
   notdelivered_correct = [p for p in correct if msg not in delivered_by[p]]
   soft_assert(len(delivered_all) == 0 or len(notdelivered_correct) == 0, "URB4 Violated. Process %s delivered %d and correct %s did not deliver it" % (delivered_all, msg, notdelivered_correct))
-  
+
+# RB4 secondary check
 for p in correct:
   delivered_by_p = delivered_by[p]
   for p1 in correct:
@@ -108,12 +109,12 @@ for p in range(1, n + 1):
     for j, msg2 in enumerate(broadcast_by[p]):
       if i < j:
         for p1 in correct:
-          have_msg1 = False
-          have_msg2 = False
-          for msg in broadcast_by[p]:
-            if msg == msg1: have_msg1 = True
-            if msg == msg2: have_msg2 = True
-            soft_assert(not(have_msg2 and not have_msg1), "FRB5 violated: Process %d sent %d before %d and correct process %d delivered %d before %d" % (p, msg1, msg2, p1, msg2, msg1))
+          del_p1 = delivered_by[p1]
+          if msg1 in del_p1 and msg2 in del_p1:
+            ind1 = del_p1.index(msg1)
+            ind2 = del_p1.index(msg2)
+            soft_assert(ind1 < ind2, "FRB5 violated: Process %d sent %d before %d and correct process %d delivered %d before %d" %
+                                     (p, msg1, msg2, p1, msg2, msg1))
 
 # printing the last line with status
 print("INCORRECT" if were_errors else "CORRECT")

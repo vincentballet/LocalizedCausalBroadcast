@@ -60,7 +60,7 @@ public:
     void dump();
     
     /// Print only necessary stuff or not
-    bool debug = false;
+    bool debug = true;
 };
 
 #endif // INMEMORYLOG_H
