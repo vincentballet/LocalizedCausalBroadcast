@@ -34,4 +34,4 @@ shuffle(rng)
 for i in rng:
   pids += [os.spawnlp(os.P_NOWAIT, './da_proc', 'da_proc', str(i + 1), 'membership', '10', 'test')]
 
-sleep(10)
+sleep(4)
