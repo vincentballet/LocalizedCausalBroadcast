@@ -19,6 +19,7 @@ using std::mutex;
 class InMemoryLog
 {
 private:
+
     /// Output file
     ofstream file;
 
@@ -57,6 +58,9 @@ public:
      * Call from ONE thread only!
      */
     void dump();
+    
+    /// Print only necessary stuff or not
+    bool debug = false;
 };
 
 #endif // INMEMORYLOG_H

@@ -263,7 +263,8 @@ int main(int argc, char** argv)
     for(int i = 0; i < m; i++)
     {
         stringstream ss;
-        int payload = 1000 * n + i + 1;
+        int payload = i + 1;
+        if (memorylog->debug) {  payload += 1000 * n; }
         int32ToChars(payload, buf);
         ss << "b " << payload;
         memorylog->log(ss.str());

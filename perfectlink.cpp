@@ -40,8 +40,10 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         //cout << "** Received ACK " << seqnumack << endl;
 
         stringstream ss;
-        ss << "< plack " << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
-        memorylog->log(ss.str());
+        if (memorylog->debug) {
+            ss << "< plack " << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
+            memorylog->log(ss.str());
+        }
 
         mtx.lock();
         if(msgs.find(seqnumack) != msgs.end())
@@ -71,8 +73,10 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         }
 
         stringstream ss;
-        ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1);// << " " << charsToInt32(buf + 5 + 8);
-        memorylog->log(ss.str());
+        if (memorylog->debug) {
+            ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
+            memorylog->log(ss.str());
+        }
 
         delivered.insert(message);
         deliverToAll(source, buf + 5, len - 5);
@@ -122,9 +126,10 @@ void *PerfectLink::sendLoop(void *arg)
 
                 // logging message
                 stringstream ss;
-                ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
-                memorylog->log(ss.str());
-
+                if (memorylog->debug) {
+                    ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
+                    memorylog->log(ss.str());
+                }
                 // filling in last_sent time
                 get<2>((*it).second) = TIME_MS_NOW();
             }

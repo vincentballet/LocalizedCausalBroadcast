@@ -60,17 +60,21 @@ void UDPSender::send(char *data, int N)
     if(type == 0x01)
     {
         stringstream ss;
-        ss << "Destination " << target << " source " << source << " type " << type
+        if (memorylog->debug) {
+            ss << "Destination " << target << " source " << source << " type " << type
            << " pkseq " << pk_seq << " log_sender " << log_sender
-           << " fifo_seq " << fifo_seq << " payload " << payload;
-        memorylog->log(ss.str());
+            << " fifo_seq " << fifo_seq << " payload " << payload;
+            memorylog->log(ss.str());
+        }
     }
 
     if(buf[1] == 0x01)
     {
         stringstream ss;
-        ss << "> udps\t" << int(buf[0])<< " " <<target;// << " "  << charsToInt32(data + 5 + 8);
-        memorylog->log(ss.str());
+        if (memorylog->debug) {
+            ss << "> udps\t" << int(buf[0])<< " " <<target; // << " "  << charsToInt32(data + 5 + 8);
+            memorylog->log(ss.str());
+        }
     }
 
     if(sendto(fd, buf, len1 + 1, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
