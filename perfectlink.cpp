@@ -114,19 +114,42 @@ void *PerfectLink::sendLoop(void *arg)
     // Sending loop
     while(true)
     {
-        // updading clean variable
-        link->clean = link->msgs.size() == 0;
-
-        // doing nothing if the link is not running anymore
+        // flushing the data if the link is not running
         if(!link->running)
         {
-            usleep(10000);
-            continue;
+            // emptying the link
+            link->mtx.lock();
+
+            // number of messages in the queue
+            unsigned sz = link->msgs.size();
+
+            // updating the clean variable
+            link->clean = sz == 0;
+
+            // incrementing sem
+            for(unsigned i = 0; i < sz; i++)
+            {
+                sem_post(&(link->empty_sem));
+                sem_wait(&(link->fill_sem));
+            }
+
+            // removing all messages
+            link->msgs.clear();
+
+            // resetting inqueue
+            link->inqueue = 0;
+
+            // unlock
+            link->mtx.unlock();
         }
 
         // checking if there are messages in the queue
         sem_wait(&(link->fill_sem));
         sem_post(&(link->fill_sem));
+
+        // doing nothing if the link is not running anymore
+        if(!link->running)
+            continue;
 
         // start of critical section
         link->mtx.lock();

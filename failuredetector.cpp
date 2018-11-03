@@ -24,7 +24,7 @@ void FailureDetector::onMessage(unsigned source, const char* buffer, unsigned le
     }
 
     // in any case, registering the response
-    last_reply = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
+    last_reply = TIME_MS_NOW();
 }
 
 void *FailureDetector::pingLoop(void *arg)
@@ -36,16 +36,16 @@ void *FailureDetector::pingLoop(void *arg)
     bool reported = false;
 
     // interval for ping in ms
-    int ping_interval = detector->timeout_ms / 3;
+    int ping_interval = detector->timeout_ms / 20;
 
     // current time
-    long begin = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
+    long begin = TIME_MS_NOW();
 
     // forever
     while(true)
     {
         // getting current time
-        long now = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
+        long now = TIME_MS_NOW();
 
         // checking if it's time to PING
         long delta = now - begin;
@@ -55,7 +55,7 @@ void *FailureDetector::pingLoop(void *arg)
             char buf[1];
             buf[0] = (char) first_byte_ping;
             detector->s->send(buf, 1);
-            begin = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
+            begin = TIME_MS_NOW();
         }
 
         // checking if interval since last reply is too big
@@ -68,7 +68,7 @@ void *FailureDetector::pingLoop(void *arg)
 #ifdef FAILUREDETECTOR_DEBUG
                 // logging the crash
                 stringstream ss;
-                ss << "crash " << detector->s->getTarget() << " to " << detector->timeout_ms;
+                ss << "crash " << detector->s->getTarget() << " timeout " << detector->timeout_ms;
                 memorylog->log(ss.str());
 #endif
 
@@ -92,7 +92,7 @@ FailureDetector::FailureDetector(Sender *s, Receiver* r, unsigned timeout_ms, Fa
     this->timeout_ms = timeout_ms;
 
     // initializing last_reply
-    last_reply = std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count();
+    last_reply = TIME_MS_NOW();
 
     // starting ping thread
     pthread_create(&thread, nullptr, &FailureDetector::pingLoop, this);
