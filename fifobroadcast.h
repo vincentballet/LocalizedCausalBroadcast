@@ -58,7 +58,7 @@ private:
     virtual void onMessage(unsigned logical_source, char* buffer, unsigned length);
 
     /// @brief React on a parsed message
-    void onMessage1(FIFOMessage m);
+    void tryDeliverAll(FIFOMessage m);
 
     /**
      * @brief tryDeliver Try delivering a message

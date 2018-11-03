@@ -74,16 +74,19 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         // need to deliver this message?
         bool need_deliver = false;
 
-        mtx.lock();
+        // no need for critical section
+        // because only one thread calls onMessage
+        // which is the UDPReceiver thread
+        //mtx.lock();
 
         // WARNING: need to return ONLY after sending the ACK, otherwise can lose the ACK
         // And the sender will keep sending this message
-        if (delivered.find(string(message)) == delivered.end())
+        if (delivered.find(message) == delivered.end())
         {
             need_deliver = true;
             delivered.insert(message);
         }
-        mtx.unlock();
+        //mtx.unlock();
 
         // delivering message
         if(need_deliver)
@@ -94,6 +97,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
             memorylog->log(ss.str());
 #endif
 
+            // will pass the data to a separate thread for processing!
             deliverToAll(source, buf + 5, len - 5);
         }
     }
@@ -121,8 +125,8 @@ void *PerfectLink::sendLoop(void *arg)
         }
 
         // checking if there are messages in the queue
-        sem_wait(&(link->empty_sem));
-        sem_post(&(link->empty_sem));
+        sem_wait(&(link->fill_sem));
+        sem_post(&(link->fill_sem));
 
         // start of critical section
         link->mtx.lock();
@@ -130,7 +134,7 @@ void *PerfectLink::sendLoop(void *arg)
         // if no messages need to be sent now
         // this will be equal to the minimal time (in ms)
         // in which a message should be sent
-        long min_send_in = TIMEOUT_MSG;
+        int64_t min_send_in = TIMEOUT_MSG;
 
         // loop over the buffer
         // if buffer is empty, will perform no iterations
@@ -144,17 +148,17 @@ void *PerfectLink::sendLoop(void *arg)
             int len = get<0>((*it).second);
 
             // last sent timestamp
-            long last_sent = get<2>((*it).second);
+            int64_t last_sent = get<2>((*it).second);
 
             // in how many milliseconds the message should be sent?
-            long send_in = last_sent + TIMEOUT_MSG - TIME_MS_NOW();
+            int64_t send_in = last_sent + TIMEOUT_MSG - TIME_MS_NOW();
 
             // calculatin min_send_in
             min_send_in = min(min_send_in, send_in);
 
             // if send_in is positive, it means that it's not
             // yet time to send this message
-            if(send_in >= 0) continue;
+            if(send_in > 0) continue;
 
             // sending message
             link->s->send(sdata, len);

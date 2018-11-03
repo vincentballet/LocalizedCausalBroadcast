@@ -7,9 +7,8 @@
 using std::cout;
 using std::endl;
 
-void FIFOBroadcast::onMessage(unsigned logical_source, char *buffer, unsigned length)
+void FIFOBroadcast::onMessage(unsigned logical_source, char *message, unsigned length)
 {
-    mtx.lock();
     // resulting parsed message
     FIFOMessage msg;
 
@@ -20,16 +19,23 @@ void FIFOBroadcast::onMessage(unsigned logical_source, char *buffer, unsigned le
     msg.length = length - 4;
 
     // copying data
-    memcpy(msg.buffer, buffer + 4, min(MAXLEN, length - 4));
+    memcpy(msg.buffer, message + 4, min(MAXLEN, length - 4));
 
     // obtaining seq num
-    msg.seq_num = charsToInt32(buffer);
+    msg.seq_num = charsToInt32(message);
 
     // obtaining source
     msg.source = logical_source;
 
-    // processing message further
-    onMessage1(msg);
+    mtx.lock();
+
+    // adding a message to the list in any case
+    // will deliver it if it's correct, adding to front to be faster
+    buffer.push_front(msg);
+
+    // trying to deliver all messages
+    tryDeliverAll(msg);
+
     mtx.unlock();
 }
 
@@ -53,44 +59,21 @@ bool FIFOBroadcast::tryDeliver(FIFOMessage m)
     return false;
 }
 
-void FIFOBroadcast::onMessage1(FIFOMessage m)
+void FIFOBroadcast::tryDeliverAll(FIFOMessage m)
 {
-    // message payload length must be > 0
-    assert(m.length > 0);
-
-    // adding a message to the list in any case
-    // will deliver it if it's correct, adding to front to be faster
-    buffer.push_front(m);
-
-    // need one more loop over list of not yet delivered messages?
-    bool needMoreLoops = true;
-
     // for going over buffer
     list<FIFOMessage>::iterator it;
 
-    // loop until nothing to deliver
-    while(needMoreLoops)
+    // loop over buffer
+    for(it = buffer.begin(); it != buffer.end(); )
     {
-        // by default, there is nothing to deliver until something was found
-        needMoreLoops = false;
+        // if can deliver, erasing current element
+        if(tryDeliver(*it))
+            // erase() returns the next element
+            it = buffer.erase(it);
 
-        // loop over buffer
-        for(it = buffer.begin(); it != buffer.end(); it++)
-        {
-            // trying to deliver current message
-            if(tryDeliver(*it)) // SUCCESS
-            {
-                // after delivering the message it's no longer required
-                buffer.erase(it);
-
-                // need more loops because there was a message delivered
-                needMoreLoops = true;
-
-                // cannot continue the loop since iterator is now invalid...
-                /// @todo fix that (otherwise can have O(N^2) time)
-                break;
-            }
-        }
+        // otherwise just incrementing the counter
+        else it++;
     }
 }
 
@@ -121,9 +104,6 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
 
     mtx.unlock();
 
-    // for loop over links
-    vector<PerfectLink*>::iterator it;
-
     // buffer for sending
     char buffer[MAXLEN];
 
@@ -133,5 +113,6 @@ void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
     // copying payload
     memcpy(buffer + 4, message, min(length, MAXLEN - 4));
 
+    // broadcasting data
     b->broadcast(buffer, min(length + 4, MAXLEN), source);
 }

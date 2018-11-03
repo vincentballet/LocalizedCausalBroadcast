@@ -21,7 +21,7 @@ d = sys.argv[1]
 os.chdir(d)
 
 f = open('membership', 'w')
-n = 5
+n = 2
 f.write('%d\n' % n)
 for i in range(1, n + 1):
   f.write('127.0.0.1 110%02d\n' % i)
@@ -45,10 +45,9 @@ pids = []
 os.system("rm *.recvall")
 
 # creating processes
-#for i in range(n)[1:]:
-for i in range(n):
+for i in range(n)[1:]:
   pids += [os.spawnlp(os.P_NOWAIT, './da_proc', 'da_proc', str(i + 1), 'membership', str(m))]
-#pids += [int(open('da_proc_1.pid', 'r').read())]
+pids += [int(open('da_proc_1.pid', 'r').read())]
 
 print("Created processes %s" % pids)
 

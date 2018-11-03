@@ -149,7 +149,7 @@ int main(int argc, char** argv)
 
     // set += [USR2, INT, TERM]
     sigaddset(&set, SIGUSR2);
-//    sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGINT);
     sigaddset(&set, SIGTERM);
 
     // all threads don't care about signals from the set
