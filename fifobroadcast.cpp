@@ -21,12 +21,16 @@ void FIFOBroadcast::onMessage(unsigned logical_source, const char* message, unsi
 
     mtx_recv.lock();
 
-    // adding a message to the list in any case
-    // will deliver it if it's correct, adding to front to be faster
-    buffer[logical_source][seq_num] = content;
+    // no need to deliver if received a message which was already seen
+    if(seq_num > recv_seq_num[logical_source])
+    {
+        // adding a message to the list in any case
+        // will deliver it if it's correct, adding to front to be faster
+        buffer[logical_source][seq_num] = content;
 
-    // trying to deliver all messages
-    tryDeliverAll(logical_source);
+        // trying to deliver all messages
+        tryDeliverAll(logical_source);
+    }
 
     mtx_recv.unlock();
 }
