@@ -9,47 +9,39 @@ using std::endl;
 
 void FIFOBroadcast::onMessage(unsigned logical_source, const char* message, unsigned length)
 {
-    // resulting parsed message
-    FIFOMessage msg;
-
     // must have at least 4 bytes for seq num
     assert(length >= 4);
+    assert(logical_source <= links.size() + 1);
 
-    // filling in length
-    msg.length = length - 4;
-
-    // copying data
-    memcpy(msg.buffer, message + 4, min(MAXLEN, length - 4));
+    // obtaining the content
+    string content(message + 4, length - 4);
 
     // obtaining seq num
-    msg.seq_num = charsToInt32(message);
-
-    // obtaining source
-    msg.source = logical_source;
+    unsigned seq_num = charsToInt32(message);
 
     mtx_recv.lock();
 
     // adding a message to the list in any case
     // will deliver it if it's correct, adding to front to be faster
-    buffer.push_front(msg);
+    buffer[logical_source][seq_num] = content;
 
     // trying to deliver all messages
-    tryDeliverAll();
+    tryDeliverAll(logical_source);
 
     mtx_recv.unlock();
 }
 
-bool FIFOBroadcast::tryDeliver(FIFOMessage m)
+bool FIFOBroadcast::tryDeliver(unsigned seq_num, unsigned source, std::string message)
 {
     // if current sequence number if 1 + old sequence number
     // from this sender, to ensure FRB5
-    if(recv_seq_num[m.source] + 1 == m.seq_num)
+    if(recv_seq_num[source] + 1 == seq_num)
     {
         // delivering
-        deliverToAll(m.source, m.buffer, m.length);
+        deliverToAll(source, message.c_str(), message.length());
 
         // increasing seq num
-        recv_seq_num[m.source] += 1;
+        recv_seq_num[source] += 1;
 
         // successfully delivered
         return true;
@@ -59,18 +51,21 @@ bool FIFOBroadcast::tryDeliver(FIFOMessage m)
     return false;
 }
 
-void FIFOBroadcast::tryDeliverAll()
+void FIFOBroadcast::tryDeliverAll(unsigned sender)
 {
     // for going over buffer
-    list<FIFOMessage>::iterator it;
+    map<unsigned, string>::iterator it;
 
     // loop over buffer
-    for(it = buffer.begin(); it != buffer.end(); )
+    for(it = buffer[sender].begin(); it != buffer[sender].end(); )
     {
+        unsigned seq_num = (*it).first;
+        string content = (*it).second;
+
         // if can deliver, erasing current element
-        if(tryDeliver(*it))
+        if(tryDeliver(seq_num, sender, content))
             // erase() returns the next element
-            it = buffer.erase(it);
+            it = buffer[sender].erase(it);
 
         // otherwise just incrementing the counter
         else it++;
@@ -79,14 +74,19 @@ void FIFOBroadcast::tryDeliverAll()
 
 FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->links)
 {
-    // sending sequence number is initially 0
-    send_seq_num = 0;
+    // sending sequence number is initially 1
+    send_seq_num = 1;
 
-    // expecting to receive 0
+    // allocating data for the buffer
+    // n = |links| + 1
+    // +1 for indexing from 1 instead of 0
+    buffer = new map<unsigned, string>[links.size() + 2];
+
+    // expecting to receive 1
     vector<PerfectLink*>::iterator it;
     for(it = links.begin(); it != links.end(); it++)
-        recv_seq_num[(*it)->getTarget()] = -1;
-    recv_seq_num[this_process] = -1;
+        recv_seq_num[(*it)->getTarget()] = 0;
+    recv_seq_num[this_process] = 0;
 
     // saving broadcast object
     this->b = broadcast;
@@ -95,12 +95,17 @@ FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_p
     b->addTarget(this);
 }
 
+FIFOBroadcast::~FIFOBroadcast()
+{
+    free(buffer);
+}
+
 void FIFOBroadcast::broadcast(const char* message, unsigned length, unsigned source)
 {
     mtx_send.lock();
 
     // incrementing sequence number
-    int seqnum = send_seq_num++;
+    unsigned seqnum = send_seq_num++;
 
     mtx_send.unlock();
 

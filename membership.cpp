@@ -10,14 +10,14 @@ Membership::Membership(std::string file)
     handle.open(file);
 
     // number of nodes
-    int n;
+    unsigned n;
     handle >> n;
 
     // loop over nodes
-    for(int i = 0; i < n; i++) {
+    for(unsigned i = 0; i < n; i++) {
         // buffer variables
         string s;
-        int n, idx;
+        unsigned n, idx;
 
         // number of process, IP address, port
         //handle >> idx >> s >> n;
@@ -35,7 +35,7 @@ Membership::Membership(std::string file)
     }
 }
 
-std::string Membership::getIP(int process)
+std::string Membership::getIP(unsigned process)
 {
     if(ips.find(process) == ips.end()) {
         cout << "Invalid process " << process << endl;
@@ -44,7 +44,7 @@ std::string Membership::getIP(int process)
     return ips[process];
 }
 
-int Membership::getPort(int process)
+unsigned Membership::getPort(unsigned process)
 {
     if(ports.find(process) == ports.end()) {
         cout << "Invalid process " << process << endl;
@@ -53,29 +53,29 @@ int Membership::getPort(int process)
     return ports[process];
 }
 
-vector<int> Membership::getProcesses()
+vector<unsigned> Membership::getProcesses()
 {
     return processes;
 }
 
-bool Membership::validProcess(int process)
+bool Membership::validProcess(unsigned process)
 {
-    vector<int>::iterator it;
+    vector<unsigned>::iterator it;
     for(it = processes.begin(); it != processes.end(); it++)
         if(*it == process) return true;
     return false;
 }
 
-int Membership::getID(std::string IP, int port)
+unsigned Membership::getID(std::string IP, unsigned port)
 {
-    map<int, string>::iterator it;
+    map<unsigned, string>::iterator it;
     for(it = ips.begin(); it != ips.end(); it++)
     {
-        int id = (*it).first;
+        unsigned id = (*it).first;
         string ip_ = (*it).second;
-        int port_ = ports[id];
+        unsigned port_ = ports[id];
         if(ip_ == IP && port_ == port)
             return id;
     }
-    return -1;
+    return 0;
 }

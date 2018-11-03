@@ -49,11 +49,11 @@ void ReliableBroadcast::broadcast(const char* message, unsigned length, unsigned
     b->broadcast(message, length, source);
 }
 
-void ReliableBroadcast::onFailure(int process)
+void ReliableBroadcast::onFailure(unsigned process)
 {
     mtx.lock();
     // removing process from correct list
-    list<int>::iterator it;
+    list<unsigned>::iterator it;
     for(it = correct.begin(); it != correct.end(); it++)
     {
         if(*it == process)
@@ -90,10 +90,10 @@ void ReliableBroadcast::onFailure(int process)
     }
 }
 
-bool ReliableBroadcast::isCorrect(int process)
+bool ReliableBroadcast::isCorrect(unsigned process)
 {
     // removing process from correct list
-    list<int>::iterator it;
+    list<unsigned>::iterator it;
     for(it = correct.begin(); it != correct.end(); it++)
     {
         if(*it == process)
@@ -104,7 +104,7 @@ bool ReliableBroadcast::isCorrect(int process)
     return false;
 }
 
-ReliableBroadcast::ReliableBroadcast(Broadcast *broadcast, int timeout_ms) :
+ReliableBroadcast::ReliableBroadcast(Broadcast *broadcast, unsigned timeout_ms) :
     Broadcast (broadcast->this_process, broadcast->links)
 {
     // creating failure detectors

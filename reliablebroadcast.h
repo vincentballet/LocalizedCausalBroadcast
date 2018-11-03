@@ -32,10 +32,10 @@ private:
     mutex mtx;
 
     /// @brief from array (Algo 3.2)
-    map<int, set<string> > from;
+    map<unsigned, set<string> > from;
 
     /// @brief Correct processes (Algo 3.2)
-    list<int> correct;
+    list<unsigned> correct;
 
     /// @brief Failure detectors for links
     vector<FailureDetector*> detectors;
@@ -47,10 +47,10 @@ private:
     virtual void broadcast(const char* message, unsigned length, unsigned source);
 
     /** @brief Called by failure detector */
-    virtual void onFailure(int process);
+    virtual void onFailure(unsigned process);
 
     /** @brief Is the process correct? */
-    bool isCorrect(int process);
+    bool isCorrect(unsigned process);
 
     /** @brief Underlying broadcast object */
     Broadcast* b;
@@ -60,7 +60,7 @@ public:
      * @param broadcast Underlying broadcast object
      * @param timeout_ms Timeout in ms for failure detector
      */
-    ReliableBroadcast(Broadcast* broadcast, int timeout_ms);
+    ReliableBroadcast(Broadcast* broadcast, unsigned timeout_ms);
 
     virtual ~ReliableBroadcast() {}
 };

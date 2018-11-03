@@ -32,7 +32,7 @@ private:
      * @param maxlen Maximal length to receive
      * @return Number of bytes received
      */
-    virtual int receive(char* data, int maxlen);
+    virtual unsigned receive(char* data, unsigned maxlen);
 
     /**
      * @brief receiveLoop Starts the receive thread
@@ -47,7 +47,7 @@ public:
      * @param membership The membership mapping
      * @param n The parameters of current process
      */
-    UDPReceiver(Membership* membership, int n, Target* target = nullptr);
+    UDPReceiver(Membership* membership, unsigned n, Target* target = nullptr);
 
     /**
      * @brief halt Stop the receiver

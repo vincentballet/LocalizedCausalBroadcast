@@ -23,9 +23,9 @@ class Membership
 {
 private:
     ifstream handle;
-    map<int, string> ips;
-    map<int, int> ports;
-    vector<int> processes;
+    map<unsigned, string> ips;
+    map<unsigned, unsigned> ports;
+    vector<unsigned> processes;
 public:
     /**
      * @brief Load membership file
@@ -38,34 +38,34 @@ public:
      * @param process to get IP of
      * @return IP as a string
      */
-    string getIP(int process);
+    string getIP(unsigned process);
 
     /**
      * @brief Get port of a process
      * @param process to get port of
      * @return Port as an int
      */
-    int getPort(int process);
+    unsigned getPort(unsigned process);
 
     /**
      * @brief getProcesses List of processes
      * @return Vector with processes
      */
-    vector<int> getProcesses();
+    vector<unsigned> getProcesses();
 
     /**
      * @brief validProcess Checks if process ID is valid
      * @return True if valid
      */
-    bool validProcess(int process);
+    bool validProcess(unsigned process);
 	
     /**
      * @brief getID Of a process with IP and port
      * @param IP IP address of a process
      * @param port Port of a process
-     * @return -1 on failure or membership ID
+     * @return 0 on failure or membership ID
      */
-    int getID(string IP, int port);
+    unsigned getID(string IP, unsigned port);
 };
 
 #endif // MEMBERSHIP_H

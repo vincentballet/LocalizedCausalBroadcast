@@ -31,10 +31,10 @@ private:
     Membership* membership;
 
     /// @brief This process ID
-    int this_process;
+    unsigned this_process;
 
     /// @brief Target process ID
-    int target;
+    unsigned target;
 
     /// @brief Mutex for testing
     mutex mtx;
@@ -45,7 +45,7 @@ public:
      * @param n The destination process
      * @param this_process This process ID (sender ID)
      */
-    UDPSender(Membership* membership, int n, int this_process);
+    UDPSender(Membership* membership, unsigned n, unsigned this_process);
 
     virtual ~UDPSender();
 
@@ -55,7 +55,7 @@ public:
      * @param data array of bytes
      * @param N length of the array
      */
-    virtual void send(const char* data, int N);
+    virtual void send(const char* data, unsigned N);
 
     /**
      * @brief halt Stop the sender

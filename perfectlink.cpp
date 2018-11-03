@@ -37,7 +37,7 @@ void PerfectLink::onMessage(unsigned source, const char* buf, unsigned len)
     if(len == 5 && buf[0] == 0x02)
     {
         // sequence number which has been acked
-        int seqnumack = charsToInt32(buf + 1);
+        unsigned seqnumack = charsToInt32(buf + 1);
 
 #ifdef PERFECTLINK_DEBUG
         stringstream ss;
@@ -109,7 +109,7 @@ void *PerfectLink::sendLoop(void *arg)
     PerfectLink* link = (PerfectLink*) arg;
 
     // Iterator for msgs
-    map<int, tuple<int, char*, long> >::iterator it;
+    map<unsigned, tuple<unsigned, char*, long> >::iterator it;
 
     // Sending loop
     while(true)
@@ -145,7 +145,7 @@ void *PerfectLink::sendLoop(void *arg)
             const char* sdata = get<1>((*it).second);
 
             // data length
-            int len = get<0>((*it).second);
+            unsigned len = get<0>((*it).second);
 
             // last sent timestamp
             int64_t last_sent = get<2>((*it).second);
@@ -212,7 +212,7 @@ Receiver *PerfectLink::getReceiver()
 }
 
 /// @todo bad name, does not send but adds message to send list
-void PerfectLink::send(const char* buffer, int length)
+void PerfectLink::send(const char* buffer, unsigned length)
 {
     // parameters check
     if (!(buffer && length > 0)){

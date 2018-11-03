@@ -83,7 +83,7 @@ void *FailureDetector::pingLoop(void *arg)
     }
 }
 
-FailureDetector::FailureDetector(Sender *s, Receiver* r, int timeout_ms, FailureMonitor *monitor)
+FailureDetector::FailureDetector(Sender *s, Receiver* r, unsigned timeout_ms, FailureMonitor *monitor)
 {
     r->addTarget(this);
     // saving parameters

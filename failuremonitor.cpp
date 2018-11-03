@@ -9,7 +9,7 @@ FailureMonitor::FailureMonitor()
 
 }
 
-void FailureMonitor::onFailure(int process)
+void FailureMonitor::onFailure(unsigned process)
 {
     cout << "Process " << process << " has failed" << endl;
 }

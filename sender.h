@@ -14,9 +14,9 @@ using std::string;
 class Sender
 {
 private:
-    int destination;
+    unsigned destination;
 public:
-    Sender(int destination);
+    Sender(unsigned destination);
     virtual ~Sender() {}
 
     /**
@@ -36,10 +36,10 @@ public:
      * @param data array of bytes
      * @param N length of the array
      */
-    virtual void send(const char* data, int N);
+    virtual void send(const char* data, unsigned N);
 
     /** @brief Get target ID */
-    int getTarget();
+    unsigned getTarget();
 };
 
 #endif // SENDER_H

@@ -32,7 +32,7 @@ class PerfectLink : public Sender, public ThreadedReceiver, public Target
 {
 private:
     /// @brief Map seq number -> message, timestamp
-    map<int, tuple<int, char*, long> > msgs;
+    map<unsigned, tuple<unsigned, char*, long> > msgs;
 
     /** @brief Object for sending data to other host */
     Sender* s;
@@ -69,13 +69,13 @@ private:
     set<string> delivered;
     
     /** @brief Current sequence number? Receive or send? */
-    int seqnum;
+    unsigned seqnum;
 
     /** @brief Wait for an ACK */
     void waitForNewMessagesOrTimeout();
 
     /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec) */
-    static unsigned const TIMEOUT_MSG = 100;
+    static unsigned const TIMEOUT_MSG = 500;
 
     /** @brief Maximal number of messages in the send queue (w/o ack)
      * Or the WINDOW SIZE */
@@ -94,7 +94,7 @@ private:
     volatile bool clean;
 
     /** @brief Messages now in queue */
-    volatile int inqueue;
+    volatile unsigned inqueue;
 public:
     /**
      * @brief Establish a perfect link
@@ -116,7 +116,7 @@ public:
     Receiver* getReceiver();
 
     /** @brief Send data */
-    void send(const char* buffer, int length);
+    void send(const char* buffer, unsigned length);
 
     /**
      * @brief halt Stop the link (e.g. if destination crashed)

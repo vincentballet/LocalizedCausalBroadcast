@@ -29,10 +29,10 @@ private:
     set<string> delivered;
 
     /// @brief Received but not yet delivered
-    set<pair<string, int> > pending;
+    set<pair<string, unsigned> > pending;
 
     /// @brief Acknowledged messages
-    map<string, set<int> > ack;
+    map<string, set<unsigned> > ack;
 
     /// @brief React on a message with parsed source
     virtual void onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length);
@@ -41,7 +41,7 @@ private:
     virtual void broadcast(const char* message, unsigned length, unsigned source);
 
     /** @brief Called by failure detector */
-    virtual void onFailure(int process);
+    virtual void onFailure(unsigned process);
 
     /// @brief Underlying broadcast object
     Broadcast* b;

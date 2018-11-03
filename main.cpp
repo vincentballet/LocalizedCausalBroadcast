@@ -38,7 +38,7 @@ using std::stringstream;
 // wait for SIGUSR?
 bool do_wait = true;
 
-int m = 10;
+unsigned m = 10;
 volatile bool sigusr_received = false;
 
 // listening on our port
@@ -168,7 +168,7 @@ int main(int argc, const char** argv)
     }
     
     // obtaining n and membership file
-    int n = atoi(argv[1]);
+    unsigned n = (unsigned) atoi(argv[1]);
 
     // creating in-memory log
     memorylog = new InMemoryLog(n, "da_proc_" + string(argv[1]) + ".out");
@@ -189,7 +189,7 @@ int main(int argc, const char** argv)
     Membership members(membership);
 
     // list of processes
-    vector<int> processes = members.getProcesses();
+    vector<unsigned> processes = members.getProcesses();
 
     // checking if process is valid
     assert(members.validProcess(n));
@@ -210,7 +210,7 @@ int main(int argc, const char** argv)
     global_senders = &senders;
 
     // creating links and senders
-    vector<int>::iterator it;
+    vector<unsigned>::iterator it;
     for(it = processes.begin(); it != processes.end(); it++)
     {
         // not sending to myself
@@ -270,10 +270,10 @@ int main(int argc, const char** argv)
 
     // broadcasting messages
     char buf[4];
-    for(int i = 0; i < m; i++)
+    for(unsigned i = 0; i < m; i++)
     {
         stringstream ss;
-        int payload = i + 1;
+        unsigned payload = i + 1;
         if(UNIQUE_MESSAGES)
             payload += 1000 * n;
         int32ToChars(payload, buf);

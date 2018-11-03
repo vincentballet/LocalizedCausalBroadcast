@@ -48,13 +48,13 @@ private:
     mutex m;
 
     /// @brief Process ID
-    int n;
+    unsigned n;
 public:
     /**
      * @brief InMemoryLog initializer
      * @param destination_filename The file to write
      */
-    InMemoryLog(int n, string destination_filename);
+    InMemoryLog(unsigned n, string destination_filename);
 
     /**
      * @brief log Logs a string

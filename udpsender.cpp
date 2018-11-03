@@ -11,7 +11,7 @@
 using std::cout;
 using std::endl;
 
-UDPSender::UDPSender(Membership *membership, int n, int this_process) : Sender(n)
+UDPSender::UDPSender(Membership *membership, unsigned n, unsigned this_process) : Sender(n)
 {
     this->membership = membership;
     this->this_process = this_process;
@@ -37,26 +37,26 @@ UDPSender::~UDPSender()
     if(fd >= 0) close(fd);
 }
 
-void UDPSender::send(const char* data, int N)
+void UDPSender::send(const char* data, unsigned N)
 {
 #ifdef UDPSENDER_DELAY_MS
     mtx.lock();
 #endif
     char buf[MAXLEN];
 
-    buf[0] = this_process;
+    buf[0] = (char) this_process;
 
-    int len1 = min(N, MAXLEN - 1);
+    unsigned len1 = min(N, MAXLEN - 1);
 
     memcpy(buf + 1, data, len1);
 
 #ifdef UDP_DEBUG
     int source = buf[0];
     int type = buf[1];
-    int pk_seq = charsToInt32(buf + 2);
-    int log_sender = charsToInt32(buf + 6);
-    int fifo_seq = charsToInt32(buf + 10);
-    int payload = charsToInt32(buf + 14);
+    unsigned pk_seq = charsToInt32(buf + 2);
+    unsigned log_sender = charsToInt32(buf + 6);
+    unsigned fifo_seq = charsToInt32(buf + 10);
+    unsigned payload = charsToInt32(buf + 14);
 
     if(type == 0x01)
     {

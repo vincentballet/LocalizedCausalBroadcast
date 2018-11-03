@@ -68,7 +68,7 @@ void int32ToChars(uint32_t input, char* dest);
 uint32_t charsToInt32(const char* input);
 
 /** @brief Maximal buffer size */
-const int MAXLEN = 1000;
+const unsigned MAXLEN = 1000;
 
 /**
  * @brief memorylog In Memory Log

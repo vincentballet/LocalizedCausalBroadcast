@@ -11,7 +11,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     string content(buffer, length);
 
     // pair (message, sender)
-    pair<string, int> pend = make_pair(content, logical_source);
+    pair<string, unsigned> pend = make_pair(content, logical_source);
 
     // need to relay?
     bool need_broadcast = false;
@@ -21,7 +21,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
 
     // this message is also an acknowledgement of itself
     if(ack.find(content) == ack.end())
-        ack[content] = set<int>();
+        ack[content] = set<unsigned>();
     ack[content].insert(source);
 
     // adding myself as an acker
@@ -79,7 +79,7 @@ bool UniformReliableBroadcast::canDeliver(std::string msg)
     return 2 * ack[msg].size() > (links.size() + 1);
 }
 
-void UniformReliableBroadcast::onFailure(int process)
+void UniformReliableBroadcast::onFailure(unsigned process)
 {
     // destroying the perfect link
     vector<PerfectLink*>::iterator pit;
@@ -99,13 +99,13 @@ bool UniformReliableBroadcast::tryDeliver()
     string message;
 
     // source buffer
-    int source;
+    unsigned source;
 
     // are buffers valid?
     bool found = false;
 
     // iterator for pending
-    set<pair<string, int> >::iterator it;
+    set<pair<string, unsigned> >::iterator it;
 
     // critical section
     m.lock();

@@ -5,7 +5,7 @@
 using std::cout;
 using std::endl;
 
-Sender::Sender(int destination)
+Sender::Sender(unsigned destination)
 {
     this->destination = destination;
 }
@@ -20,12 +20,12 @@ void Sender::send(const char* data)
     send(data, strlen(data) + 1);
 }
 
-void Sender::send(const char* data, int N)
+void Sender::send(const char* data, unsigned N)
 {
     cout << "SENDING " << N << " bytes starting with" << data[0] << ")" << endl;
 }
 
-int Sender::getTarget()
+unsigned Sender::getTarget()
 {
     return destination;
 }

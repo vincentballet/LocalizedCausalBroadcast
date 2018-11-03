@@ -52,7 +52,7 @@ public:
      * @param source The source to check
      * @return True if valid
      */
-    bool validSource(int source);
+    bool validSource(unsigned source);
 public:
     Broadcast();
 };

@@ -20,14 +20,14 @@ void Receiver::deliverToAll(unsigned source, const char* message, unsigned lengt
     }
 }
 
-Receiver::Receiver(int this_process, Target *target)
+Receiver::Receiver(unsigned this_process, Target *target)
 {
     if(target)
         this->targets.push_back(target);
     this->this_process = this_process;
 }
 
-int Receiver::getThis()
+unsigned Receiver::getThis()
 {
     return this_process;
 }

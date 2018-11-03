@@ -4,7 +4,7 @@
 
 using std::endl;
 
-InMemoryLog::InMemoryLog(int n, string destination_filename) : n(n)
+InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
 {
     // allocating memory
     buffer = new string[MAX_MESSAGES];
@@ -71,7 +71,7 @@ void InMemoryLog::dump()
     int current_messages = messages;
 
     // loop over buffer
-    for(int i = 0; i < current_messages; i++)
+    for(unsigned i = 0; i < current_messages; i++)
     {
         // writing data
         file << buffer[i] << std::endl;

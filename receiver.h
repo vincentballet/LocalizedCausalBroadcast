@@ -21,7 +21,7 @@ protected:
     vector<Target*> targets;
 
     /// @brief This process ID
-    int this_process;
+    unsigned this_process;
 
     /// @brief Deliver a message to all targets with logical source
     void deliverToAll(unsigned source, unsigned logical_source, const char* message, unsigned length);
@@ -33,12 +33,12 @@ public:
      * @brief Receiver constructor
      * @param target The object to deliver messages to
      */
-    Receiver(int this_process, Target* target = nullptr);
+    Receiver(unsigned this_process, Target* target = nullptr);
 
     virtual ~Receiver() {}
 
     /** @brief Get this process ID */
-    int getThis();
+    unsigned getThis();
 
     /** @brief Set target manually */
     void addTarget(Target* target);

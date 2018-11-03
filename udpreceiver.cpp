@@ -13,7 +13,7 @@ using namespace std;
 
 // protocol: <first byte == source ID> <Data bytes...>
 
-UDPReceiver::UDPReceiver(Membership *membership, int n, Target *target) : Receiver(n, target)
+UDPReceiver::UDPReceiver(Membership *membership, unsigned n, Target *target) : Receiver(n, target)
 {
     fd = -1;
     struct sockaddr_in si_me;
@@ -54,7 +54,7 @@ UDPReceiver::~UDPReceiver()
     close(fd);
 }
 
-int UDPReceiver::receive(char* data, int maxlen)
+unsigned UDPReceiver::receive(char* data, unsigned maxlen)
 {
     struct sockaddr_in si_other;
     socklen_t slen = sizeof(si_other);
@@ -67,7 +67,7 @@ int UDPReceiver::receive(char* data, int maxlen)
         return 0;
     };
 
-    return recv_len;
+    return recv_len >= 0 ? ((int) recv_len) : 0;
 }
 
 void* UDPReceiver::receiveLoop(void *args)
@@ -79,17 +79,18 @@ void* UDPReceiver::receiveLoop(void *args)
 
     while(true)
     {
-        int len = instance->receive(buffer, MAXLEN);
+        unsigned len = instance->receive(buffer, MAXLEN);
         if(len == 0) continue;
+        if(len < 1) continue;
         // <first byte sender 1> <0x01 1> <PF seq number 4 bytes> <logical sender 4> <fifo sequence number 4> <data 4>
         int source = buffer[0];
 
 #ifdef UDP_DEBUG
         int type = buffer[1];
-        int pk_seq = charsToInt32(buffer + 2);
-        int log_sender = charsToInt32(buffer + 6);
-        int fifo_seq = charsToInt32(buffer + 10);
-        int payload = charsToInt32(buffer + 14);
+        unsigned pk_seq = charsToInt32(buffer + 2);
+        unsigned log_sender = charsToInt32(buffer + 6);
+        unsigned fifo_seq = charsToInt32(buffer + 10);
+        unsigned payload = charsToInt32(buffer + 14);
 
         if(type == 0x01)
         {
@@ -102,7 +103,7 @@ void* UDPReceiver::receiveLoop(void *args)
 #endif
 
         if(source >= 0)
-            instance->deliverToAll(buffer[0], buffer + 1, len - 1);
+            instance->deliverToAll((uint8_t) buffer[0], buffer + 1, len - 1);
     }
 
     // no return

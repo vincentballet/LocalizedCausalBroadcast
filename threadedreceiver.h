@@ -69,7 +69,7 @@ public:
      * @brief Receiver constructor
      * @param target The object to deliver messages to
      */
-    ThreadedReceiver(int this_process, Target* target = nullptr);
+    ThreadedReceiver(unsigned this_process, Target* target = nullptr);
 
     virtual ~ThreadedReceiver() {}
 };

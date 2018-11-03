@@ -41,13 +41,13 @@ using std::endl;
 void runPerfectLink(PerfectLink* l, int nbr){
     
     char buffer[16];
-    for (int i = 0; i < nbr; i++){
+    for (unsigned i = 0; i < nbr; i++){
         l->send(buffer, 16);
     }
 }
 
 
-void testPerfectLink(int n, vector<PerfectLink*> links)
+void testPerfectLink(unsigned n, vector<PerfectLink*> links)
 {
         
     int nMessages = 23;
@@ -60,7 +60,7 @@ void testPerfectLink(int n, vector<PerfectLink*> links)
 
 }
 
-void testUDP(int n, vector<UDPSender *> senders, UDPReceiver *receiver)
+void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
 {
     vector<UDPSender*>::iterator sender_;
     for(sender_ = senders.begin(); sender_ != senders.end(); sender_++)
@@ -68,7 +68,7 @@ void testUDP(int n, vector<UDPSender *> senders, UDPReceiver *receiver)
         UDPSender* sender = *sender_;
         char buf[6];
         buf[0] = 0x01;
-        for(int i = 0; i < 10000000; i++)
+        for(unsigned i = 0; i < 10000000; i++)
         {
             int32ToChars(i, buf + 1);
             sender->send(buf, 5);

@@ -6,10 +6,10 @@
 using std::cerr;
 using std::endl;
 
-SeqTarget::SeqTarget(int n, int maxSeq) : maxSeq(maxSeq), n(n)
+SeqTarget::SeqTarget(unsigned n, unsigned maxSeq) : maxSeq(maxSeq), n(n)
 {
-    seqs = new int[n + 1];
-    for(int i = 1; i <= n; i++)
+    seqs = new unsigned[n + 1];
+    for(unsigned i = 1; i <= n; i++)
         seqs[i] = 0;
 }
 
@@ -21,7 +21,7 @@ void SeqTarget::onMessage(unsigned logical_source, const char* buffer, unsigned 
     assert(length == 4);
 
     // message payload
-    int msg = charsToInt32(buffer);
+    unsigned msg = charsToInt32(buffer);
 
     // updating the maximal message
     seqs[logical_source] = max(msg, seqs[logical_source]);
@@ -35,9 +35,9 @@ void SeqTarget::onMessage(unsigned logical_source, const char* buffer, unsigned 
 bool SeqTarget::isFull()
 {
     bool full = true;
-    for(int i = 1; i <= n; i++)
+    for(unsigned i = 1; i <= n; i++)
     {
-        volatile int seq = seqs[i];
+        volatile unsigned seq = seqs[i];
         full = full && (seq >= (maxSeq + i * 1000));
     }
     return full;
@@ -46,7 +46,7 @@ bool SeqTarget::isFull()
 string SeqTarget::describe()
 {
     stringstream ss;
-    for(int i = 1; i <= n; i++)
+    for(unsigned i = 1; i <= n; i++)
         ss << seqs[i] << " ";
     return ss.str();
 }

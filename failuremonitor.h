@@ -17,7 +17,7 @@ public:
      * @brief onFailure Will be called when a process has failed
      * @param process The ID of the failed process
      */
-    virtual void onFailure(int process);
+    virtual void onFailure(unsigned process);
 };
 
 #endif // FAILUREMONITOR_H

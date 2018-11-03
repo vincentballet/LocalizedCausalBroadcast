@@ -17,19 +17,19 @@ using std::vector;
 class SeqTarget : public Target
 {
     /// @brief Maximal message
-    int maxSeq;
+    unsigned maxSeq;
 
     /// @brief Current sequence number
-    volatile int* volatile seqs;
+    volatile unsigned* volatile seqs;
 
     /// @brief Number of processes
-    int n;
+    unsigned n;
 public:
     /**
      * @brief SeqTarget Accepts numbers as messages
      * @param maxSeq Maximal message to expect
      */
-    SeqTarget(int n, int maxSeq);
+    SeqTarget(unsigned n, unsigned maxSeq);
 
     /**
      * @brief onMessage Print message

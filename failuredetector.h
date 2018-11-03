@@ -62,7 +62,7 @@ public:
      * @param timeout_ms Timeout in milliseconds
      * @param monitor The object to inform about a failure
      */
-    FailureDetector(Sender *s, Receiver *r, int timeout_ms, FailureMonitor *monitor = nullptr);
+    FailureDetector(Sender *s, Receiver *r, unsigned timeout_ms, FailureMonitor *monitor = nullptr);
 
     /// @brief Set monitor after creation
     void setMonitor(FailureMonitor* monitor);

@@ -73,7 +73,7 @@ void ThreadedReceiver::deliverToAll(unsigned source, const char* message, unsign
     deliverToAll(source, 0, message, length);
 }
 
-ThreadedReceiver::ThreadedReceiver(int this_process, Target *target) : Receiver(this_process, target)
+ThreadedReceiver::ThreadedReceiver(unsigned this_process, Target *target) : Receiver(this_process, target)
 {
     // creating the fill semaphore
     sem_init(&fill_sem, 0, 0);
