@@ -11,7 +11,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     string content(buffer, length);
 
     // pair (message, sender)
-    pair<string, unsigned> pend = make_pair(content, logical_source);
+    pair<string, unsigned> content_source = make_pair(content, logical_source);
 
     // need to relay?
     bool need_broadcast = false;
@@ -20,19 +20,19 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     m.lock();
 
     // message already delivered, no need to do anything else
-    if(delivered.find(content) != delivered.end())
+    if(delivered.find(content_source) != delivered.end())
     {
         m.unlock();
         return;
     }
 
     // this message is also an acknowledgement of itself
-    if(ack.find(content) == ack.end())
-        ack[content] = set<unsigned>();
-    ack[content].insert(source);
+    if(ack.find(content_source) == ack.end())
+        ack[content_source] = set<unsigned>();
+    ack[content_source].insert(source);
 
     // adding myself as an acker
-    ack[content].insert(this_process);
+    ack[content_source].insert(this_process);
 
 #ifdef URB_DEBUG
     stringstream ss;
@@ -41,9 +41,9 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
 #endif
 
     // if message is not pending, add it there and relay
-    if(pending.find(pend) == pending.end())
+    if(pending.find(content_source) == pending.end())
     {
-        pending.insert(pend);
+        pending.insert(content_source);
         need_broadcast = true;
     }
 
@@ -74,13 +74,13 @@ void UniformReliableBroadcast::broadcast(const char* message, unsigned length, u
     b->broadcast(message, length, source);
 }
 
-bool UniformReliableBroadcast::canDeliver(std::string msg)
+bool UniformReliableBroadcast::canDeliver(pair<string, unsigned> content_source)
 {
     // if message was never acknowledged, can't deliver it
-    if(ack.find(msg) == ack.end()) return false;
+    if(ack.find(content_source) == ack.end()) return false;
 
     // otherwise must be acknowledged by > half of members (others + me)
-    return 2 * ack[msg].size() > (links.size() + 1);
+    return 2 * ack[content_source].size() > (links.size() + 1);
 }
 
 void UniformReliableBroadcast::onFailure(unsigned process)
@@ -116,16 +116,16 @@ bool UniformReliableBroadcast::tryDeliver()
         unsigned source = (*it).second;
 
         // if not delivered and can deliver
-        if(delivered.find(message) == delivered.end() && canDeliver(message))
+        if(delivered.find(*it) == delivered.end() && canDeliver(*it))
         {
             // marking message as delivered
-            delivered.insert(message);
+            delivered.insert(*it);
 
             // saving the message
             to_deliver.push_back(make_pair(message, source));
 
             // no need to keep it in ACK
-            ack.erase(message);
+            ack.erase(*it);
 
             // erasing message from pending
             it = pending.erase(it);
@@ -166,8 +166,12 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
     for(it = links.begin(); it != links.end(); it++)
     {
         PerfectLink* link = *it;
+
         // adding failure detector for a link
         FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), NO_PONG_DEAD_MS, this);
+
+        // saving the detector
+        detectors.push_back(detector);
     }
 #endif
 }

@@ -26,13 +26,16 @@ class UniformReliableBroadcast : public Broadcast, public FailureMonitor
 private:
     /// @brief Delivered messages
     /// @see p83 of the Book (Introduction to Reliable and Secure Distributed Programming, Cachin, Guerraou, Rodrigues), 2ed
-    set<string> delivered;
+    /// (content, source)
+    set<pair<string, unsigned>> delivered;
 
     /// @brief Received but not yet delivered
+    /// (content, source)
     set<pair<string, unsigned> > pending;
 
     /// @brief Acknowledged messages
-    map<string, set<unsigned> > ack;
+    /// (content, source) -> process
+    map<pair<string, unsigned>, set<unsigned> > ack;
 
     /// @brief React on a message with parsed source
     virtual void onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length);
@@ -47,13 +50,16 @@ private:
     Broadcast* b;
 
     /// @brief Can deliver a message?
-    bool canDeliver(string msg);
+    bool canDeliver(pair<string, unsigned> content_source);
 
     /// @brief Try deliver messages from pending list
     bool tryDeliver();
 
     /// @brief Mutex for syncronization
     mutex m;
+
+    /// @brief Failure detectors
+    vector<FailureDetector*> detectors;
 public:
     /**
      * @brief Broadcast initialization
