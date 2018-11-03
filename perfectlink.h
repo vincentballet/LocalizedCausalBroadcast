@@ -17,7 +17,9 @@
 
 #include "sender.h"
 #include "receiver.h"
+#include "threadedreceiver.h"
 #include "failuredetector.h"
+#include <semaphore.h>
 
 using std::mutex;
 using std::map;
@@ -26,7 +28,7 @@ using std::tuple;
 using std::string;
 
 /** @class This class implements the Perfect Link */
-class PerfectLink : public Sender, public Receiver, public Target
+class PerfectLink : public Sender, public ThreadedReceiver, public Target
 {
 private:
     /// @brief Map seq number -> message, timestamp
@@ -40,6 +42,14 @@ private:
 
     /// @brief Send Thread
     pthread_t send_thread, ack_thread;
+
+    /// @brief Fill semaphore for the msgs buffer
+    /// @see https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem
+    sem_t fill_sem;
+
+    /// @brief Empty semaphore for the msgs buffer
+    /// @see https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem
+    sem_t empty_sem;
 
     /**
      * @brief sendLoop Runs the sending loop
@@ -70,7 +80,8 @@ private:
     /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec) */
     static unsigned const TIMEOUT_MSG = 50000;
 
-    /** @brief Maximal number of messages in the send queue (w/o ack) */
+    /** @brief Maximal number of messages in the send queue (w/o ack)
+     * Or the WINDOW SIZE */
     static unsigned const MAX_IN_QUEUE = 50;
 
     /** @brief A mutex to be used by the PerfectLink class */
@@ -84,9 +95,6 @@ private:
 
     /** @brief true if send buffer is empty */
     volatile bool clean;
-
-    /** @brief Maximal window size */
-    int window = 10;
 
     /** @brief Messages now in queue */
     volatile int inqueue;

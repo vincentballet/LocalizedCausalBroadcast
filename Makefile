@@ -24,6 +24,7 @@ reliablebroadcast.o \
 seqtarget.o \
 test.o \
 uniformreliablebroadcast.o \
+threadedreceiver.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 

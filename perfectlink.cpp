@@ -51,6 +51,12 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
             free(get<1>(msgs[seqnumack]));
             msgs.erase(seqnumack);
             inqueue--;
+
+            // +1 to the empty
+            sem_post(&empty_sem);
+
+            // -1 from the fill
+            sem_wait(&fill_sem);
         } // else: ACKed an unknown message!
         mtx.unlock();
 
@@ -97,7 +103,10 @@ void *PerfectLink::sendLoop(void *arg)
 {
     // pointer to failure detector
     PerfectLink* link = (PerfectLink*) arg;
-    
+
+    // Iterator for msgs
+    map<int, tuple<int, char*, long> >::iterator it;
+
     // Sending loop
     while(true)
     {
@@ -111,52 +120,66 @@ void *PerfectLink::sendLoop(void *arg)
             continue;
         }
 
-        if(link->msgs.size() > 0)
+        // checking if there are messages in the queue
+        sem_wait(&(link->empty_sem));
+        sem_post(&(link->empty_sem));
+
+        // start of critical section
+        link->mtx.lock();
+
+        // if no messages need to be sent now
+        // this will be equal to the minimal time (in ms)
+        // in which a message should be sent
+        long min_send_in = TIMEOUT_MSG;
+
+        // loop over the buffer
+        // if buffer is empty, will perform no iterations
+        // and will wait on the semaphore at the next while() iteration
+        for (it = link->msgs.begin(); it != link->msgs.end(); it++)
         {
-            // Send all messages if ACK missing
-            map<int, tuple<int, char*, long> >::iterator it;
-            
-            // start of critical section
-            link->mtx.lock();
-            for (it = link->msgs.begin(); it != link->msgs.end(); it++)
-            {
-                // data
-                char* sdata = get<1>((*it).second);
+            // data
+            char* sdata = get<1>((*it).second);
 
-                // data length
-                int len = get<0>((*it).second);
+            // data length
+            int len = get<0>((*it).second);
 
-                // last sent timestamp
-                long last_sent = get<2>((*it).second);
+            // last sent timestamp
+            long last_sent = get<2>((*it).second);
 
-                // doing nothing if message was sent recently already
-                if(TIME_MS_NOW() - last_sent <= TIMEOUT_MSG) continue;
+            // in how many milliseconds the message should be sent?
+            long send_in = last_sent + TIMEOUT_MSG - TIME_MS_NOW();
 
-                // sending message
-                link->s->send(sdata, len);
+            // calculatin min_send_in
+            min_send_in = min(min_send_in, send_in);
+
+            // if send_in is positive, it means that it's not
+            // yet time to send this message
+            if(send_in >= 0) continue;
+
+            // sending message
+            link->s->send(sdata, len);
 
 #ifdef PERFECTLINK_DEBUG
-                // logging message
-                stringstream ss;
-                ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
-                memorylog->log(ss.str());
+            // logging message
+            stringstream ss;
+            ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
+            memorylog->log(ss.str());
 #endif
-                // filling in last_sent time
-                get<2>((*it).second) = TIME_MS_NOW();
-            }
-
-            // end of critical section
-            link->mtx.unlock();
-
-            // waiting for something to change
-            link->waitForNewMessagesOrTimeout();
+            // filling in last_sent time
+            get<2>((*it).second) = TIME_MS_NOW();
         }
-        else usleep(10000);
+
+        // end of critical section
+        link->mtx.unlock();
+
+        // sleeping until a next message needs to be sent
+        if(min_send_in > 0)
+            usleep(min_send_in * 1000);
     }
 }
 
 PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
-    Sender(s->getTarget()), Receiver(r->getThis(), target)
+    Sender(s->getTarget()), ThreadedReceiver(r->getThis(), target)
 {
     r->addTarget(this);
     this->s = s;
@@ -169,6 +192,9 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     // starting sending thread
     pthread_create(&send_thread, nullptr, &PerfectLink::sendLoop, this);
     
+    // initializing fill/empty semaphores
+    sem_init(&fill_sem, 0, 0);
+    sem_init(&empty_sem, 0, MAX_IN_QUEUE);
 }
 
 Sender *PerfectLink::getSender()
@@ -193,7 +219,8 @@ void PerfectLink::send(char* buffer, int length)
     if(!running) return;
 
     // waiting until can send
-    //while(inqueue >= MAX_IN_QUEUE) {}
+    // VIA -1 to the empty semaphore
+    sem_wait(&empty_sem);
 
     // allocating new memory
     char* data = static_cast<char*>(malloc(length + 5));
@@ -224,6 +251,9 @@ void PerfectLink::send(char* buffer, int length)
     // +1 message in queue
     inqueue++;
 
+    // +1 to the fill semaphore
+    sem_post(&fill_sem);
+
     // finished critical section
     mtx.unlock();
 }
@@ -236,21 +266,4 @@ void PerfectLink::halt()
 bool PerfectLink::isClean()
 {
     return clean;
-}
-
-void PerfectLink::waitForNewMessagesOrTimeout()
-{
-    // waiting until all messages are sent
-    steady_clock::time_point begin = steady_clock::now();
-    int seq = this->seqnum;
-    while(this->msgs.size() != 0 ) {
-        long a = chrono::duration_cast<chrono::microseconds>(steady_clock::now() - begin).count();
-        if (a > TIMEOUT) break;
-
-        if(this->seqnum > seq) return;
-
-        /// Sleep 1 millisecond
-        /// Drastically reduces CPU load (thread sleep instead of busy wait)
-        usleep(1000);
-    }
 }
