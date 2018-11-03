@@ -20,7 +20,7 @@ class SeqTarget : public Target
     int maxSeq;
 
     /// @brief Current sequence number
-    int* volatile seqs;
+    volatile int* volatile seqs;
 
     /// @brief Number of processes
     int n;

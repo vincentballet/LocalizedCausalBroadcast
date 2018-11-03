@@ -9,10 +9,10 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # messages to send
-m = 50
+m = 100
 
 # time to initialize
-wait_time = 5
+wait_time = 20
 
 # maximal time of crash in ms
 max_crash_time_ms = 50
@@ -40,7 +40,8 @@ n = len(membership)
 print('There are %d processes' % n)
 
 # maximal number of crashed processes
-max_crashed = n // 2 if len(sys.argv) == 2 else 0
+#max_crashed = n // 2 if len(sys.argv) == 2 else 0
+max_crashed = 0
 
 # checking that max_crashed is valid
 assert 2 * max_crashed < n, "Must have a valid majority"
@@ -80,7 +81,7 @@ for i in range(n):
 print("Created processes %s" % pids)
 
 # sleeping until processes are ready
-sleep(wait_time)
+sleep(2)
 
 # starting processes
 print("Starting processes")

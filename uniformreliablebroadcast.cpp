@@ -60,9 +60,6 @@ void UniformReliableBroadcast::broadcast(char *message, unsigned length, unsigne
     string content = string(message, length);
     pending.insert(make_pair(content, source));
 
-    // adding myself as acknowledged
-    ack[content] = set<int>();
-
     // end of critical section
     m.unlock();
 
@@ -120,11 +117,6 @@ bool UniformReliableBroadcast::tryDeliver()
         message = (*it).first;
         source = (*it).second;
 
-//        stringstream ss;
-//        ss << "tryDeliver " << charsToInt32((char*) message.c_str()) << " " << source << " "
-//           << ack[message].size() << " " << canDeliver(message);
-//        memorylog->log(ss.str());
-
         // if not delivered and can deliver
         if(delivered.find(message) == delivered.end() && canDeliver(message))
         {
@@ -173,12 +165,12 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
     // adding this object as the target
     b->addTarget(this);
 
-//    // creating failure detectors
-//    vector<PerfectLink*>::iterator it;
-//    for(it = links.begin(); it != links.end(); it++)
-//    {
-//        PerfectLink* link = *it;
-//        // adding failure detector for a link
-//        FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), 1000, this);
-//    }
+    // creating failure detectors
+    vector<PerfectLink*>::iterator it;
+    for(it = links.begin(); it != links.end(); it++)
+    {
+        PerfectLink* link = *it;
+        // adding failure detector for a link
+        FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), NO_PONG_DEAD_MS, this);
+    }
 }

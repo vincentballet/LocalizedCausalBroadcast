@@ -27,16 +27,16 @@ void FIFOBroadcast::onMessage(unsigned logical_source, char *message, unsigned l
     // obtaining source
     msg.source = logical_source;
 
-    mtx.lock();
+    mtx_recv.lock();
 
     // adding a message to the list in any case
     // will deliver it if it's correct, adding to front to be faster
     buffer.push_front(msg);
 
     // trying to deliver all messages
-    tryDeliverAll(msg);
+    tryDeliverAll();
 
-    mtx.unlock();
+    mtx_recv.unlock();
 }
 
 bool FIFOBroadcast::tryDeliver(FIFOMessage m)
@@ -59,7 +59,7 @@ bool FIFOBroadcast::tryDeliver(FIFOMessage m)
     return false;
 }
 
-void FIFOBroadcast::tryDeliverAll(FIFOMessage m)
+void FIFOBroadcast::tryDeliverAll()
 {
     // for going over buffer
     list<FIFOMessage>::iterator it;
@@ -97,12 +97,12 @@ FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_p
 
 void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
 {
-    mtx.lock();
+    mtx_send.lock();
 
     // incrementing sequence number
     int seqnum = send_seq_num++;
 
-    mtx.unlock();
+    mtx_send.unlock();
 
     // buffer for sending
     char buffer[MAXLEN];

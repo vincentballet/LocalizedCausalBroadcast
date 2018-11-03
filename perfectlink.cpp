@@ -192,13 +192,13 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
 
     // currently no messages inside the queue
     inqueue = 0;
-
-    // starting sending thread
-    pthread_create(&send_thread, nullptr, &PerfectLink::sendLoop, this);
     
     // initializing fill/empty semaphores
     sem_init(&fill_sem, 0, 0);
     sem_init(&empty_sem, 0, MAX_IN_QUEUE);
+
+    // starting sending thread
+    pthread_create(&send_thread, nullptr, &PerfectLink::sendLoop, this);
 }
 
 Sender *PerfectLink::getSender()
@@ -264,6 +264,11 @@ void PerfectLink::send(char* buffer, int length)
 
 void PerfectLink::halt()
 {
+#ifdef PERFECTLINK_DEBUG
+    stringstream ss;
+    ss << "Stopping link to " << s->getTarget();
+    memorylog->log(ss.str());
+#endif
     running = false;
 }
 

@@ -75,9 +75,9 @@ void ThreadedReceiver::deliverToAll(unsigned source, char *message, unsigned len
 
 ThreadedReceiver::ThreadedReceiver(int this_process, Target *target) : Receiver(this_process, target)
 {
-    // creating the delivery thread
-    pthread_create(&deliver_thread, nullptr, &ThreadedReceiver::deliverLoop, this);
-
     // creating the fill semaphore
     sem_init(&fill_sem, 0, 0);
+
+    // creating the delivery thread
+    pthread_create(&deliver_thread, nullptr, &ThreadedReceiver::deliverLoop, this);
 }

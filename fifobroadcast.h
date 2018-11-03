@@ -40,7 +40,7 @@ class FIFOBroadcast : public Broadcast
 {
 private:
     /// @brief Mutex for the object
-    mutex mtx;
+    mutex mtx_send, mtx_recv;
 
     /// @brief Reliable broadcast instance
     Broadcast* b;
@@ -58,7 +58,7 @@ private:
     virtual void onMessage(unsigned logical_source, char* buffer, unsigned length);
 
     /// @brief React on a parsed message
-    void tryDeliverAll(FIFOMessage m);
+    void tryDeliverAll();
 
     /**
      * @brief tryDeliver Try delivering a message
