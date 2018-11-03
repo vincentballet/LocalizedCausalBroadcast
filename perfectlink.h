@@ -39,7 +39,7 @@ private:
     Receiver* r;
 
     /// @brief Send Thread
-    pthread_t thread;
+    pthread_t send_thread, ack_thread;
 
     /**
      * @brief sendLoop Runs the sending loop
@@ -47,6 +47,13 @@ private:
      * @return nullptr
      */
     static void* sendLoop(void* arg);
+
+    /**
+     * @brief ackLoop Runs the ACK loop
+     * @param arg PerfectLink instance
+     * @return nullptr
+     */
+    static void* ackLoop(void* arg);
     
     /** @brief List of delivered messages (not to get no-duplication violated) */
     set<string> delivered;
@@ -62,6 +69,9 @@ private:
 
     /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec) */
     static unsigned const TIMEOUT_MSG = 50000;
+
+    /** @brief Maximal number of messages in the send queue (w/o ack) */
+    static unsigned const MAX_IN_QUEUE = 50;
 
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;

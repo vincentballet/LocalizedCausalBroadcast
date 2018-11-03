@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # messages to send
-m = 2000
+m = 500
 
 # time to initialize
 wait_time = 5
@@ -34,12 +34,13 @@ open('crashed.log', 'w').write('')
 pids = []
 
 # killing old processes
-os.system("killall -9 da_proc")
+#os.system("killall -9 da_proc")
 os.system("rm *.recvall")
 
 # creating processes
-for i in range(n):
+for i in range(n)[1:]:
   pids += [os.spawnlp(os.P_NOWAIT, './da_proc', 'da_proc', str(i + 1), 'membership', str(m))]
+pids += [int(open('da_proc_1.pid', 'r').read())]
 
 print("Created processes %s" % pids)
 
@@ -68,7 +69,7 @@ time_end = time()
 
 # killing processes
 for pid in pids:
-  os.kill(pid, signal.SIGINT)
+  os.kill(pid, signal.SIGTERM)
 
 # waiting to finish
 sleep(wait_time)

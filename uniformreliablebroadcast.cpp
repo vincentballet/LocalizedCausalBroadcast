@@ -170,6 +170,9 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
     // saving the underlying broadcast
     this->b = broadcast;
 
+    // adding this object as the target
+    b->addTarget(this);
+
 //    // creating failure detectors
 //    vector<PerfectLink*>::iterator it;
 //    for(it = links.begin(); it != links.end(); it++)
@@ -178,7 +181,4 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
 //        // adding failure detector for a link
 //        FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), 1000, this);
 //    }
-
-    // adding this object as the target
-    b->addTarget(this);
 }

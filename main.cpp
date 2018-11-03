@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 
     // set += [USR2, INT, TERM]
     sigaddset(&set, SIGUSR2);
-    sigaddset(&set, SIGINT);
+//    sigaddset(&set, SIGINT);
     sigaddset(&set, SIGTERM);
 
     // all threads don't care about signals from the set
@@ -282,7 +282,7 @@ int main(int argc, char** argv)
     while(true)
     {
         usleep(100000);
-        cerr << "Data" << endl;
+        cerr << "Waiting..." << endl;
         cout << "Proc " << n << " got " << t.describe() << " messages" << endl;
 
         if(t.isFull())
@@ -301,6 +301,7 @@ int main(int argc, char** argv)
             while(true)
             {
                 usleep(100000);
+                cerr << "All received" << endl;
             }
         }
     }

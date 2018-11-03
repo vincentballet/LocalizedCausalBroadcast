@@ -145,7 +145,6 @@ void *PerfectLink::sendLoop(void *arg)
     }
 }
 
-
 PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     Sender(s->getTarget()), Receiver(r->getThis(), target)
 {
@@ -158,7 +157,7 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     inqueue = 0;
 
     // starting sending thread
-    pthread_create(&thread, nullptr, &PerfectLink::sendLoop, this);
+    pthread_create(&send_thread, nullptr, &PerfectLink::sendLoop, this);
     
 }
 
@@ -183,6 +182,9 @@ void PerfectLink::send(char* buffer, int length)
     // doing nothing if link is stopped
     if(!running) return;
 
+    // waiting until can send
+    //while(inqueue >= MAX_IN_QUEUE) {}
+
     // allocating new memory
     char* data = static_cast<char*>(malloc(length + 5));
     
@@ -198,9 +200,12 @@ void PerfectLink::send(char* buffer, int length)
     // copying data
     memcpy(data + 5, buffer, length);
     
-    // saving the message
-    this->msgs[this->seqnum] = make_tuple(length + 5, data, 0);
-    
+    // sending message NOW
+    s->send(data, length + 5);
+
+    // saving the message and current timestamp
+    this->msgs[this->seqnum] = make_tuple(length + 5, data, TIME_MS_NOW());
+
     // IMPORTANT: incrementing the sequence number
     // Otherwise another thread could send a message with SAME
     // sequence number
