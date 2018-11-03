@@ -52,10 +52,6 @@ private:
     /// @brief Try deliver messages from pending list
     bool tryDeliver();
 
-    /// @brief Trying to deliver until there are messages left
-    /// @todo: make the search faster (now quadratic?)
-    void tryDeliverAll();
-
     /// @brief Mutex for syncronization
     mutex m;
 public:

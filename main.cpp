@@ -149,7 +149,7 @@ int main(int argc, const char** argv)
 
     // set += [USR2, INT, TERM]
     sigaddset(&set, SIGUSR2);
-    //sigaddset(&set, SIGINT);
+    sigaddset(&set, SIGINT);
     sigaddset(&set, SIGTERM);
 
     // all threads don't care about signals from the set
@@ -274,8 +274,9 @@ int main(int argc, const char** argv)
     {
         stringstream ss;
         unsigned payload = i + 1;
-        if(UNIQUE_MESSAGES)
+#ifdef UNIQUE_MESSAGES
             payload += 1000 * n;
+#endif
         int32ToChars(payload, buf);
         ss << "b " << payload;
         memorylog->log(ss.str());

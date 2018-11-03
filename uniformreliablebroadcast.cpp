@@ -19,6 +19,13 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     // critical section
     m.lock();
 
+    // message already delivered, no need to do anything else
+    if(delivered.find(content) != delivered.end())
+    {
+        m.unlock();
+        return;
+    }
+
     // this message is also an acknowledgement of itself
     if(ack.find(content) == ack.end())
         ack[content] = set<unsigned>();
@@ -48,7 +55,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
         b->broadcast(buffer, length, logical_source);
 
     // ack and pending changed, checking if can deliver something now
-    tryDeliverAll();
+    tryDeliver();
 }
 
 void UniformReliableBroadcast::broadcast(const char* message, unsigned length, unsigned source)
@@ -62,9 +69,6 @@ void UniformReliableBroadcast::broadcast(const char* message, unsigned length, u
 
     // end of critical section
     m.unlock();
-
-    // trying to deliver messages (in case N = 1)
-    tryDeliverAll();
 
     // broadcasting the message
     b->broadcast(message, length, source);
@@ -95,27 +99,21 @@ void UniformReliableBroadcast::onFailure(unsigned process)
 
 bool UniformReliableBroadcast::tryDeliver()
 {
-    // message buffer
-    string message;
-
-    // source buffer
-    unsigned source;
-
-    // are buffers valid?
-    bool found = false;
-
     // iterator for pending
     set<pair<string, unsigned> >::iterator it;
 
     // critical section
     m.lock();
 
+    // subset of messages which can be delivered
+    vector<pair<string, unsigned>> to_deliver;
+
     // loop over pending
-    for(it = pending.begin(); it != pending.end(); it++)
+    for(it = pending.begin(); it != pending.end();)
     {
         // filling in the buffers
-        message = (*it).first;
-        source = (*it).second;
+        string message = (*it).first;
+        unsigned source = (*it).second;
 
         // if not delivered and can deliver
         if(delivered.find(message) == delivered.end() && canDeliver(message))
@@ -123,20 +121,27 @@ bool UniformReliableBroadcast::tryDeliver()
             // marking message as delivered
             delivered.insert(message);
 
-            // buffer is valid now
-            found = true;
+            // saving the message
+            to_deliver.push_back(make_pair(message, source));
 
-            // stopping the loop
-            break;
+            // no need to keep it in ACK
+            ack.erase(message);
+
+            // erasing message from pending
+            it = pending.erase(it);
         }
+        else it++;
     }
 
     // end of critical section
     m.unlock();
 
-    // if buffer is valid, delivering its content
-    if(found)
+    // delivering everything that was in the buffer
+    vector<pair<string, unsigned>>::iterator it1;
+    for(it1 = to_deliver.begin(); it1 != to_deliver.end(); it1++)
     {
+        string message = (*it1).first;
+        unsigned source = (*it1).second;
 #ifdef URB_DEBUG
         // log BEB deliver
         stringstream ss;
@@ -145,16 +150,6 @@ bool UniformReliableBroadcast::tryDeliver()
 #endif
         deliverToAll(source, message.c_str(), message.length());
     }
-
-    // return true if there was a message delivered (therefore one more loop might be required)
-    return found;
-}
-
-void UniformReliableBroadcast::tryDeliverAll()
-{
-    // trying to deliver messages until there are no messages to deliver
-    while(true)
-        if(!tryDeliver()) return;
 }
 
 UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->links)
