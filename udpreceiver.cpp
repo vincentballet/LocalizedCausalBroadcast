@@ -84,8 +84,6 @@ void* UDPReceiver::receiveLoop(void *args)
         // <first byte sender 1> <0x01 1> <PF seq number 4 bytes> <logical sender 4> <fifo sequence number 4> <data 4>
         int source = buffer[0];
 
-        cout << "Tick" << endl;
-
 #ifdef UDP_DEBUG
         int type = buffer[1];
         int pk_seq = charsToInt32(buffer + 2);

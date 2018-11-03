@@ -230,8 +230,13 @@ int main(int argc, char** argv)
         testPerfectLink(n, links);
         sleep(3);
         writeOutputAndHalt();
+        return 0;    
+    }
+    if (test.compare("testUDP") == 0){
+        testUDP(n, senders, &r);
+        sleep(3);
+        writeOutputAndHalt();
         return 0;
-        
     }
     
     // WARNING: MUST set up everything BEFORE waiting

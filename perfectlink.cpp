@@ -36,8 +36,8 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
     // receiving an ACK from a sent message
     if(len == 5 && buf[0] == 0x02)
     {
+        // sequence number which has been acked
         int seqnumack = charsToInt32(buf + 1);
-        //cout << "** Received ACK " << seqnumack << endl;
 
 #ifdef PERFECTLINK_DEBUG
         stringstream ss;
@@ -51,7 +51,7 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
             free(get<1>(msgs[seqnumack]));
             msgs.erase(seqnumack);
             inqueue--;
-        }
+        } // else: ACKed an unknown message!
         mtx.unlock();
 
     } // receiving content from another process => we send an ACK
@@ -65,21 +65,31 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         //cout << "** Sending ACK for " << tmp << endl;
         s->send(sdata, 5);
 
-        // WARNING: need to return ONLY after sending the ACK, otherwise can loose the ACK
-        // And the sender will keep sending this message
-        // no need for mutex as only 1 thread is calling this function
-        if (delivered.find(string(message)) != delivered.end()){
-            return;
-        }
+        // need to deliver this message?
+        bool need_deliver = false;
 
+        mtx.lock();
+
+        // WARNING: need to return ONLY after sending the ACK, otherwise can lose the ACK
+        // And the sender will keep sending this message
+        if (delivered.find(string(message)) == delivered.end())
+        {
+            need_deliver = true;
+            delivered.insert(message);
+        }
+        mtx.unlock();
+
+        // delivering message
+        if(need_deliver)
+        {
 #ifdef PERFECTLINK_DEBUG
-        stringstream ss;
-        ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
-        memorylog->log(ss.str());
+            stringstream ss;
+            ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
+            memorylog->log(ss.str());
 #endif
 
-        delivered.insert(message);
-        deliverToAll(source, buf + 5, len - 5);
+            deliverToAll(source, buf + 5, len - 5);
+        }
     }
 }
 
