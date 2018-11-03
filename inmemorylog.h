@@ -23,6 +23,9 @@ private:
     /// Output file
     ofstream file;
 
+    /// Output file with timestamps
+    ofstream file_ts;
+
     /// Output file (immediate)
     ofstream file_immediate;
 
@@ -37,6 +40,9 @@ private:
 
     /// Buffer for data
     string *buffer;
+
+    /// Buffer for data
+    uint64_t *timestamps;
 
     /// Mutex for buffer access
     mutex m;
@@ -58,9 +64,6 @@ public:
      * Call from ONE thread only!
      */
     void dump();
-    
-    /// Print only necessary stuff or not
-    bool debug = true;
 };
 
 #endif // INMEMORYLOG_H

@@ -1,3 +1,4 @@
+*.ts
 *.recvall
 *.out.nowait
 *.log

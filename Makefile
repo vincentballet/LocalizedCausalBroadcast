@@ -1,6 +1,6 @@
 MYPROGRAM=da_proc
 CC=g++
-CXXFLAGS=-O0 -g -std=gnu++11
+CXXFLAGS=-O3 -g -std=gnu++11
 
 all: $(MYPROGRAM)
 
@@ -27,7 +27,7 @@ uniformreliablebroadcast.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 
-%.o : %.cpp %.h
+%.o : %.cpp *.h
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
 clean:

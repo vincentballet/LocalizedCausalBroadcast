@@ -9,12 +9,16 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 {
     // allocating memory
     buffer = new string[MAX_MESSAGES];
+    timestamps = new uint64_t[MAX_MESSAGES];
 
     // currently, active
     active = true;
 
     // opening the file
     file.open(destination_filename, std::ios::out);
+
+    // opening the file
+    file_ts.open(destination_filename + ".ts", std::ios::out);
 
 #ifdef IMMEDIATE_FILE
     // opening the immediate file output
@@ -44,6 +48,7 @@ void InMemoryLog::log(std::string content)
     {
         // adding content to vector
         buffer[messages] = content;
+        timestamps[messages] = TIME_MS_NOW();
         messages++;
     }
     else
@@ -70,6 +75,7 @@ void InMemoryLog::dump()
     {
         // writing data
         file << buffer[i] << std::endl;
+        file_ts << timestamps[i] << " " << buffer[i] << std::endl;
     }
 
     // logging end

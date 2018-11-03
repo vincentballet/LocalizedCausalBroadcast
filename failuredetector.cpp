@@ -65,12 +65,12 @@ void *FailureDetector::pingLoop(void *arg)
             // reporting failure (only once)
             if(detector->monitor)
             {
+#ifdef FAILUREDETECTOR_DEBUG
                 // logging the crash
                 stringstream ss;
-                if (memorylog->debug) {
-                    ss << "crash " << detector->s->getTarget() << " to " << detector->timeout_ms;
-                    memorylog->log(ss.str());
-                }
+                ss << "crash " << detector->s->getTarget() << " to " << detector->timeout_ms;
+                memorylog->log(ss.str());
+#endif
 
                 // reporting failure downstream
                 detector->monitor->onFailure(detector->s->getTarget());

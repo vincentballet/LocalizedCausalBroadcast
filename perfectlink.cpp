@@ -39,11 +39,11 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
         int seqnumack = charsToInt32(buf + 1);
         //cout << "** Received ACK " << seqnumack << endl;
 
+#ifdef PERFECTLINK_DEBUG
         stringstream ss;
-        if (memorylog->debug) {
-            ss << "< plack " << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
-            memorylog->log(ss.str());
-        }
+        ss << "< plack " << r->getThis() <<  " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
+        memorylog->log(ss.str());
+#endif
 
         mtx.lock();
         if(msgs.find(seqnumack) != msgs.end())
@@ -72,11 +72,11 @@ void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
             return;
         }
 
+#ifdef PERFECTLINK_DEBUG
         stringstream ss;
-        if (memorylog->debug) {
-            ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
-            memorylog->log(ss.str());
-        }
+        ss << "< pld " << r->getThis() << " " << source << " " << charsToInt32(buf + 1); // << " " << charsToInt32(buf + 5 + 8);
+        memorylog->log(ss.str());
+#endif
 
         delivered.insert(message);
         deliverToAll(source, buf + 5, len - 5);
@@ -89,7 +89,8 @@ void *PerfectLink::sendLoop(void *arg)
     PerfectLink* link = (PerfectLink*) arg;
     
     // Sending loop
-    while(true){
+    while(true)
+    {
         // updading clean variable
         link->clean = link->msgs.size() == 0;
 
@@ -119,24 +120,24 @@ void *PerfectLink::sendLoop(void *arg)
                 long last_sent = get<2>((*it).second);
 
                 // doing nothing if message was sent recently already
-                if(TIME_MS_NOW() - last_sent <= TIMEOUT / 1000) continue;
+                if(TIME_MS_NOW() - last_sent <= TIMEOUT_MSG) continue;
 
                 // sending message
                 link->s->send(sdata, len);
 
+#ifdef PERFECTLINK_DEBUG
                 // logging message
                 stringstream ss;
-                if (memorylog->debug) {
-                    ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
-                    memorylog->log(ss.str());
-                }
+                ss << "> pls " << TIME_MS_NOW() << " " << link->s->getTarget() << " " << link->r->getThis() << " " << charsToInt32(sdata + 1);// << " " << charsToInt32(sdata + 5 + 8);
+                memorylog->log(ss.str());
+#endif
                 // filling in last_sent time
                 get<2>((*it).second) = TIME_MS_NOW();
             }
 
             // end of critical section
             link->mtx.unlock();
-        
+
             // waiting for something to change
             link->waitForNewMessagesOrTimeout();
         }

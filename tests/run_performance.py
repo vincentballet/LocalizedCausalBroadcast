@@ -27,6 +27,8 @@ membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('m
 n = len(membership)
 print('There are %d processes' % n)
 
+# Reading logs
+logs = {i: list(filter(lambda x : len(x) > 0, open('./da_proc_%d.out' % i, 'r').read().split('\n'))) for i in range(1, n + 1)}
 
 # writing down crashed processes
 open('crashed.log', 'w').write('')
@@ -73,6 +75,18 @@ for pid in pids:
 
 # waiting to finish
 sleep(wait_time)
+
+# counting messages sent
+messages = [[0 for y in range(n)] for x in range(n)]
+for i in range(1, n + 1):
+  for msg in logs[i]:
+    if not msg.startswith('Destination'): continue
+    msg = msg.split()
+    dst, payload = int(msg[1]), int(msg[-1])
+    messages[i - 1][dst - 1] += 1
+
+messages = np.array([[messages[x][y] for y in range(n) if x != y] for x in range(n)]).flatten()
+print('Sent messages: %.1f +- %.1f, had to send %d' % (np.mean(messages), np.std(messages), m * n))
 
 # printing stats
 time_delta = time_end - time_start

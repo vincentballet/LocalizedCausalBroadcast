@@ -5,11 +5,11 @@
 void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
 {
     // log BEB deliver
+#ifdef BEB_DEBUG
     stringstream ss;
-    if (memorylog->debug) {
-        ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 8);
-        memorylog->log(ss.str());
-    }
+    ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 8);
+    memorylog->log(ss.str());
+#endif
 
     // just delivering the data using logical sender
     deliverToAll(source, charsToInt32(buffer), buffer + 4, length - 4);
@@ -17,12 +17,13 @@ void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned leng
 
 void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned source)
 {
+#ifdef BEB_DEBUG
     // log BEB broadcast
     stringstream ss;
-    if (memorylog->debug) {
-        ss << "bebb " << charsToInt32(message + 4);
-        memorylog->log(ss.str());
-    }
+    ss << "bebb " << charsToInt32(message + 4);
+    memorylog->log(ss.str());
+#endif
+
     // for loop over links
     vector<PerfectLink*>::iterator it;
 

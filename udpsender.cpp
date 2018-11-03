@@ -50,6 +50,7 @@ void UDPSender::send(char *data, int N)
 
     memcpy(buf + 1, data, len1);
 
+#ifdef UDP_DEBUG
     int source = buf[0];
     int type = buf[1];
     int pk_seq = charsToInt32(buf + 2);
@@ -60,22 +61,19 @@ void UDPSender::send(char *data, int N)
     if(type == 0x01)
     {
         stringstream ss;
-        if (memorylog->debug) {
-            ss << "Destination " << target << " source " << source << " type " << type
+        ss << "Destination " << target << " source " << source << " type " << type
            << " pkseq " << pk_seq << " log_sender " << log_sender
-            << " fifo_seq " << fifo_seq << " payload " << payload;
-            memorylog->log(ss.str());
-        }
+           << " fifo_seq " << fifo_seq << " payload " << payload;
+        memorylog->log(ss.str());
     }
 
     if(buf[1] == 0x01)
     {
         stringstream ss;
-        if (memorylog->debug) {
-            ss << "> udps\t" << int(buf[0])<< " " <<target; // << " "  << charsToInt32(data + 5 + 8);
-            memorylog->log(ss.str());
-        }
+        ss << "> udps\t" << int(buf[0])<< " " << target; // << " "  << charsToInt32(data + 5 + 8);
+        memorylog->log(ss.str());
     }
+#endif
 
     if(sendto(fd, buf, len1 + 1, 0, (sockaddr*) &servaddr, sizeof(servaddr)) < 0)
     {
@@ -83,6 +81,7 @@ void UDPSender::send(char *data, int N)
     }
 
 #ifdef UDPSENDER_DELAY_MS
+    #warning "Delaying the sender!"
     usleep(1000 * UDPSENDER_DELAY_MS);
     mtx.unlock();
 #endif

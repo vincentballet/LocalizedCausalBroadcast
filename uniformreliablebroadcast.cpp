@@ -27,11 +27,11 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     // adding myself as an acker
     ack[content].insert(this_process);
 
+#ifdef URB_DEBUG
     stringstream ss;
-    if (memorylog->debug) {
-        ss << "urback " << charsToInt32(buffer + 4) << " " << source;
-        memorylog->log(ss.str());
-    }
+    ss << "urback " << charsToInt32(buffer + 4) << " " << source;
+    memorylog->log(ss.str());
+#endif
 
     // if message is not pending, add it there and relay
     if(pending.find(pend) == pending.end())
@@ -141,12 +141,12 @@ bool UniformReliableBroadcast::tryDeliver()
     // if buffer is valid, delivering its content
     if(found)
     {
+#ifdef URB_DEBUG
         // log BEB deliver
         stringstream ss;
-        if (memorylog->debug) {
-            ss << "urbd " << source << " " << charsToInt32((char*) message.c_str() + 4);
-            memorylog->log(ss.str());
-        }
+        ss << "urbd " << source << " " << charsToInt32((char*) message.c_str() + 4);
+        memorylog->log(ss.str());
+#endif
         deliverToAll(source, (char*) message.c_str(), message.length());
     }
 

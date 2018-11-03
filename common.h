@@ -25,9 +25,28 @@ using std::chrono::steady_clock;
 //#define INMEMORY_PRINT 1
 
 /// @macro Dump to a separate file immediately
-//#define IMMEDIATE_FILE 1
+#define IMMEDIATE_FILE 1
 
+/// @macro Message = 1000 * sender + payload
+#define UNIQUE_MESSAGES 1
+
+/// @macro Current time in milliseconds
 #define TIME_MS_NOW() (std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count())
+
+/// @macro Debug perfectlink
+#define PERFECTLINK_DEBUG
+
+/// @macro Debug UDP messages
+#define UDP_DEBUG
+
+/// @macro Debug BestEffortBroadcast
+#define BEB_DEBUG
+
+/// @macro Debug UniformReliableBroadcast
+#define URB_DEBUG
+
+/// @macro Debug Failure Detector
+#define FAILUREDETECTOR_DEBUG
 
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
