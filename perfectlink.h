@@ -85,7 +85,7 @@ private:
     mutex mtx;
 
     /** @brief Called on message */
-    void onMessage(unsigned source, char* buffer, unsigned length);
+    void onMessage(unsigned source, const char* buffer, unsigned length);
 
     /** @brief Set to false to disable */
     bool running = true;
@@ -116,7 +116,7 @@ public:
     Receiver* getReceiver();
 
     /** @brief Send data */
-    void send(char *buffer, int length);
+    void send(const char* buffer, int length);
 
     /**
      * @brief halt Stop the link (e.g. if destination crashed)

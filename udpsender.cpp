@@ -37,7 +37,7 @@ UDPSender::~UDPSender()
     if(fd >= 0) close(fd);
 }
 
-void UDPSender::send(char *data, int N)
+void UDPSender::send(const char* data, int N)
 {
 #ifdef UDPSENDER_DELAY_MS
     mtx.lock();

@@ -8,7 +8,7 @@ BytePrinter::BytePrinter()
 
 }
 
-void BytePrinter::onMessage(unsigned source, char *buffer, unsigned length)
+void BytePrinter::onMessage(unsigned source, const char* buffer, unsigned length)
 {
     cerr << "Message from ID " << source << " len=" << length << " data=";
     for(unsigned i = 0; i < length; i++)

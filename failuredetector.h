@@ -68,7 +68,7 @@ public:
     void setMonitor(FailureMonitor* monitor);
 
     /// @brief Called on message from link
-    void onMessage(unsigned source, char* buffer, unsigned length);
+    void onMessage(unsigned source, const char* buffer, unsigned length);
 };
 
 #endif // FAILUREDETECTOR_H

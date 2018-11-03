@@ -55,7 +55,7 @@ private:
     int send_seq_num;
 
     /// @brief React on a message with parsed source
-    virtual void onMessage(unsigned logical_source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned logical_source, const char* buffer, unsigned length);
 
     /// @brief React on a parsed message
     void tryDeliverAll();
@@ -68,7 +68,7 @@ private:
     bool tryDeliver(FIFOMessage m);
 
     /** @brief Broadcast a message with source other than this process */
-    void broadcast(char* message, unsigned length, unsigned source);
+    void broadcast(const char* message, unsigned length, unsigned source);
 public:
     /**
      * @brief FIFOBroadcast initialization

@@ -12,15 +12,15 @@ Sender::Sender(int destination)
 
 void Sender::send(std::string data)
 {
-    send((char*) data.c_str());
+    send(data.c_str(), data.length());
 }
 
-void Sender::send(char *data)
+void Sender::send(const char* data)
 {
     send(data, strlen(data) + 1);
 }
 
-void Sender::send(char *data, int N)
+void Sender::send(const char* data, int N)
 {
     cout << "SENDING " << N << " bytes starting with" << data[0] << ")" << endl;
 }

@@ -13,7 +13,7 @@ SeqTarget::SeqTarget(int n, int maxSeq) : maxSeq(maxSeq), n(n)
         seqs[i] = 0;
 }
 
-void SeqTarget::onMessage(unsigned logical_source, char *buffer, unsigned length)
+void SeqTarget::onMessage(unsigned logical_source, const char* buffer, unsigned length)
 {
     //fprintf(stderr, "Proc %d SeqTarget::onMessage(%u %d %d)\n", n, logical_source, charsToInt32(buffer), length);
     // checking the size
@@ -37,7 +37,8 @@ bool SeqTarget::isFull()
     bool full = true;
     for(int i = 1; i <= n; i++)
     {
-        full = full && (seqs[i] >= (maxSeq + i * 1000));
+        volatile int seq = seqs[i];
+        full = full && (seq >= (maxSeq + i * 1000));
     }
     return full;
 }

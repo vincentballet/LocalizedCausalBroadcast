@@ -14,7 +14,7 @@ class BytePrinter : public Target
 {
 public:
     BytePrinter();
-    void onMessage(unsigned source, char* buffer, unsigned length);
+    void onMessage(unsigned source, const char* buffer, unsigned length);
 };
 
 #endif // BYTEPRINTER_H

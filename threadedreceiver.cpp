@@ -38,9 +38,9 @@ void *ThreadedReceiver::deliverLoop(void *arg)
         {
             vector<Target*>::iterator it;
             if(msg.logical_source == 0) for(it = receiver->targets.begin(); it != receiver->targets.end(); it++)
-                (*it)->onMessage(msg.source, (char*) msg.data.c_str(), msg.data.length());
+                (*it)->onMessage(msg.source, msg.data.c_str(), msg.data.length());
             else for(it = receiver->targets.begin(); it != receiver->targets.end(); it++)
-                (*it)->onMessage(msg.source, msg.logical_source, (char*) msg.data.c_str(), msg.data.length());
+                (*it)->onMessage(msg.source, msg.logical_source, msg.data.c_str(), msg.data.length());
         }
     }
 
@@ -48,7 +48,7 @@ void *ThreadedReceiver::deliverLoop(void *arg)
     return nullptr;
 }
 
-void ThreadedReceiver::deliverToAll(unsigned source, unsigned logical_source, char *message, unsigned length)
+void ThreadedReceiver::deliverToAll(unsigned source, unsigned logical_source, const char* message, unsigned length)
 {
     // WARNING: set size is unbounded!
 
@@ -67,7 +67,7 @@ void ThreadedReceiver::deliverToAll(unsigned source, unsigned logical_source, ch
     sem_post(&fill_sem);
 }
 
-void ThreadedReceiver::deliverToAll(unsigned source, char *message, unsigned length)
+void ThreadedReceiver::deliverToAll(unsigned source, const char* message, unsigned length)
 {
     // deliver to all with three arguments
     deliverToAll(source, 0, message, length);

@@ -131,7 +131,7 @@ static void *sig_thread(void *arg)
  * @param argc Number of arguments
  * @param argv Array of parameters
  */
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
     // map signals to their handlers
 

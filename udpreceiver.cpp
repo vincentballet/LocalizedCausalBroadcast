@@ -54,7 +54,7 @@ UDPReceiver::~UDPReceiver()
     close(fd);
 }
 
-int UDPReceiver::receive(char *data, int maxlen)
+int UDPReceiver::receive(char* data, int maxlen)
 {
     struct sockaddr_in si_other;
     socklen_t slen = sizeof(si_other);

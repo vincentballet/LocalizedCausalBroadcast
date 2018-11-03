@@ -1,7 +1,7 @@
 #include "reliablebroadcast.h"
 #include "common.h"
 
-void ReliableBroadcast::onMessage(unsigned source, unsigned logical_source, char *buffer, unsigned length)
+void ReliableBroadcast::onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length)
 {
     if(logical_source == this_process && source == this_process)
     {
@@ -43,7 +43,7 @@ void ReliableBroadcast::onMessage(unsigned source, unsigned logical_source, char
     }
 }
 
-void ReliableBroadcast::broadcast(char *message, unsigned length, unsigned source)
+void ReliableBroadcast::broadcast(const char* message, unsigned length, unsigned source)
 {
     // just running broadcast
     b->broadcast(message, length, source);
@@ -86,7 +86,7 @@ void ReliableBroadcast::onFailure(int process)
     for(it1 = relay.begin(); it1 != relay.end(); it1++)
     {
         string s = (*it1);
-        b->broadcast((char*) s.c_str(), s.length(), process);
+        b->broadcast(s.c_str(), s.length(), process);
     }
 }
 

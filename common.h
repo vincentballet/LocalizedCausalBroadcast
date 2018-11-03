@@ -23,7 +23,8 @@ using std::chrono::steady_clock;
 
 /// @macro Time in ms after which the proces is considered crashed
 /// If there were no responses from it
-#define NO_PONG_DEAD_MS 10000
+/// Not running failure detector if not defined
+//#define NO_PONG_DEAD_MS 10000
 
 /// @macro Message = 1000 * sender + payload
 #define UNIQUE_MESSAGES 1
@@ -64,7 +65,7 @@ void int32ToChars(uint32_t input, char* dest);
  * @param input chars
  * @return uint32
  */
-uint32_t charsToInt32(char* input);
+uint32_t charsToInt32(const char* input);
 
 /** @brief Maximal buffer size */
 const int MAXLEN = 1000;

@@ -37,7 +37,7 @@ public:
      * @param buffer
      * @param length
      */
-    virtual void onMessage(unsigned source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned source, const char* buffer, unsigned length);
 
     /**
      * @brief isFull Checks if maximal sequence number was reached

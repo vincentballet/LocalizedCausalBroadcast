@@ -1,6 +1,6 @@
 #include "receiver.h"
 
-void Receiver::deliverToAll(unsigned source, unsigned logical_source, char *message, unsigned length)
+void Receiver::deliverToAll(unsigned source, unsigned logical_source, const char* message, unsigned length)
 {
     vector<Target*>::iterator it;
     for(it = targets.begin(); it != targets.end(); it++)
@@ -10,7 +10,7 @@ void Receiver::deliverToAll(unsigned source, unsigned logical_source, char *mess
     }
 }
 
-void Receiver::deliverToAll(unsigned source, char *message, unsigned length)
+void Receiver::deliverToAll(unsigned source, const char* message, unsigned length)
 {
     vector<Target*>::iterator it;
     for(it = targets.begin(); it != targets.end(); it++)

@@ -5,7 +5,7 @@
 
 // Protocol: first 4 bytes: physical source, then bytes
 
-void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_source, char *buffer, unsigned length)
+void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length)
 {
     // string with the content
     string content(buffer, length);
@@ -51,7 +51,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     tryDeliverAll();
 }
 
-void UniformReliableBroadcast::broadcast(char *message, unsigned length, unsigned source)
+void UniformReliableBroadcast::broadcast(const char* message, unsigned length, unsigned source)
 {
     // beginning of critical section
     m.lock();
@@ -140,10 +140,10 @@ bool UniformReliableBroadcast::tryDeliver()
 #ifdef URB_DEBUG
         // log BEB deliver
         stringstream ss;
-        ss << "urbd " << source << " " << charsToInt32((char*) message.c_str() + 4);
+        ss << "urbd " << source << " " << charsToInt32(message.c_str() + 4);
         memorylog->log(ss.str());
 #endif
-        deliverToAll(source, (char*) message.c_str(), message.length());
+        deliverToAll(source, message.c_str(), message.length());
     }
 
     // return true if there was a message delivered (therefore one more loop might be required)
@@ -165,6 +165,7 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
     // adding this object as the target
     b->addTarget(this);
 
+#ifdef NO_PONG_DEAD_MS
     // creating failure detectors
     vector<PerfectLink*>::iterator it;
     for(it = links.begin(); it != links.end(); it++)
@@ -173,4 +174,5 @@ UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broad
         // adding failure detector for a link
         FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), NO_PONG_DEAD_MS, this);
     }
+#endif
 }

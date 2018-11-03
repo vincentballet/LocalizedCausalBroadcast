@@ -27,7 +27,7 @@ public:
      * @param buffer The message in memory
      * @param length The message length
      */
-    virtual void onMessage(unsigned source, unsigned logical_source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length);
 
     /**
      * @brief onMessage Called when new message is available
@@ -35,7 +35,7 @@ public:
      * @param buffer The message in memory
      * @param length The message length
      */
-    virtual void onMessage(unsigned source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned source, const char* buffer, unsigned length);
 };
 
 #endif // TARGET_H

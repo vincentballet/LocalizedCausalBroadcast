@@ -32,7 +32,7 @@ private:
      * @param maxlen Maximal length to receive
      * @return Number of bytes received
      */
-    virtual int receive(char *data, int maxlen);
+    virtual int receive(char* data, int maxlen);
 
     /**
      * @brief receiveLoop Starts the receive thread

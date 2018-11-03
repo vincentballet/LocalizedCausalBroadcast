@@ -24,10 +24,10 @@ protected:
     int this_process;
 
     /// @brief Deliver a message to all targets with logical source
-    void deliverToAll(unsigned source, unsigned logical_source, char* message, unsigned length);
+    void deliverToAll(unsigned source, unsigned logical_source, const char* message, unsigned length);
 
     /// @brief Deliver a message to all targets
-    void deliverToAll(unsigned source, char* message, unsigned length);
+    void deliverToAll(unsigned source, const char* message, unsigned length);
 public:
     /**
      * @brief Receiver constructor

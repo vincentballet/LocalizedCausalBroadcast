@@ -60,10 +60,10 @@ private:
 
 protected:
     /// @brief Deliver a message to all targets with logical source
-    void deliverToAll(unsigned source, unsigned logical_source, char* queued_message, unsigned length);
+    void deliverToAll(unsigned source, unsigned logical_source, const char* queued_message, unsigned length);
 
     /// @brief Deliver a message to all targets
-    void deliverToAll(unsigned source, char* queued_message, unsigned length);
+    void deliverToAll(unsigned source, const char* queued_message, unsigned length);
 public:
     /**
      * @brief Receiver constructor

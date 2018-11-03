@@ -25,7 +25,7 @@ using std::get;
 // Protocol: <0x01> <SEQ 4 bytes> <Content>
 //           <0x02> <SEQ 4 bytes> -- means ACK
 
-void PerfectLink::onMessage(unsigned source, char *buf, unsigned len)
+void PerfectLink::onMessage(unsigned source, const char* buf, unsigned len)
 {
     // ignoring foreign messages
     if(source != s->getTarget()) return;
@@ -142,7 +142,7 @@ void *PerfectLink::sendLoop(void *arg)
         for (it = link->msgs.begin(); it != link->msgs.end(); it++)
         {
             // data
-            char* sdata = get<1>((*it).second);
+            const char* sdata = get<1>((*it).second);
 
             // data length
             int len = get<0>((*it).second);
@@ -212,7 +212,7 @@ Receiver *PerfectLink::getReceiver()
 }
 
 /// @todo bad name, does not send but adds message to send list
-void PerfectLink::send(char* buffer, int length)
+void PerfectLink::send(const char* buffer, int length)
 {
     // parameters check
     if (!(buffer && length > 0)){

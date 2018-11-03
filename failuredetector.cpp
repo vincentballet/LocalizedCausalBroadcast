@@ -8,7 +8,7 @@
 using std::cerr;
 using std::endl;
 
-void FailureDetector::onMessage(unsigned source, char *buffer, unsigned length)
+void FailureDetector::onMessage(unsigned source, const char* buffer, unsigned length)
 {
     // checking if the source is correct
     if(source != s->getTarget()) return;

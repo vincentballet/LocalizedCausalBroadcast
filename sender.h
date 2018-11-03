@@ -29,14 +29,14 @@ public:
      * @brief send
      * @param data Null-terminated string
      */
-    void send(char* data);
+    void send(const char* data);
 
     /**
      * @brief send array of bytes
      * @param data array of bytes
      * @param N length of the array
      */
-    virtual void send(char* data, int N);
+    virtual void send(const char* data, int N);
 
     /** @brief Get target ID */
     int getTarget();

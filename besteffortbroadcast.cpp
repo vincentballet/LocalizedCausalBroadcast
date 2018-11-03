@@ -2,7 +2,7 @@
 #include "common.h"
 #include <cstring>
 
-void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned length)
+void BestEffortBroadcast::onMessage(unsigned source, const char* buffer, unsigned length)
 {
     // log BEB deliver
 #ifdef BEB_DEBUG
@@ -15,7 +15,7 @@ void BestEffortBroadcast::onMessage(unsigned source, char *buffer, unsigned leng
     deliverToAll(source, charsToInt32(buffer), buffer + 4, length - 4);
 }
 
-void BestEffortBroadcast::broadcast(char *message, unsigned length, unsigned source)
+void BestEffortBroadcast::broadcast(const char* message, unsigned length, unsigned source)
 {
 #ifdef BEB_DEBUG
     // log BEB broadcast

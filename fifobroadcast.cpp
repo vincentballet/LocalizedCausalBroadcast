@@ -7,7 +7,7 @@
 using std::cout;
 using std::endl;
 
-void FIFOBroadcast::onMessage(unsigned logical_source, char *message, unsigned length)
+void FIFOBroadcast::onMessage(unsigned logical_source, const char* message, unsigned length)
 {
     // resulting parsed message
     FIFOMessage msg;
@@ -95,7 +95,7 @@ FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_p
     b->addTarget(this);
 }
 
-void FIFOBroadcast::broadcast(char *message, unsigned length, unsigned source)
+void FIFOBroadcast::broadcast(const char* message, unsigned length, unsigned source)
 {
     mtx_send.lock();
 

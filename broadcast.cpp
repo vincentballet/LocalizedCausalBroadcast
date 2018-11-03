@@ -1,11 +1,11 @@
 #include "broadcast.h"
 
-void Broadcast::onMessage(unsigned source, char *buffer, unsigned length)
+void Broadcast::onMessage(unsigned source, const char* buffer, unsigned length)
 {
     // do nothing
 }
 
-void Broadcast::broadcast(char *message, unsigned length, unsigned source)
+void Broadcast::broadcast(const char* message, unsigned length, unsigned source)
 {
     // do nothing
 }
@@ -16,7 +16,7 @@ Broadcast::Broadcast(unsigned this_process, vector<PerfectLink *> links) : Recei
     this->links = links;
 }
 
-void Broadcast::broadcastPublic(char *message, unsigned length)
+void Broadcast::broadcastPublic(const char* message, unsigned length)
 {
     // send message from this process
     broadcast(message, length, this_process);

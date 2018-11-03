@@ -55,7 +55,7 @@ public:
      * @param data array of bytes
      * @param N length of the array
      */
-    virtual void send(char* data, int N);
+    virtual void send(const char* data, int N);
 
     /**
      * @brief halt Stop the sender

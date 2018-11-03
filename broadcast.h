@@ -26,10 +26,10 @@ protected:
     vector<PerfectLink*> links;
 
     /// @brief React on a message with parsed source
-    virtual void onMessage(unsigned source, char* buffer, unsigned length);
+    virtual void onMessage(unsigned source, const char* buffer, unsigned length);
 
     /** @brief Broadcast a message with source other than this process */
-    virtual void broadcast(char* message, unsigned length, unsigned source);
+    virtual void broadcast(const char* message, unsigned length, unsigned source);
 public:
     /**
      * @brief Broadcast initialization
@@ -45,7 +45,7 @@ public:
      * @param message A string to be sent
      * @param length The length of the message in bytes
      */
-    void broadcastPublic(char* message, unsigned length);
+    void broadcastPublic(const char* message, unsigned length);
 
     /**
      * @brief validSource Check if a source is valid
