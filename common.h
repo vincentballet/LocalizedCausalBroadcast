@@ -30,25 +30,25 @@ using std::chrono::steady_clock;
 //#define UNIQUE_MESSAGES 1
 
 /** @macro Print messages stored in memory */
-#define INMEMORY_PRINT 1
+//#define INMEMORY_PRINT 1
 
 /// @macro Dump to a separate file immediately
-#define IMMEDIATE_FILE 1
+//#define IMMEDIATE_FILE 1
 
 /// @macro Debug perfectlink
-#define PERFECTLINK_DEBUG
+//#define PERFECTLINK_DEBUG
 
 /// @macro Debug UDP messages
-#define UDP_DEBUG
+//#define UDP_DEBUG
 
 /// @macro Debug BestEffortBroadcast
-#define BEB_DEBUG
+//#define BEB_DEBUG
 
 /// @macro Debug UniformReliableBroadcast
-#define URB_DEBUG
+//#define URB_DEBUG
 
 /// @macro Debug Failure Detector
-#define FAILUREDETECTOR_DEBUG
+//#define FAILUREDETECTOR_DEBUG
 
 /// @macro Delay after each UDPSender::send
 //#define UDPSENDER_DELAY_MS 0.5

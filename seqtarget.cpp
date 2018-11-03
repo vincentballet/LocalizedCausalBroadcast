@@ -38,7 +38,11 @@ bool SeqTarget::isFull()
     for(unsigned i = 1; i <= n; i++)
     {
         volatile unsigned seq = seqs[i];
-        full = full && (seq >= (maxSeq + i * 1000));
+        unsigned dest_seq = maxSeq;
+#ifdef UNIQUE_MESSAGES
+        dest_seq += i * 1000;
+#endif
+        full = full && (seq >= dest_seq);
     }
     return full;
 }
