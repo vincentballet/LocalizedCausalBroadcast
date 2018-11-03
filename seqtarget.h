@@ -20,7 +20,10 @@ class SeqTarget : public Target
     int maxSeq;
 
     /// @brief Current sequence number
-    vector<int> seqs;
+    int* volatile seqs;
+
+    /// @brief Number of processes
+    int n;
 public:
     /**
      * @brief SeqTarget Accepts numbers as messages
@@ -42,6 +45,9 @@ public:
      * @return True if reached
      */
     bool isFull();
+
+    /** @brief Get received messages vector */
+    string describe();
 };
 
 #endif // SEQTARGET_H

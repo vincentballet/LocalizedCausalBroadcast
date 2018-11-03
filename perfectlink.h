@@ -61,7 +61,7 @@ private:
     static unsigned const TIMEOUT = 100000;
 
     /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec) */
-    static unsigned const TIMEOUT_MSG = 500;
+    static unsigned const TIMEOUT_MSG = 50000;
 
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;

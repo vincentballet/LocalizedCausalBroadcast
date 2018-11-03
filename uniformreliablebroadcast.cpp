@@ -57,7 +57,11 @@ void UniformReliableBroadcast::broadcast(char *message, unsigned length, unsigne
     m.lock();
 
     // adding message to pending
-    pending.insert(make_pair(string(message, length), source));
+    string content = string(message, length);
+    pending.insert(make_pair(content, source));
+
+    // adding myself as acknowledged
+    ack[content] = set<int>();
 
     // end of critical section
     m.unlock();

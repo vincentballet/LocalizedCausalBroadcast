@@ -9,7 +9,7 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # messages to send
-m = 200
+m = 2000
 
 # time to initialize
 wait_time = 5
@@ -26,9 +26,6 @@ membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('m
 # Counting processes
 n = len(membership)
 print('There are %d processes' % n)
-
-# Reading logs
-logs = {i: list(filter(lambda x : len(x) > 0, open('./da_proc_%d.out' % i, 'r').read().split('\n'))) for i in range(1, n + 1)}
 
 # writing down crashed processes
 open('crashed.log', 'w').write('')
@@ -75,6 +72,9 @@ for pid in pids:
 
 # waiting to finish
 sleep(wait_time)
+
+# Reading logs
+logs = {i: list(filter(lambda x : len(x) > 0, open('./da_proc_%d.out' % i, 'r').read().split('\n'))) for i in range(1, n + 1)}
 
 # counting messages sent
 messages = [[0 for y in range(n)] for x in range(n)]

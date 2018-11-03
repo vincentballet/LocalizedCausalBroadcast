@@ -61,6 +61,6 @@ bool BestEffortBroadcast::isClean()
     bool clean = true;
     vector<PerfectLink*>::iterator it;
     for(it = links.begin(); it != links.end(); it++)
-        clean &= (*it)->isClean();
+        clean = clean && (*it)->isClean();
     return clean;
 }

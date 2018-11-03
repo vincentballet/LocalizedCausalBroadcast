@@ -1,11 +1,10 @@
-#include <iostream>
+#include <stdio.h>
 #include "inmemorylog.h"
 #include "common.h"
 
-using std::cout;
 using std::endl;
 
-InMemoryLog::InMemoryLog(std::string destination_filename)
+InMemoryLog::InMemoryLog(int n, string destination_filename) : n(n)
 {
     // allocating memory
     buffer = new string[MAX_MESSAGES];
@@ -32,13 +31,14 @@ InMemoryLog::InMemoryLog(std::string destination_filename)
 void InMemoryLog::log(std::string content)
 {
     if(!active) return;
+    uint64_t time = TIME_MS_NOW();
 
 #ifdef INMEMORY_PRINT
-    cout << "LOG   | " << content << endl;
+    fprintf(stderr, "LOG %02d %07d| %lu %s\n", n, pthread_self(), time, content.c_str());
 #endif
 
 #ifdef IMMEDIATE_FILE
-    file_immediate << content << endl;
+    file_immediate << time << " " << content << endl;
 #endif
 
     // beginning of critical section
@@ -48,13 +48,13 @@ void InMemoryLog::log(std::string content)
     {
         // adding content to vector
         buffer[messages] = content;
-        timestamps[messages] = TIME_MS_NOW();
+        timestamps[messages] = time;
         messages++;
     }
     else
     {
         // WARNING: dropping message
-        cout << "Message Dropped: " << content << endl;
+        fprintf(stderr, "DROP   | %lu %s\n", time, content.c_str());
     }
 
     // end of critical section
@@ -79,7 +79,7 @@ void InMemoryLog::dump()
     }
 
     // logging end
-    cout << "END" << std::endl;
+    fprintf(stderr, "END\n");
     file << "END" << std::endl;
 
     file.close();

@@ -22,7 +22,7 @@ using std::chrono::steady_clock;
 #define max(x, y) ((x) < (y) ? (y) : (x))
 
 /** @macro Print messages stored in memory */
-//#define INMEMORY_PRINT 1
+#define INMEMORY_PRINT 1
 
 /// @macro Dump to a separate file immediately
 #define IMMEDIATE_FILE 1

@@ -27,9 +27,12 @@
 #include "seqtarget.h"
 #include "test.h"
 #include "pthread.h"
+#include <sys/types.h>
+#include <unistd.h>
 
 using std::string;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::stringstream;
 
@@ -131,9 +134,6 @@ static void *sig_thread(void *arg)
  */
 int main(int argc, char** argv)
 {
-    // creating in-memory log
-    memorylog = new InMemoryLog("da_proc_" + string(argv[1]) + ".out");
-
     // map signals to their handlers
 
     // temp variable
@@ -170,6 +170,12 @@ int main(int argc, char** argv)
     
     // obtaining n and membership file
     int n = atoi(argv[1]);
+
+    // creating in-memory log
+    memorylog = new InMemoryLog(n, "da_proc_" + string(argv[1]) + ".out");
+
+    // writing my PID
+    ofstream("da_proc_" + string(argv[1]) + ".pid", std::ios::out) << getpid() << endl;
 
     // copying membership filename
     string membership = argv[2];
@@ -276,16 +282,22 @@ int main(int argc, char** argv)
     while(true)
     {
         usleep(100000);
+        cerr << "Data" << endl;
+        cout << "Proc " << n << " got " << t.describe() << " messages" << endl;
+
         if(t.isFull())
         {
-            cout << "Received ALL messages" << endl;
+            stringstream ss, ss_fn;
+            ss << "Process " << n << " received all messages";
+            memorylog->log(ss.str());
+            cerr << "Allmsg" << endl;
 
             // writing a file
-            stringstream ss;
-            ss << "da_proc_" << n << ".recvall";
-            ofstream(ss.str(), std::ios::out) << "done";
+            ss_fn << "da_proc_" << n << ".recvall";
+            ofstream f(ss_fn.str(), std::ios::out);
+            f << "done";
+            f.close();
 
-            memorylog->log("Received ALL messages");
             while(true)
             {
                 usleep(100000);
