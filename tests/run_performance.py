@@ -38,9 +38,10 @@ pids = []
 os.system("rm *.recvall")
 
 # creating processes
-for i in range(n)[1:]:
+#for i in range(n)[1:]:
+for i in range(n):
   pids += [os.spawnlp(os.P_NOWAIT, './da_proc', 'da_proc', str(i + 1), 'membership', str(m))]
-pids += [int(open('da_proc_1.pid', 'r').read())]
+#pids += [int(open('da_proc_1.pid', 'r').read())]
 
 print("Created processes %s" % pids)
 

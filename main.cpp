@@ -32,7 +32,6 @@
 
 using std::string;
 using std::cout;
-using std::cerr;
 using std::endl;
 using std::stringstream;
 
@@ -286,16 +285,13 @@ int main(int argc, char** argv)
     // Waiting to be killed
     while(true)
     {
-        usleep(100000);
-        cerr << "Waiting..." << endl;
-        cout << "Proc " << n << " got " << t.describe() << " messages" << endl;
+        usleep(10000);
 
         if(t.isFull())
         {
             stringstream ss, ss_fn;
             ss << "Process " << n << " received all messages";
             memorylog->log(ss.str());
-            cerr << "Allmsg" << endl;
 
             // writing a file
             ss_fn << "da_proc_" << n << ".recvall";
@@ -306,7 +302,6 @@ int main(int argc, char** argv)
             while(true)
             {
                 usleep(100000);
-                cerr << "All received" << endl;
             }
         }
     }

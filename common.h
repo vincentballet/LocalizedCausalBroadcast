@@ -21,32 +21,32 @@ using std::chrono::steady_clock;
 /** @macro minimal of two numbers */
 #define max(x, y) ((x) < (y) ? (y) : (x))
 
-/** @macro Print messages stored in memory */
-#define INMEMORY_PRINT 1
-
-/// @macro Dump to a separate file immediately
-#define IMMEDIATE_FILE 1
-
 /// @macro Message = 1000 * sender + payload
 #define UNIQUE_MESSAGES 1
 
-/// @macro Current time in milliseconds
-#define TIME_MS_NOW() (std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count())
+/** @macro Print messages stored in memory */
+//#define INMEMORY_PRINT 1
+
+/// @macro Dump to a separate file immediately
+//#define IMMEDIATE_FILE 1
 
 /// @macro Debug perfectlink
-#define PERFECTLINK_DEBUG
+//#define PERFECTLINK_DEBUG
 
 /// @macro Debug UDP messages
-#define UDP_DEBUG
+//#define UDP_DEBUG
 
 /// @macro Debug BestEffortBroadcast
-#define BEB_DEBUG
+//#define BEB_DEBUG
 
 /// @macro Debug UniformReliableBroadcast
-#define URB_DEBUG
+//#define URB_DEBUG
 
 /// @macro Debug Failure Detector
 #define FAILUREDETECTOR_DEBUG
+
+/// @macro Delay after each UDPSender::send
+//#define UDPSENDER_DELAY_MS 0.5
 
 /**
  * @brief int32ToChars Convert unsigned int32 to chars
@@ -70,7 +70,7 @@ const int MAXLEN = 1000;
  */
 extern InMemoryLog* memorylog;
 
-/// @macro Delay after each UDPSender::send
-//#define UDPSENDER_DELAY_MS 0.5
+/// @macro Current time in milliseconds
+#define TIME_MS_NOW() (std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count())
 
 #endif // COMMON_H
