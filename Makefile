@@ -15,16 +15,14 @@ udpsender.o \
 fifobroadcast.o \
 inmemorylog.o \
 target.o \
-failuredetector.o \
-failuremonitor.o \
 byteprinter.o \
 broadcast.o \
 besteffortbroadcast.o \
-reliablebroadcast.o \
 seqtarget.o \
 test.o \
 uniformreliablebroadcast.o \
 threadedreceiver.o \
+threadedsender.o \
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 
