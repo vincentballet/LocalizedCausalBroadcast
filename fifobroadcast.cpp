@@ -11,7 +11,7 @@ void FIFOBroadcast::onMessage(unsigned logical_source, const char* message, unsi
 {
     // must have at least 4 bytes for seq num
     assert(length >= 4);
-    assert(logical_source <= links.size() + 1);
+    assert(logical_source <= senders.size() + 1);
 
     // obtaining the content
     string content(message + 4, length - 4);
@@ -76,7 +76,7 @@ void FIFOBroadcast::tryDeliverAll(unsigned sender)
     }
 }
 
-FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->links)
+FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
     // sending sequence number is initially 1
     send_seq_num = 1;
@@ -84,11 +84,11 @@ FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_p
     // allocating data for the buffer
     // n = |links| + 1
     // +1 for indexing from 1 instead of 0
-    buffer = new map<unsigned, string>[links.size() + 2];
+    buffer = new map<unsigned, string>[senders.size() + 2];
 
     // expecting to receive 1
-    vector<PerfectLink*>::iterator it;
-    for(it = links.begin(); it != links.end(); it++)
+    vector<Sender*>::iterator it;
+    for(it = senders.begin(); it != senders.end(); it++)
         recv_seq_num[(*it)->getTarget()] = 0;
     recv_seq_num[this_process] = 0;
 

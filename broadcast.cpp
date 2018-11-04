@@ -16,10 +16,11 @@ void Broadcast::broadcast(const char* message, unsigned length, unsigned source)
     cout << "Broadcast::broadcast(" << source << ", " << message[0] << ", " << length << ") not implemented!" << endl;
 }
 
-Broadcast::Broadcast(unsigned this_process, vector<PerfectLink *> links) : Receiver(this_process)
+Broadcast::Broadcast(unsigned this_process, vector<Sender *> senders, vector<Receiver *> receivers) :
+    Receiver(this_process)
 {
-    // saving perfect links
-    this->links = links;
+    this->senders = senders;
+    this->receivers = receivers;
 }
 
 void Broadcast::broadcastPublic(const char* message, unsigned length)
@@ -30,8 +31,8 @@ void Broadcast::broadcastPublic(const char* message, unsigned length)
 
 bool Broadcast::validSource(unsigned source)
 {
-    vector<PerfectLink*>::iterator it;
-    for(it = links.begin(); it != links.end(); it++)
+    vector<Sender*>::iterator it;
+    for(it = senders.begin(); it != senders.end(); it++)
     {
         if((*it)->getTarget() == source)
             return true;

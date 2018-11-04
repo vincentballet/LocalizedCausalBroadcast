@@ -80,21 +80,7 @@ bool UniformReliableBroadcast::canDeliver(pair<string, unsigned> content_source)
     if(ack.find(content_source) == ack.end()) return false;
 
     // otherwise must be acknowledged by > half of members (others + me)
-    return 2 * ack[content_source].size() > (links.size() + 1);
-}
-
-void UniformReliableBroadcast::onFailure(unsigned process)
-{
-    // destroying the perfect link
-    vector<PerfectLink*>::iterator pit;
-    for(pit = links.begin(); pit != links.end(); pit++)
-    {
-        if((*pit)->getTarget() == process)
-        {
-            // halting the perfect link on failure
-            (*pit)->halt();
-        }
-    }
+    return 2 * ack[content_source].size() > (senders.size() + 1);
 }
 
 bool UniformReliableBroadcast::tryDeliver()
@@ -152,26 +138,11 @@ bool UniformReliableBroadcast::tryDeliver()
     }
 }
 
-UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->links)
+UniformReliableBroadcast::UniformReliableBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
     // saving the underlying broadcast
     this->b = broadcast;
 
     // adding this object as the target
     b->addTarget(this);
-
-#ifdef NO_PONG_DEAD_MS
-    // creating failure detectors
-    vector<PerfectLink*>::iterator it;
-    for(it = links.begin(); it != links.end(); it++)
-    {
-        PerfectLink* link = *it;
-
-        // adding failure detector for a link
-        FailureDetector* detector = new FailureDetector(link->getSender(), link->getReceiver(), NO_PONG_DEAD_MS, this);
-
-        // saving the detector
-        detectors.push_back(detector);
-    }
-#endif
 }

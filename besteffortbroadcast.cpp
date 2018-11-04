@@ -25,7 +25,7 @@ void BestEffortBroadcast::broadcast(const char* message, unsigned length, unsign
 #endif
 
     // for loop over links
-    vector<PerfectLink*>::iterator it;
+    vector<Sender*>::iterator it;
 
     // delivering the message locally
     /// @todo How to ensure it's not delivered twice?
@@ -42,25 +42,21 @@ void BestEffortBroadcast::broadcast(const char* message, unsigned length, unsign
     memcpy(buffer + 4, message, min(length, MAXLEN - 4));
 
     // sending data to all perfect links
-    for(it = links.begin(); it != links.end(); it++)
+    for(it = senders.begin(); it != senders.end(); it++)
     {
         (*it)->send(buffer, length + 4);
     }
 }
 
-BestEffortBroadcast::BestEffortBroadcast(unsigned this_process, vector<PerfectLink *> links) :
-    Broadcast (this_process, links)
+BestEffortBroadcast::BestEffortBroadcast(unsigned this_process, vector<Sender *> senders, vector<Receiver *> receivers) :
+    Broadcast(this_process, senders, receivers)
 {
-    vector<PerfectLink*>::iterator it;
-    for(it = links.begin(); it != links.end(); it++)
+    vector<Receiver*>::iterator it;
+    for(it = receivers.begin(); it != receivers.end(); it++)
         (*it)->addTarget(this);
 }
 
 bool BestEffortBroadcast::isClean()
 {
-    bool clean = true;
-    vector<PerfectLink*>::iterator it;
-    for(it = links.begin(); it != links.end(); it++)
-        clean = clean && (*it)->isClean();
-    return clean;
+    return false;
 }

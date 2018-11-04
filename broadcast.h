@@ -8,8 +8,8 @@
 #define BROADCAST_H
 
 #include "receiver.h"
+#include "sender.h"
 #include "target.h"
-#include "perfectlink.h"
 
 class FIFOBroadcast;
 class ReliableBroadcast;
@@ -22,8 +22,11 @@ class Broadcast : public Receiver, public Target
     friend class ReliableBroadcast;
     friend class UniformReliableBroadcast;
 protected:
-    /// @brief A vector of Perfect Links (destinations)
-    vector<PerfectLink*> links;
+    /// @brief A vector of Senders
+    vector<Sender*> senders;
+
+    /// @brief A vector of Senders
+    vector<Receiver*> receivers;
 
     /// @brief React on a message with parsed source
     virtual void onMessage(unsigned source, const char* buffer, unsigned length);
@@ -34,9 +37,11 @@ public:
     /**
      * @brief Broadcast initialization
      * @param this_process_id ID of the current process
-     * @param links Vector of PerfectLink pointers connected to members
+     * @param senders Sender objects
+     * @param receivers Receivers objects
      */
-    Broadcast(unsigned this_process, vector<PerfectLink*> links);
+    Broadcast(unsigned this_process, vector<Sender*> senders,
+              vector<Receiver*> receivers);
 
     virtual ~Broadcast() {}
 

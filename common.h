@@ -21,11 +21,6 @@ using std::chrono::steady_clock;
 /** @macro minimal of two numbers */
 #define max(x, y) ((x) < (y) ? (y) : (x))
 
-/// @macro Time in ms after which the proces is considered crashed
-/// If there were no responses from it
-/// Not running failure detector if not defined
-#define NO_PONG_DEAD_MS 5000
-
 /// @macro Message = 1000 * sender + payload
 //#define UNIQUE_MESSAGES 1
 

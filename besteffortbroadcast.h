@@ -25,9 +25,11 @@ public:
     /**
      * @brief Broadcast initialization
      * @param this_process_id ID of the current process
-     * @param links Vector of PerfectLink pointers connected to members
+     * @param senders Senders list
+     * @param receivers Receivers list
      */
-    BestEffortBroadcast(unsigned this_process, vector<PerfectLink*> links);
+    BestEffortBroadcast(unsigned this_process, vector<Sender*> senders,
+                        vector<Receiver*> receivers);
 
     /**
      * @brief isClean

@@ -22,11 +22,11 @@
 #include "byteprinter.h"
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
-#include "reliablebroadcast.h"
 #include "uniformreliablebroadcast.h"
 #include "seqtarget.h"
 #include "test.h"
 #include "pthread.h"
+#include "threadedsender.h"
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -205,6 +205,12 @@ int main(int argc, const char** argv)
     // array with perfect links
     vector<PerfectLink*> links;
 
+    // senders for the broadcast
+    vector<Sender*> br_senders;
+
+    // receivers for the broadcast
+    vector<Receiver*> br_receivers;
+
     // saving global sender/receiver
     global_receiver = &r;
     global_senders = &senders;
@@ -220,6 +226,10 @@ int main(int argc, const char** argv)
             PerfectLink* link = new PerfectLink(sender, &r);
             senders.push_back(sender);
             links.push_back(link);
+
+            // creating objects for broadcast
+            br_receivers.push_back(link);
+            br_senders.push_back(new ThreadedSender(link));
         }
     }
     
@@ -242,10 +252,7 @@ int main(int argc, const char** argv)
     // for SIGUSR2. Otherwise can lose messages!
 
     // creating the best effort broadcast
-    BestEffortBroadcast broadcast2(n, links);
-
-    // creating broadcast object
-    //ReliableBroadcast broadcast1(&broadcast2, 5000);
+    BestEffortBroadcast broadcast2(n, br_senders, br_receivers);
 
     // creating UR broadcast
     UniformReliableBroadcast broadcast1(&broadcast2);

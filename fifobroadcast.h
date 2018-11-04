@@ -15,7 +15,6 @@
 #include "membership.h"
 #include "udpreceiver.h"
 #include "broadcast.h"
-#include "reliablebroadcast.h"
 #include "common.h"
 #include <mutex>
 
@@ -62,7 +61,6 @@ public:
     /**
      * @brief FIFOBroadcast initialization
      * @param this_process_id ID of the current process
-     * @param links Vector of PerfectLink pointers connected to members     
      * @param timeout_ms Timeout for failure detector
      */
     FIFOBroadcast(Broadcast* broadcast);

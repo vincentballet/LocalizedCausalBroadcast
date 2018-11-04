@@ -12,7 +12,10 @@
 #include <map>
 #include <mutex>
 #include "broadcast.h"
+#include "failuredetector.h"
 
+using std::mutex;
+using std::map;
 using std::map;
 using std::string;
 using std::pair;
@@ -21,7 +24,7 @@ using std::set;
 /** @classs This class implements Uniform Reliable Broadcast
  * With an assumption that at least half of the processes is correct
  */
-class UniformReliableBroadcast : public Broadcast, public FailureMonitor
+class UniformReliableBroadcast : public Broadcast
 {
 private:
     /// @brief Delivered messages
@@ -42,9 +45,6 @@ private:
 
     /** @brief Broadcast a message with source other than this process */
     virtual void broadcast(const char* message, unsigned length, unsigned source);
-
-    /** @brief Called by failure detector */
-    virtual void onFailure(unsigned process);
 
     /// @brief Underlying broadcast object
     Broadcast* b;
