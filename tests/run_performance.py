@@ -3,13 +3,13 @@ import numpy as np
 from time import sleep, time
 
 # Showing help if arguments are incorrect
-if len(sys.argv) < 2:
-    print("Usage: %s dir_with_da_proc" % sys.argv[0])
+if len(sys.argv) < 4:
+    print("Usage: %s dir_with_da_proc m=500 n=5" % sys.argv[0])
     print(" The directory must contain the membership file and also the da_proc executable")
     sys.exit(0)
 
 # messages to send
-m = 500
+m = int(sys.argv[2])
 
 # time to initialize
 wait_time = 5
@@ -21,7 +21,10 @@ d = sys.argv[1]
 os.chdir(d)
 
 f = open('membership', 'w')
-n = 5
+n = int(sys.argv[3])
+
+print('Using %d messages and %d processes' % (m, n))
+
 f.write('%d\n' % n)
 for i in range(1, n + 1):
   f.write('%d 127.0.0.1 110%02d\n' % (i, i))
