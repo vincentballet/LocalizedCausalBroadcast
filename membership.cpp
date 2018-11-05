@@ -20,9 +20,7 @@ Membership::Membership(std::string file)
         unsigned n, idx;
 
         // number of process, IP address, port
-        //handle >> idx >> s >> n;
-        handle >> s >> n;
-        idx = i + 1;
+        handle >> idx >> s >> n;
 
         // adding process id
         processes.push_back(idx);
