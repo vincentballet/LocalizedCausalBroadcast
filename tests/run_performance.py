@@ -8,6 +8,9 @@ if len(sys.argv) < 4:
     print(" The directory must contain the membership file and also the da_proc executable")
     sys.exit(0)
 
+# original working directory
+orig_dir = os.getcwd()
+
 # messages to send
 m = int(sys.argv[2])
 
@@ -103,3 +106,7 @@ print('Sent messages: %.1f +- %.1f, had to send %d' % (np.mean(messages), np.std
 # printing stats
 time_delta = time_end - time_start
 print("Sent %d messages over %d machines and received all in %.1f seconds, throughput = %.1f" % (m, n, time_delta, (m * n) / time_delta))
+
+# also writing time to a file in ORIGINAL place
+os.chdir(orig_dir)
+open('time.out', 'w').write(str(time_delta) + '\n')
