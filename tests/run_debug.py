@@ -24,11 +24,11 @@ f = open('membership', 'w')
 n = 2
 f.write('%d\n' % n)
 for i in range(1, n + 1):
-  f.write('127.0.0.1 110%02d\n' % i)
+  f.write('%d 127.0.0.1 110%02d\n' % (i, i))
 f.close()
 
 # Reading membership file
-membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:])))
+membership = list(map(lambda x : x.split()[1:], filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:])))
 
 # Counting processes
 n = len(membership)
