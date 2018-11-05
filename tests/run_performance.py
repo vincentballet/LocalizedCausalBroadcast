@@ -15,7 +15,7 @@ orig_dir = os.getcwd()
 m = int(sys.argv[2])
 
 # time to initialize
-wait_time = 5
+wait_time = 2
 
 # Obtaining directory name
 d = sys.argv[1]
