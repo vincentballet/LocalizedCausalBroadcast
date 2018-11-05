@@ -77,8 +77,9 @@ for p in correct:
 
 # BEB2: No duplication
 for p in range(1, n + 1):
-    delivered_by_p = delivered_by[p]
-    soft_assert(len(delivered_by_p) == len(set(delivered_by_p)), "BEB2 Violated. Process %d delivered some messages twice" % p)
+  for s in range(1, n + 1):
+    delivered_by_p_f_s = delivered_by_from[(p, s)]
+    soft_assert(len(delivered_by_p_f_s) == len(set(delivered_by_p_f_s)), "BEB2 Violated. Process %d delivered some messages from %d twice" % (p, s))
 
 # BEB3: No creation
 for p in range(1, n + 1):
