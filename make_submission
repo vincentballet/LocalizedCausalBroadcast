@@ -4,14 +4,21 @@
 
 id=24
 
-# removes .o
-make clean
+# check that the code compiles
+make -j10
+
+# removing old archive
+rm $id.zip
 
 # removes log files
 rm *.out
 
-# removes executable
-rm da_proc
+# creating the directory and copying data inside
+mkdir $id
+cp *.h *.cpp Makefile $id/
 
 # zip to submit
-zip -r ${id}.zip . -x *.git* *.vscode* *.DS_Store*
+zip -r $id.zip $id
+
+# removing the directory
+rm -rf $id
