@@ -24,8 +24,10 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     file_immediate.open(destination_filename + ".nowait", std::ios::out);
 #endif
 
+#ifdef INMEMORY_PRINT
     // Logging the beginning
     log("BEGINNING");
+#endif
 }
 
 void InMemoryLog::log(std::string content)
@@ -78,9 +80,11 @@ void InMemoryLog::dump()
         file_ts << timestamps[i] << " " << buffer[i] << std::endl;
     }
 
+#ifdef INMEMORY_PRINT
     // logging end
     fprintf(stderr, "END\n");
     file << "END" << std::endl;
+#endif
 
     file.close();
 }
