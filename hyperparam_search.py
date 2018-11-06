@@ -8,7 +8,7 @@ import subprocess
 
 def generate_perfectlinkh(t, m):
     with open("perfectlink_backup.h", "r") as b, open("perfectlink.h", "w") as f:
-        for line in b:
+        for line.decode('utf-8') in b:
             if 'TIMEOUT_MSG' in line:
                 f.write('    static unsigned const TIMEOUT_MSG = {};\n'.format(t))
             elif 'MAX_IN_QUEUE' in line:
