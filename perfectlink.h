@@ -74,7 +74,7 @@ private:
     void waitForNewMessagesOrTimeout();
 
     /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec) */
-    static unsigned const TIMEOUT_MSG = 500;
+    static unsigned const TIMEOUT_MSG = 1000;
 
     /** @brief Maximal number of messages in the send queue (w/o ack)
      * Or the WINDOW SIZE */
