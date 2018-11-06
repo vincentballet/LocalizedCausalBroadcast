@@ -21,4 +21,4 @@ for m in ms:
         results[m].append(get_time(m, n))
 
 # saving data
-open('results_m_bigger.pkl', 'wb').write(pickle.dumps(results))
+open('results_m_beb.pkl', 'wb').write(pickle.dumps(results))
