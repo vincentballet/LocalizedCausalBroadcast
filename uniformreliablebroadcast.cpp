@@ -28,24 +28,27 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
 
     // this message is also an acknowledgement of itself
     if(ack.find(content_source) == ack.end())
+    {
+        need_broadcast = true;
         ack[content_source] = set<unsigned>();
+    }
+
+    // adding source as an acker
     ack[content_source].insert(source);
 
     // adding myself as an acker
     ack[content_source].insert(this_process);
+
+    // can deliver => adding to the set
+    if(canDeliver(content_source)) {
+        ready_for_delivery.insert(content_source);
+    }
 
 #ifdef URB_DEBUG
     stringstream ss;
     ss << "urback " << charsToInt32(buffer + 4) << " " << source;
     memorylog->log(ss.str());
 #endif
-
-    // if message is not pending, add it there and relay
-    if(pending.find(content_source) == pending.end())
-    {
-        pending.insert(content_source);
-        need_broadcast = true;
-    }
 
     // end of critical section
     m.unlock();
@@ -54,7 +57,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
     if(need_broadcast)
         b->broadcast(buffer, length, logical_source);
 
-    // ack and pending changed, checking if can deliver something now
+    // delivering all messages from the ready_for_delivery array
     tryDeliver();
 }
 
@@ -65,7 +68,23 @@ void UniformReliableBroadcast::broadcast(const char* message, unsigned length, u
 
     // adding message to pending
     string content = string(message, length);
-    pending.insert(make_pair(content, source));
+
+    // content + source
+    pair<string, unsigned> content_source = make_pair(content, source);
+
+    // if the message was sent previously, doing nothing now
+    if(ack.find(content_source) != ack.end())
+    {
+        m.unlock();
+        return;
+    }
+
+    // adding to the ACKed array
+    ack[content_source] = set<unsigned>();
+
+    // adding source and this process as ackers (if they are different)
+    ack[content_source].insert(source);
+    ack[content_source].insert(this_process);
 
     // end of critical section
     m.unlock();
@@ -76,9 +95,6 @@ void UniformReliableBroadcast::broadcast(const char* message, unsigned length, u
 
 bool UniformReliableBroadcast::canDeliver(pair<string, unsigned> content_source)
 {
-    // if message was never acknowledged, can't deliver it
-    if(ack.find(content_source) == ack.end()) return false;
-
     // otherwise must be acknowledged by > half of members (others + me)
     return 2 * ack[content_source].size() > (senders.size() + 1);
 }
@@ -95,29 +111,20 @@ bool UniformReliableBroadcast::tryDeliver()
     vector<pair<string, unsigned>> to_deliver;
 
     // loop over pending
-    for(it = pending.begin(); it != pending.end();)
+    for(it = ready_for_delivery.begin(); it != ready_for_delivery.end(); it++)
     {
-        // filling in the buffers
-        string message = (*it).first;
-        unsigned source = (*it).second;
+        // adding to the local buffer
+        to_deliver.push_back(*it);
 
-        // if not delivered and can deliver
-        if(delivered.find(*it) == delivered.end() && canDeliver(*it))
-        {
-            // marking message as delivered
-            delivered.insert(*it);
+        // marking as delivered
+        delivered.insert(*it);
 
-            // saving the message
-            to_deliver.push_back(make_pair(message, source));
-
-            // no need to keep it in ACK
-            ack.erase(*it);
-
-            // erasing message from pending
-            it = pending.erase(it);
-        }
-        else it++;
+        // no need to keep it in ACK
+        ack.erase(*it);
     }
+
+    // clearing the ready_for_delivery array
+    ready_for_delivery.clear();
 
     // end of critical section
     m.unlock();

@@ -47,7 +47,7 @@ open('crashed.log', 'w').write('')
 pids = []
 
 # killing old processes
-#os.system("killall -9 da_proc")
+os.system("killall -9 da_proc")
 os.system("rm *.recvall")
 
 # creating processes

@@ -7,10 +7,10 @@ from get_time import get_time
 repetitions = range(5)
 
 # n processes
-n = 5
+n = 3
 
 # messages
-ms = np.arange(1, 20000, 3000)
+ms = np.arange(1, 50000, 5000)
 
 # results: map m messages -> array over repetitions
 results = {m: [] for m in ms}
@@ -21,4 +21,4 @@ for m in ms:
         results[m].append(get_time(m, n))
 
 # saving data
-open('results_m.pkl', 'wb').write(pickle.dumps(results))
+open('results_m_fifo.pkl', 'wb').write(pickle.dumps(results))

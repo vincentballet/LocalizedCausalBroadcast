@@ -10,7 +10,7 @@ repetitions = range(5)
 ns = list(range(2, 7))
 
 # messages
-m = 500
+m = 10000
 
 # results: map n proc -> array over repetitions
 results = {n: [] for n in ns}

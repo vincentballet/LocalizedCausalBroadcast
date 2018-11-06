@@ -13,6 +13,11 @@ SeqTarget::SeqTarget(unsigned n, unsigned maxSeq) : maxSeq(maxSeq), n(n)
         seqs[i] = 0;
 }
 
+void SeqTarget::onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length)
+{
+    onMessage(logical_source, buffer, length);
+}
+
 void SeqTarget::onMessage(unsigned logical_source, const char* buffer, unsigned length)
 {
     //fprintf(stderr, "Proc %d SeqTarget::onMessage(%u %d %d)\n", n, logical_source, charsToInt32(buffer), length);

@@ -38,7 +38,10 @@ using std::stringstream;
 // wait for SIGUSR?
 bool do_wait = true;
 
+// number of messages to send
 unsigned m = 10;
+
+// got a command to send data already?
 volatile bool sigusr_received = false;
 
 // listening on our port
@@ -51,7 +54,7 @@ vector<UDPSender*> *global_senders;
  * @brief Handle the SIGUSR2 signal
  * @param signal_num must be SIGUSR2
  */
-void onSignalUsr1(int signal_num)
+void onSignalUsr2(int signal_num)
 {
     if(signal_num != SIGUSR2) return;
 	
@@ -120,7 +123,7 @@ static void *sig_thread(void *arg)
         printf("Signal handling thread got signal %d\n", sig);
 
         // if signal is not for this function, it should ignore it
-        onSignalUsr1(sig);
+        onSignalUsr2(sig);
         onSignalInt(sig);
         onSignalTerm(sig);
     }
@@ -267,7 +270,7 @@ int main(int argc, const char** argv)
     // starting listening to signals
     s = pthread_create(&signal_thread, NULL, &sig_thread, (void *) &set);
 
-    // Waiting for sigusr1
+    // Waiting for sigusr2
     while(do_wait && sigusr_received == false)
     {
         usleep(10000);

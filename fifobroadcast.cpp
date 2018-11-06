@@ -64,6 +64,16 @@ void FIFOBroadcast::tryDeliverAll(unsigned sender)
     for(it = buffer[sender].begin(); it != buffer[sender].end(); )
     {
         unsigned seq_num = (*it).first;
+
+        // some sequence number is greater than we need
+        // since they only grow, there cannot be a delivery at this point
+        // because stl::map is ordering the keys in ASCENDING order
+        // http://www.cplusplus.com/reference/map/map/begin/
+        if(recv_seq_num[sender] + 1 < seq_num)
+        {
+            break;
+        }
+
         string content = (*it).second;
 
         // if can deliver, erasing current element

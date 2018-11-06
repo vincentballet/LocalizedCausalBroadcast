@@ -12,7 +12,6 @@
 #include <map>
 #include <mutex>
 #include "broadcast.h"
-#include "failuredetector.h"
 
 using std::mutex;
 using std::map;
@@ -34,7 +33,7 @@ private:
 
     /// @brief Received but not yet delivered
     /// (content, source)
-    set<pair<string, unsigned> > pending;
+    set<pair<string, unsigned> > ready_for_delivery;
 
     /// @brief Acknowledged messages
     /// (content, source) -> process
@@ -57,9 +56,6 @@ private:
 
     /// @brief Mutex for syncronization
     mutex m;
-
-    /// @brief Failure detectors
-    vector<FailureDetector*> detectors;
 public:
     /**
      * @brief Broadcast initialization

@@ -18,7 +18,6 @@
 #include "sender.h"
 #include "receiver.h"
 #include "threadedreceiver.h"
-#include "failuredetector.h"
 #include <semaphore.h>
 
 using std::mutex;

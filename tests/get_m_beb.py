@@ -10,7 +10,7 @@ repetitions = range(5)
 n = 3
 
 # messages
-ms = np.arange(1000, 5000, 1000)
+ms = np.arange(1, 2000000, 500000)
 
 # results: map m messages -> array over repetitions
 results = {m: [] for m in ms}
@@ -21,4 +21,4 @@ for m in ms:
         results[m].append(get_time(m, n))
 
 # saving data
-open('results_m_bigger.pkl', 'wb').write(pickle.dumps(results))
+open('results_m_beb.pkl', 'wb').write(pickle.dumps(results))
