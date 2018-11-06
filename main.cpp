@@ -236,7 +236,7 @@ int main(int argc, const char** argv)
     // if last argument is test, run tests
     string test = argv[argc];
     if (test.compare("test") == 0){
-        testPerfectLink(n, links);
+        testPerfectLink(n, m, links);
         sleep(3);
         writeOutputAndHalt();
         return 0;    
