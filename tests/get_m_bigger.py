@@ -10,7 +10,7 @@ repetitions = range(5)
 n = 3
 
 # messages
-ms = np.arange(1000, 5000, 1000)
+ms = np.arange(1000, 10000, 1000)
 
 # results: map m messages -> array over repetitions
 results = {m: [] for m in ms}
