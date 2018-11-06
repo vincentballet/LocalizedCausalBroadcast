@@ -7,12 +7,12 @@ import pandas as pd
 import subprocess
 
 def generate_perfectlinkh(t, m):
-    with open("perfectlink_backup.h", "r", encoding="utf-8") as b, open("perfectlink.h", "w") as f:
+    with open("perfectlink_config_backup.cpp", "r", encoding="utf-8") as b, open("perfectlink_config.cpp", "w", encoding="utf-8") as f:
         for line in b:
             if 'TIMEOUT_MSG' in line:
-                f.write('    static unsigned const TIMEOUT_MSG = {};\n'.format(t))
+                f.write('const unsigned PerfectLink::TIMEOUT_MSG = {};\n'.format(t))
             elif 'MAX_IN_QUEUE' in line:
-                f.write('    static unsigned const MAX_IN_QUEUE = {};\n'.format(m))
+                f.write('const unsigned PerfectLink::MAX_IN_QUEUE = {};\n'.format(m))
             else :
                 f.write(line)
 
@@ -32,16 +32,16 @@ def main():
     for idx, x in enumerate(itertools.product(timeouts, maxinqueues)):
         print("{}/{} Running for TimeOut={}, MaxInQueue={}".format(idx+1, tot_runs, x[0], x[1])) 
         generate_perfectlinkh(x[0], x[1])
+        call(["make -j4"])
         run_times = []
         for i in range(runs):
             print("\tRun " + str(i))
-            call(["make"])
             call(["python", "tests/run_performance.py", ".", str(m), str(n)])
             with open("time.out", "r") as f:
                 run_times.append(float(f.readline()))
         df.loc[idx] = [x[0], x[1], run_times[0], run_times[1], run_times[2], np.mean(run_times)]
 
-    print(df.sort_values(by=['t_mean']))
+    df.to_csv('results_hs.csv')
 
 if __name__ == '__main__':
     main()
