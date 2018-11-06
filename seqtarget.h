@@ -34,6 +34,15 @@ public:
     /**
      * @brief onMessage Print message
      * @param source from 1..n
+     * @param logical_source from 1..n
+     * @param buffer
+     * @param length
+     */
+    virtual void onMessage(unsigned source, unsigned logical_source, const char* buffer, unsigned length);
+
+    /**
+     * @brief onMessage Print message
+     * @param source from 1..n
      * @param buffer
      * @param length
      */
