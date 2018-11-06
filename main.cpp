@@ -176,8 +176,10 @@ int main(int argc, const char** argv)
     // creating in-memory log
     memorylog = new InMemoryLog(n, "da_proc_" + string(argv[1]) + ".out");
 
+#ifdef DEBUG_FILES
     // writing my PID
     ofstream("da_proc_" + string(argv[1]) + ".pid", std::ios::out) << getpid() << endl;
+#endif
 
     // copying membership filename
     string membership = argv[2];
