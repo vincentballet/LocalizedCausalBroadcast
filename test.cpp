@@ -47,10 +47,10 @@ void runPerfectLink(PerfectLink* l, int nbr){
 }
 
 
-void testPerfectLink(unsigned n, vector<PerfectLink*> links)
+void testPerfectLink(unsigned n, unsigned m, vector<PerfectLink*> links)
 {
         
-    int nMessages = 23;
+    int nMessages = m;
 
     vector<PerfectLink*>::iterator it;
     for(it = links.begin(); it != links.end(); it++)
