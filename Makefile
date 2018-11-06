@@ -15,7 +15,6 @@ udpsender.o \
 fifobroadcast.o \
 inmemorylog.o \
 target.o \
-byteprinter.o \
 broadcast.o \
 besteffortbroadcast.o \
 seqtarget.o \
