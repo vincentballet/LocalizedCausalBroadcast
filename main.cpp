@@ -74,9 +74,10 @@ void writeOutputAndHalt()
     // stop networking
     global_receiver->halt();
     vector<UDPSender*>::iterator it;
-    for(it = global_senders->begin(); it != global_senders->end(); it++)
+    for(it = global_senders->begin(); it != global_senders->end(); it++){
         (*it)->halt();
-
+    }
+    
     cout << "Writing output..." << endl;
 
     // writing output file
