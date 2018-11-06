@@ -14,7 +14,7 @@
 #include "udpsender.h"
 #include "udpreceiver.h"
 
-void testPerfectLink(unsigned n, vector<PerfectLink*> links);
+void testPerfectLink(unsigned n, unsigned m, vector<PerfectLink*> links);
 void testUDP(unsigned n, vector<UDPSender*> senders, UDPReceiver* receiver);
 
 #endif /* test_h */

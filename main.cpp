@@ -19,7 +19,6 @@
 #include <sstream>
 #include <list>
 #include "common.h"
-#include "byteprinter.h"
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
 #include "uniformreliablebroadcast.h"
