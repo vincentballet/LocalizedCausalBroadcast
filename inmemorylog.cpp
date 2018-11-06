@@ -16,8 +16,10 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     // opening the file
     file.open(destination_filename, std::ios::out);
 
+#ifdef DEBUG_FILES
     // opening the file
     file_ts.open(destination_filename + ".ts", std::ios::out);
+#endif
 
 #ifdef IMMEDIATE_FILE
     // opening the immediate file output
@@ -77,7 +79,10 @@ void InMemoryLog::dump()
     {
         // writing data
         file << buffer[i] << std::endl;
+
+#ifdef DEBUG_FILES
         file_ts << timestamps[i] << " " << buffer[i] << std::endl;
+#endif
     }
 
 #ifdef INMEMORY_PRINT

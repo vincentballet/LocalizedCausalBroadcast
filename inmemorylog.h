@@ -7,6 +7,8 @@
 #ifndef INMEMORYLOG_H
 #define INMEMORYLOG_H
 
+class ImMemoryLog;
+
 #include <string>
 #include <fstream>
 #include <mutex>

@@ -235,7 +235,8 @@ int main(int argc, const char** argv)
             br_senders.push_back(new ThreadedSender(link));
         }
     }
-    
+
+#ifdef DEBUG_TEST
     // if last argument is test, run tests
     string test = argv[argc];
     if (test.compare("test") == 0){
@@ -250,6 +251,7 @@ int main(int argc, const char** argv)
         writeOutputAndHalt();
         return 0;
     }
+#endif
     
     // WARNING: MUST set up everything BEFORE waiting
     // for SIGUSR2. Otherwise can lose messages!
@@ -298,6 +300,7 @@ int main(int argc, const char** argv)
     {
         usleep(10000);
 
+#ifdef DEBUG_FILES
         if(t.isFull())
         {
             stringstream ss, ss_fn;
@@ -315,6 +318,7 @@ int main(int argc, const char** argv)
                 usleep(100000);
             }
         }
+#endif
     }
 
     // no return here
