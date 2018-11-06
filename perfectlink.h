@@ -73,12 +73,14 @@ private:
     /** @brief Wait for an ACK */
     void waitForNewMessagesOrTimeout();
 
-    /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec) */
-    static unsigned const TIMEOUT_MSG = 1000;
+    /** @brief Timeout between retries for 1 message in milliseconds (1e-3 sec)
+     * @see perfectlink_config.cpp */
+    static unsigned const TIMEOUT_MSG;
 
     /** @brief Maximal number of messages in the send queue (w/o ack)
-     * Or the WINDOW SIZE */
-    static unsigned const MAX_IN_QUEUE = 50;
+     * Or the WINDOW SIZE
+     * @see perfectlink_config.cpp */
+    static unsigned const MAX_IN_QUEUE;
 
     /** @brief A mutex to be used by the PerfectLink class */
     mutex mtx;

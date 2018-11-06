@@ -22,6 +22,7 @@ test.o \
 uniformreliablebroadcast.o \
 threadedreceiver.o \
 threadedsender.o \
+perfectlink_config.o
 
 	$(CC) $^ -o$(MYPROGRAM) -lpthread
 
