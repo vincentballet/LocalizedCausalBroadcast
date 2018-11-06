@@ -12,7 +12,6 @@
 #include <map>
 #include <mutex>
 #include "broadcast.h"
-#include "failuredetector.h"
 
 using std::mutex;
 using std::map;
@@ -57,9 +56,6 @@ private:
 
     /// @brief Mutex for syncronization
     mutex m;
-
-    /// @brief Failure detectors
-    vector<FailureDetector*> detectors;
 public:
     /**
      * @brief Broadcast initialization
