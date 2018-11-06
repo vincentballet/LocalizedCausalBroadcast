@@ -17,10 +17,10 @@ def generate_perfectlinkh(t, m):
                 f.write(line)
 
 def main():
-    timeouts = np.linspace(50, 2000, 10)
-    maxinqueues = np.linspace(20, 100, 5)
-    # timeouts = [500, 1000]
-    # maxinqueues = [50]
+    # timeouts = np.linspace(50, 2000, 10)
+    # maxinqueues = np.linspace(20, 100, 5)
+    timeouts = [500, 1000]
+    maxinqueues = [50]
     m = 20
     n = 3
     runs = 3
@@ -42,3 +42,6 @@ def main():
         df.loc[idx] = [x[0], x[1], run_times[0], run_times[1], run_times[2], np.mean(run_times)]
 
     print(df.sort_values(by=['t_mean']))
+
+if __name__ == '__main__':
+    main()
