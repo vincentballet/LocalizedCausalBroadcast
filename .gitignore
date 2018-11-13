@@ -1,3 +1,4 @@
+benchmark/
 .ipynb_checkpoints/
 *.zip
 *.pid
