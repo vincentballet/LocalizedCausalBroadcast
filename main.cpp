@@ -270,7 +270,7 @@ int main(int argc, const char** argv)
     map<unsigned, list<unsigned>> locality = members.getLocality(n);
     
     // creating localized causal broadcast
-    LocalizedCausalBroadcast broadcast(&broadcast1, locality);
+    LocalizedCausalBroadcast broadcast(&broadcast1, locality, m);
 #else
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);

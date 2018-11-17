@@ -69,7 +69,7 @@ public:
      * @param this_process_id ID of the current process
      * @param timeout_ms Timeout for failure detector
      */
-    LocalizedCausalBroadcast(Broadcast* broadcast, map<unsigned, list<unsigned>> locality);
+    LocalizedCausalBroadcast(Broadcast* broadcast, map<unsigned, list<unsigned>> locality, int m);
     
     virtual ~LocalizedCausalBroadcast();
 };

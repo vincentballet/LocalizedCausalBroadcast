@@ -33,10 +33,24 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 
 }
 
-LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, map<unsigned, list<unsigned>> locality) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
+LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, map<unsigned, list<unsigned>> locality, int m) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
-    vclock = new uint8_t[locality.size()];
-    // TODO implement
+    // init new vlock of size m (whatever the locality is)
+    vclock = new uint8_t[m];
+    
+    // sending sequence number is initially 1
+    send_seq_num = 1;
+    
+    // allocating data for the buffer
+    // n = |links| + 1
+    // +1 for indexing from 1 instead of 0
+    buffer = new map<unsigned, string>[senders.size() + 2];
+    
+    // saving broadcast object
+    this->b = broadcast;
+    
+    // initializing broadcast
+    b->addTarget(this);
 }
 
 LocalizedCausalBroadcast::~LocalizedCausalBroadcast()
@@ -51,7 +65,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 
 bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
     int size = sizeof W / sizeof W[0];
-    assert(size == locality.size());
+    assert(size == sizeof vclock / sizeof vclock[0]);
     
     for (int i = 0; i < size; i++) {
         if (!(vclock[i] <= W[i])) return false;
