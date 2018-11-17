@@ -21,6 +21,7 @@
 #include "common.h"
 #include "besteffortbroadcast.h"
 #include "fifobroadcast.h"
+#include "localizedcausalbroadcast.h"
 #include "uniformreliablebroadcast.h"
 #include "seqtarget.h"
 #include "test.h"
@@ -264,9 +265,14 @@ int main(int argc, const char** argv)
     // creating UR broadcast
     UniformReliableBroadcast broadcast1(&broadcast2);
 
+#ifdef LOCALIZED_CAUSAL_BROADCAST
+    // creating localized causal broadcast
+    LocalizedCausalBroadcast broadcast(&broadcast1);
+#else
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);
-
+#endif
+    
     // printing sequence numbers
     SeqTarget t(processes.size(), m);
     broadcast.addTarget(&t);

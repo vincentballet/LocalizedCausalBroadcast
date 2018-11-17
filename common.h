@@ -21,6 +21,9 @@ using std::chrono::steady_clock;
 /** @macro minimal of two numbers */
 #define max(x, y) ((x) < (y) ? (y) : (x))
 
+/// @macro Enable localized causal broadcast
+#define LOCALIZED_CAUSAL_BROADCAST
+
 /// @macro Enable tests for main()
 //#define DEBUG_TEST 1
 

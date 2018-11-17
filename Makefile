@@ -13,6 +13,7 @@ sender.o \
 udpreceiver.o \
 udpsender.o \
 fifobroadcast.o \
+localizedcausalbroadcast.o \
 inmemorylog.o \
 target.o \
 broadcast.o \
