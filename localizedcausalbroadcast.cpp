@@ -33,7 +33,7 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 
 }
 
-LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
+LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, map<unsigned, list<unsigned>> locality) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
     // TODO implement
 }

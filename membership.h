@@ -11,6 +11,7 @@
 #include <fstream>
 #include <map>
 #include <vector>
+#include <list>
 
 using std::string;
 using std::ifstream;
@@ -66,6 +67,14 @@ public:
      * @return 0 on failure or membership ID
      */
     unsigned getID(string IP, unsigned port);
+    
+    /**
+     * @brief getLocality Of a process with IP and port
+     * @param process to get locality of
+     * @return map of processes dependance
+     */
+    map<unsigned, std::list<unsigned>> getLocality(unsigned process);
+
 };
 
 #endif // MEMBERSHIP_H

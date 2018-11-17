@@ -77,3 +77,10 @@ unsigned Membership::getID(std::string IP, unsigned port)
     }
     return 0;
 }
+
+map<unsigned, std::list<unsigned>> Membership::getLocality(unsigned process)
+{
+    map<unsigned, std::list<unsigned>> loc;
+    // TODO implement
+    return loc;
+}

@@ -266,8 +266,11 @@ int main(int argc, const char** argv)
     UniformReliableBroadcast broadcast1(&broadcast2);
 
 #ifdef LOCALIZED_CAUSAL_BROADCAST
+    // getting processes dependance for localized broadcast
+    map<unsigned, list<unsigned>> locality = members.getLocality(n);
+    
     // creating localized causal broadcast
-    LocalizedCausalBroadcast broadcast(&broadcast1);
+    LocalizedCausalBroadcast broadcast(&broadcast1, locality);
 #else
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);
