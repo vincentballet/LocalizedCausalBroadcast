@@ -31,11 +31,11 @@ private:
     /// @brief Reliable broadcast instance
     Broadcast* b;
     
+    /// @brief vector clock
+    uint8_t* vclock;
+    
     /// @brief Processes dependance
     map<unsigned, list<unsigned>> locality;
-    
-    /// @brief Receiving sequence numbers
-    map<unsigned, unsigned> recv_seq_num;
     
     /// @brief The buffer for not yet delivered messages per sender
     /// format: source -> (seq_num -> data)
@@ -59,6 +59,10 @@ private:
     
     /** @brief Broadcast a message with source other than this process */
     void broadcast(const char* message, unsigned length, unsigned source);
+    
+    /** @brief vector clocks comparator */
+    bool compare_vclocks(uint8_t* W);
+
 public:
     /**
      * @brief LocalizedCausalBroadcast initialization
