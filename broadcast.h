@@ -18,6 +18,7 @@ class UniformReliableBroadcast;
 /** @class Broadcast interface used in the project */
 class Broadcast : public Receiver, public Target
 {
+    friend class LocalizedCausalBroadcast;
     friend class FIFOBroadcast;
     friend class ReliableBroadcast;
     friend class UniformReliableBroadcast;
