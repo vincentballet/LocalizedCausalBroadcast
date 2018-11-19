@@ -45,8 +45,6 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     }
     
     mtx_recv.unlock();
-
-    
 }
 
 bool LocalizedCausalBroadcast::tryDeliver(unsigned seq_num, unsigned source, std::string message)
@@ -62,10 +60,14 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 
 }
 
-LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<unsigned> locality, int m) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
+LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<unsigned> locality, int m, int n) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
     // init new vlock of size m (whatever the locality is)
     vclock = new uint8_t[m];
+    
+    // rank
+    // TODO build a function for this if n is ill-defined
+    this->rank = n - 1;
     
     // locality
     this->loc = locality;
@@ -95,11 +97,15 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     // buffer for sending
     char buffer[MAXLEN];
     int v_size = sizeof vclock / sizeof vclock[0];
+    
     mtx_send.lock();
     
     // incrementing sequence number
     unsigned seqnum = send_seq_num++;
     
+    // updating the vclock
+    vclock[this->rank] = seqnum;
+
     // copying vector clock
     memcpy(buffer + 4, vclock, min(v_size, MAXLEN - 4));
 
