@@ -11,7 +11,8 @@
 #include <fstream>
 #include <map>
 #include <vector>
-#include <list>
+#include <set>
+#include "common.h"
 
 using std::string;
 using std::ifstream;
@@ -26,12 +27,12 @@ private:
     ifstream handle;
     map<unsigned, string> ips;
     map<unsigned, unsigned> ports;
-    map<unsigned, std::list<unsigned>> loc;
+    map<unsigned, std::set<unsigned>> loc;
     vector<unsigned> processes;
 public:
     /**
      * @brief Load membership file
-     * @param File path
+     * @param file path
      */
 	Membership(string file);
 
@@ -74,7 +75,7 @@ public:
      * @param process to get locality of
      * @return map of processes dependance
      */
-    map<unsigned, std::list<unsigned>> getLocality(unsigned process);
+    std::set<unsigned> getLocality(unsigned process);
 
 };
 

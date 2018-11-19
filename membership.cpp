@@ -49,14 +49,14 @@ Membership::Membership(std::string file)
         else {
             // buffer variables
             unsigned local;
-            std::list<unsigned> l;
+            std::set<unsigned> l;
             
             // process id
             row >> idx;
             
             // variable number of dependencies
             while (row >> local)
-                l.push_back(local);
+                l.insert(local);
             
             // storing data
             loc[idx] = l;
@@ -93,9 +93,9 @@ vector<unsigned> Membership::getProcesses()
     return processes;
 }
 
-map<unsigned, std::list<unsigned>> Membership::getLocality(unsigned process)
+std::set<unsigned> Membership::getLocality(unsigned process)
 {
-    return loc;
+    return loc[process];
 }
 
 bool Membership::validProcess(unsigned process)

@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <list>
+#include <set>
 #include "membership.h"
 #include "udpreceiver.h"
 #include "broadcast.h"
@@ -19,6 +20,7 @@
 
 using std::vector;
 using std::list;
+using std::set;
 using std::mutex;
 
 /** @class This class implements localized causal broadcast */
@@ -35,7 +37,7 @@ private:
     uint8_t* vclock;
     
     /// @brief Processes dependance
-    map<unsigned, list<unsigned>> loc;
+    set<unsigned> loc;
     
     /// @brief The buffer for not yet delivered messages per sender
     /// format: source -> (seq_num -> data)
@@ -69,7 +71,7 @@ public:
      * @param this_process_id ID of the current process
      * @param timeout_ms Timeout for failure detector
      */
-    LocalizedCausalBroadcast(Broadcast* broadcast, map<unsigned, list<unsigned>> locality, int m);
+    LocalizedCausalBroadcast(Broadcast* broadcast, std::set<unsigned> locality, int m);
     
     virtual ~LocalizedCausalBroadcast();
 };

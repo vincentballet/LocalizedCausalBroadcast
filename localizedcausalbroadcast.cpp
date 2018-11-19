@@ -17,7 +17,21 @@ using std::endl;
 
 void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* message, unsigned length)
 {
-    // TODO implement
+    // must have at least 4 bytes for seq num
+    assert(length >= 4);
+    assert(logical_source <= senders.size() + 1);
+    
+    // obtaining the content
+    string content(message + 4, length - 4);
+    
+    // obtaining seq num
+    unsigned seq_num = charsToInt32(message);
+    
+    if(this->loc.find(logical_source) != this->loc.end())
+    {
+        //do whatever
+    }
+    
 }
 
 bool LocalizedCausalBroadcast::tryDeliver(unsigned seq_num, unsigned source, std::string message)
@@ -33,7 +47,7 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 
 }
 
-LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, map<unsigned, list<unsigned>> locality, int m) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
+LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<unsigned> locality, int m) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
     // init new vlock of size m (whatever the locality is)
     vclock = new uint8_t[m];
@@ -87,7 +101,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 }
 
 bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
-    for (int i = 0; i < sizeof vclock / sizeof vclock[0];; i++) {
+    for (int i = 0; i < sizeof vclock / sizeof vclock[0]; i++) {
         if (!(vclock[i] <= W[i])) return false;
     }
     return true;
