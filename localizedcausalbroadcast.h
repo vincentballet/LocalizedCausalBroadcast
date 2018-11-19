@@ -30,9 +30,6 @@ private:
     
     /// @brief Reliable broadcast instance
     Broadcast* b;
-
-    /// @brief number of other processes
-    int m;
     
     /// @brief vector clock
     uint8_t* vclock;
