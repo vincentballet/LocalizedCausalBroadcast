@@ -43,7 +43,7 @@ Membership::Membership(std::string file)
             ports[idx] = p;
             
             // debug
-             cout << "ID " << idx << " IP " << s << " PORT " << p << endl;
+            // cout << "ID " << idx << " IP " << s << " PORT " << p << endl;
         }
         else {
             // buffer variables
