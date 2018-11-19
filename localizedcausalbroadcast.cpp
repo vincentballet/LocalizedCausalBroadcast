@@ -38,6 +38,9 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, map<uns
     // init new vlock of size m (whatever the locality is)
     vclock = new uint8_t[m];
     
+    // locality
+    this->loc = locality;
+    
     // sending sequence number is initially 1
     send_seq_num = 1;
     
@@ -62,14 +65,14 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 {
     // buffer for sending
     char buffer[MAXLEN];
-    
+    int v_size = sizeof vclock / sizeof vclock[0];
     mtx_send.lock();
     
     // incrementing sequence number
     unsigned seqnum = send_seq_num++;
     
     // copying vector clock
-    memcpy(buffer + 4, vclock, min(this->m, MAXLEN - 4));
+    memcpy(buffer + 4, vclock, min(v_size, MAXLEN - 4));
 
     mtx_send.unlock();
     
@@ -77,19 +80,15 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     int32ToChars(seqnum, buffer);
     
     // copying payload
-    memcpy(buffer + 4 + this->m, message, min(length, MAXLEN - 4));
+    memcpy(buffer + 4 + v_size, message, min(length, MAXLEN - 4));
     
     // broadcasting data
     b->broadcast(buffer, min(length + 4, MAXLEN), source);
 }
 
 bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
-    int m = sizeof vclock / sizeof vclock[0]
-    assert(m == sizeof W / sizeof W[0])
-    
-    for (int i = 0; i < m; i++) {
+    for (int i = 0; i < sizeof vclock / sizeof vclock[0];; i++) {
         if (!(vclock[i] <= W[i])) return false;
     }
-    
     return true;
 }

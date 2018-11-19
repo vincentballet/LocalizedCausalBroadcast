@@ -35,7 +35,7 @@ private:
     uint8_t* vclock;
     
     /// @brief Processes dependance
-    map<unsigned, list<unsigned>> locality;
+    map<unsigned, list<unsigned>> loc;
     
     /// @brief The buffer for not yet delivered messages per sender
     /// format: source -> (seq_num -> data)
