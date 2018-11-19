@@ -269,7 +269,7 @@ int main(int argc, const char** argv)
     // creating fifo broadcast
     FIFOBroadcast fifo(&broadcast1);
     // creating localized causal broadcast
-    LocalizedCausalBroadcast broadcast(&fifo, members.getLocality(n), m);
+    LocalizedCausalBroadcast broadcast(&fifo, members.getLocality(n), m, n);
 #else
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);

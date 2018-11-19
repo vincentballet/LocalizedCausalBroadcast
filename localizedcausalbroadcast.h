@@ -36,6 +36,9 @@ private:
     ///
     unsigned rank;
     
+    ///
+    unsigned m;
+    
     /// @brief vector clock
     uint8_t* vclock;
     

@@ -20,31 +20,38 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // must have at least 4 bytes for seq num
     assert(length >= 4);
     assert(logical_source <= senders.size() + 1);
-    
-    // obtaining the content
-    string content(message + 4, length - 4);
-    
-    // obtaining seq num
-    unsigned seq_num = charsToInt32(message);
-    
-    mtx_recv.lock();
+   
 
     // process is affected by logical source
     if(this->loc.find(logical_source) != this->loc.end())
     {
+        mtx_recv.lock();
+
+        // obtaining the content
+        string content(message + 4 + m, length - (4 + m));
+        
+        // obtaining the clock
+        uint8_t* W[m];
+        // TODO Not sure how to decypher this
+        // memcpy(message + 4, W, m);
+        
+        // obtaining seq num
+        unsigned seq_num = charsToInt32(message);
+    
         // adding a message to the list in any case
         // will deliver it if it's correct, adding to front to be faster
         buffer[logical_source][seq_num] = content;
         
         // trying to deliver all messages
         tryDeliverAll(logical_source);
+        
+        mtx_recv.unlock();
     }
     // FIFO has done its job, we deliver 
     else {
         deliverToAll(logical_source, message, sizeof message / sizeof message[0]);
     }
     
-    mtx_recv.unlock();
 }
 
 bool LocalizedCausalBroadcast::tryDeliver(unsigned seq_num, unsigned source, std::string message)
@@ -65,6 +72,7 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     // init new vlock of size m (whatever the locality is)
     vclock = new uint8_t[m];
     
+    this->m = m;
     // rank
     // TODO build a function for this if n is ill-defined
     this->rank = n - 1;
@@ -96,7 +104,6 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 {
     // buffer for sending
     char buffer[MAXLEN];
-    int v_size = sizeof vclock / sizeof vclock[0];
     
     mtx_send.lock();
     
@@ -107,7 +114,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     vclock[this->rank] = seqnum;
 
     // copying vector clock
-    memcpy(buffer + 4, vclock, min(v_size, MAXLEN - 4));
+    memcpy(buffer + 4, vclock, min(m, MAXLEN - 4));
 
     mtx_send.unlock();
     
@@ -115,14 +122,14 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     int32ToChars(seqnum, buffer);
     
     // copying payload
-    memcpy(buffer + 4 + v_size, message, min(length, MAXLEN - 4));
+    memcpy(buffer + 4 + m, message, min(length, MAXLEN - (4 + m)));
     
     // broadcasting data
-    b->broadcast(buffer, min(length + 4, MAXLEN), source);
+    b->broadcast(buffer, min(length + m + 4, MAXLEN), source);
 }
 
 bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
-    for (int i = 0; i < sizeof vclock / sizeof vclock[0]; i++) {
+    for (int i = 0; i < m; i++) {
         if (!(vclock[i] <= W[i])) return false;
     }
     return true;
