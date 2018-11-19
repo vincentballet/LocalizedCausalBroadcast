@@ -45,6 +45,7 @@ Membership::Membership(std::string file)
             // debug
             // cout << "ID " << idx << " IP " << s << " PORT " << p << endl;
         }
+#ifdef LOCALIZED_CAUSAL_BROADCAST
         else {
             // buffer variables
             unsigned local;
@@ -65,6 +66,7 @@ Membership::Membership(std::string file)
             // for (auto v : l)
             //     std::cout << "\t" << v << endl;
         }
+#endif
     }
 }
 
