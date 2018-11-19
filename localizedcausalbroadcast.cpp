@@ -27,10 +27,25 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // obtaining seq num
     unsigned seq_num = charsToInt32(message);
     
+    mtx_recv.lock();
+
+    // process is affected by logical source
     if(this->loc.find(logical_source) != this->loc.end())
     {
-        //do whatever
+        // adding a message to the list in any case
+        // will deliver it if it's correct, adding to front to be faster
+        buffer[logical_source][seq_num] = content;
+        
+        // trying to deliver all messages
+        tryDeliverAll(logical_source);
     }
+    // FIFO has done its job, we deliver 
+    else {
+        deliverToAll(logical_source, message, sizeof message / sizeof message[0]);
+    }
+    
+    mtx_recv.unlock();
+
     
 }
 
