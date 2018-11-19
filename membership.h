@@ -26,6 +26,7 @@ private:
     ifstream handle;
     map<unsigned, string> ips;
     map<unsigned, unsigned> ports;
+    map<unsigned, std::list<unsigned>> loc;
     vector<unsigned> processes;
 public:
     /**

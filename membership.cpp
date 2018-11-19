@@ -1,35 +1,70 @@
 #include "membership.h"
 #include <iostream>
+#include <sstream>
 
 using std::cout;
 using std::endl;
 using std::map;
+using std::istringstream;
+using std::getline;
 
 Membership::Membership(std::string file)
 {
     handle.open(file);
 
+    // buffer variable
+    string line;
+    
     // number of nodes
+    getline(handle, line);
+    istringstream row(line);
     unsigned n;
-    handle >> n;
+    row >> n;
 
+    // counter
+    int c = -1;
+    
     // loop over nodes
-    for(unsigned i = 0; i < n; i++) {
-        // buffer variables
-        string s;
-        unsigned n, idx;
-
-        // number of process, IP address, port
-        handle >> idx >> s >> n;
-
-        // adding process id
-        processes.push_back(idx);
-
-        //cout << "ID " << idx << " IP " << s << " PORT " << n << endl;
-
-        // storing data
-        ips[idx] = string(s);
-        ports[idx] = n;
+    while (std::getline(handle, line)) {
+        c++;
+        istringstream row(line);
+        unsigned idx;
+        
+        if(c < n){
+            // buffer variables
+            string s;
+            unsigned p;
+            
+            // process id, ip, port
+            row >> idx >> s >> p;
+            
+            // storing data
+            ips[idx] = string(s);
+            ports[idx] = p;
+            
+            // debug
+             cout << "ID " << idx << " IP " << s << " PORT " << p << endl;
+        }
+        else {
+            // buffer variables
+            unsigned local;
+            std::list<unsigned> l;
+            
+            // process id
+            row >> idx;
+            
+            // variable number of dependencies
+            while (row >> local)
+                l.push_back(local);
+            
+            // storing data
+            loc[idx] = l;
+            
+            // debug
+            // cout << "ID " << idx << " LIST " <<endl;
+            // for (auto v : l)
+            //     std::cout << "\t" << v << endl;
+        }
     }
 }
 
@@ -56,6 +91,11 @@ vector<unsigned> Membership::getProcesses()
     return processes;
 }
 
+map<unsigned, std::list<unsigned>> Membership::getLocality(unsigned process)
+{
+    return loc;
+}
+
 bool Membership::validProcess(unsigned process)
 {
     vector<unsigned>::iterator it;
@@ -78,9 +118,3 @@ unsigned Membership::getID(std::string IP, unsigned port)
     return 0;
 }
 
-map<unsigned, std::list<unsigned>> Membership::getLocality(unsigned process)
-{
-    map<unsigned, std::list<unsigned>> loc;
-    // TODO implement
-    return loc;
-}
