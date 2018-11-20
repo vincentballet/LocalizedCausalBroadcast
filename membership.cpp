@@ -98,7 +98,7 @@ vector<unsigned> Membership::getProcesses()
 
 unsigned Membership::getRank(unsigned n)
 {
-    return n;
+    return n - 1;
 }
 
 std::set<unsigned> Membership::getLocality(unsigned process)
