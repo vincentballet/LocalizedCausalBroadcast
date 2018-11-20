@@ -42,6 +42,9 @@ Membership::Membership(std::string file)
             ips[idx] = string(s);
             ports[idx] = p;
             
+            // adding process id
+            processes.push_back(idx);
+            
             // debug
             // cout << "ID " << idx << " IP " << s << " PORT " << p << endl;
         }
