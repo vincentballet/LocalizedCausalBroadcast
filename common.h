@@ -11,6 +11,9 @@
 #include "inmemorylog.h"
 #include <sstream>
 #include <chrono>
+#include <iostream>
+#include <iterator>
+#include <algorithm>
 
 using std::stringstream;
 using std::chrono::steady_clock;
@@ -71,6 +74,9 @@ void int32ToChars(uint32_t input, char* dest);
  */
 uint32_t charsToInt32(const char* input);
 
+void prettyprint(uint8_t* arr, unsigned length);
+
+
 /** @brief Maximal buffer size */
 const unsigned MAXLEN = 1000;
 
@@ -78,6 +84,7 @@ const unsigned MAXLEN = 1000;
  * @brief memorylog In Memory Log
  */
 extern InMemoryLog* memorylog;
+
 
 /// @macro Current time in milliseconds
 #define TIME_MS_NOW() (std::chrono::duration_cast<std::chrono::milliseconds>(steady_clock::now().time_since_epoch()).count())

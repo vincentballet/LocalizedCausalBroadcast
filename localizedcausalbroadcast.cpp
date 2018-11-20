@@ -12,6 +12,7 @@
 #include <cstring>
 #include <cmath>
 
+
 using std::cout;
 using std::endl;
 
@@ -22,7 +23,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     assert(length >= 4);
     assert(logical_source <= senders.size() + 1);
    
-
+    cout << "RCV from " << logical_source << " | " << message << endl;
     // process is affected by logical source
     if(this->loc.find(logical_source) != this->loc.end())
     {
@@ -50,6 +51,8 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     }
     // FIFO has done its job, we deliver 
     else {
+        // debug
+        cout << "FIFO deliver " << logical_source << " | " << message << endl;
         deliverToAll(logical_source, message, sizeof message / sizeof message[0]);
     }
     
@@ -70,6 +73,8 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
         
         if(compare_vclocks(W)){
             vclock[Membership::getRank(sender)] += 1;
+            //debug
+            cout << "CRB deliver " << sender << " | " << content << endl;
             deliverToAll(sender, content.c_str(), content.length());
             // erase() returns the next element
             it = buffer[sender].erase(it);
@@ -86,6 +91,8 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     
     // init new vlock of size m (whatever the locality is)
     vclock = new uint8_t[n_process];
+    for (int i = 0 ; i < n_process; i++)
+        vclock[i] = 0;
     
     // rank
     // TODO build a function for this if n is ill-defined
@@ -140,6 +147,10 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     // copying payload
     memcpy(buffer + 4 + n_process, message, min(length, MAXLEN - (4 + n_process)));
     
+    // debug
+    cout << "CRB sending " << seqnum << " | ";
+    prettyprint(W, n_process);
+
     // broadcasting data
     b->broadcast(buffer, min(length + n_process + 4, MAXLEN), source);
 }
@@ -150,3 +161,4 @@ bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
     }
     return true;
 }
+
