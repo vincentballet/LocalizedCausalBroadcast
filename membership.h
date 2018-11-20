@@ -66,7 +66,9 @@ public:
      * @brief Rank can be different than the id
      * @return Returns rank of a process
      */
-    unsigned getRank(unsigned n);
+    static unsigned getRank(unsigned n) {
+        return n - 1;
+    }
     
     /**
      * @brief getID Of a process with IP and port
