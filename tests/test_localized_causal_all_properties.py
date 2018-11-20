@@ -137,7 +137,7 @@ for p in processes:
 
 # CRB5: Causal delivery: For any message m1 that potentially caused a message m2, i.e., m1 -> m2 , no process delivers m2 unless it has already delivered m1.
 # (a) some process p broadcasts m1 before it broadcasts m2 ;
-# (b) some process p delivers m1 and subsequently broadcasts m2; or
+# (b) some process p delivers m1 from a process (LOCALIZED) IT DEPENDS ON and subsequently broadcasts m2; or
 # (c) there exists some message m such that m1 -> m and m -> m2.
 # Process has dependencies dependencies[p] and itself
 
@@ -156,7 +156,9 @@ for p in processes:
     # adding message as a dependency
     soft_assert((msg not in current_dependencies) or msg[0] == p, "Error: broadcasted or delivered message %s twice!" % str(event))
     if msg not in current_dependencies:
-      current_dependencies += [msg]
+      # (LOCALIZED) either it's my message or I depend on the process that has sent it
+      if msg[0] == p or msg[0] in dependencies[p]:
+        current_dependencies += [msg]
 
     # on broadcast, fill in message dependencies
     if type_ == 'b':
