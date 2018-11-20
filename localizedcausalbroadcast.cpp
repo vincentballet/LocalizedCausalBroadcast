@@ -15,6 +15,7 @@
 using std::cout;
 using std::endl;
 
+
 void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* message, unsigned length)
 {
     // must have at least 4 bytes for seq num
@@ -34,14 +35,13 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         uint8_t W[n_process];
         
         // TODO Not sure how to decypher this
-//        memcpy(message + 4, W, n_process);
+        memcpy(W, message + 4, n_process);
         
         // obtaining seq num
         unsigned seq_num = charsToInt32(message);
-    
-        // adding a message to the list in any case
-        // will deliver it if it's correct, adding to front to be faster
-        buffer[logical_source][seq_num] = content;
+
+        pair<string, uint8_t* > p (content, W);
+        buffer[logical_source][seq_num] = p;
         
         // trying to deliver all messages
         tryDeliverAll(logical_source);
@@ -55,17 +55,28 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     
 }
 
-bool LocalizedCausalBroadcast::tryDeliver(unsigned seq_num, unsigned source, std::string message)
-{
-    // TODO implement
-
-    return false;
-}
-
 void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 {
-    // TODO implement
-
+    // for going over buffer
+    map<unsigned, pair<string, uint8_t*>>::iterator it;
+    
+    // loop over buffer
+    for(it = buffer[sender].begin(); it != buffer[sender].end(); )
+    {
+        unsigned seq_num = (*it).first;
+        pair<string, uint8_t*> p = (*it).second;
+        string content = p.first;
+        uint8_t* W = p.second;
+        
+        if(compare_vclocks(W)){
+            vclock[Membership::getRank(sender)] += 1;
+            deliverToAll(sender, content.c_str(), content.length());
+            // erase() returns the next element
+            it = buffer[sender].erase(it);
+        }
+        // otherwise just incrementing the counter
+        else it++;
+    }
 }
 
 LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<unsigned> locality, unsigned rank) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
@@ -89,7 +100,7 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     // allocating data for the buffer
     // n = |links| + 1
     // +1 for indexing from 1 instead of 0
-    buffer = new map<unsigned, string>[senders.size() + 2];
+    buffer = new map<unsigned, pair<string, uint8_t*>>[senders.size() + 2];
     
     // saving broadcast object
     this->b = broadcast;
@@ -120,12 +131,12 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     
     mtx_send.unlock();
     
-    // copying vector clock
-    memcpy(buffer + 4, W, min(n_process, MAXLEN - 4));
-
     // copying sequence number
     int32ToChars(seqnum, buffer);
     
+    // copying vector clock
+    memcpy(buffer + 4, W, min(n_process, MAXLEN - 4));
+
     // copying payload
     memcpy(buffer + 4 + n_process, message, min(length, MAXLEN - (4 + n_process)));
     
