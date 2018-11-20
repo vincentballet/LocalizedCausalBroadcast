@@ -117,12 +117,12 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     // updating the sending vclock
     memcpy(W, vclock, n_process);
     W[this->rank] = seqnum;
-
-    // copying vector clock
-    memcpy(buffer + 4, vclock, min(n_process, MAXLEN - 4));
-
+    
     mtx_send.unlock();
     
+    // copying vector clock
+    memcpy(buffer + 4, W, min(n_process, MAXLEN - 4));
+
     // copying sequence number
     int32ToChars(seqnum, buffer);
     
