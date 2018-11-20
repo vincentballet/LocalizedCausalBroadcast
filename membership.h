@@ -61,7 +61,13 @@ public:
      * @return True if valid
      */
     bool validProcess(unsigned process);
-	
+
+    /**
+     * @brief Rank can be different than the id
+     * @return Returns rank of a process
+     */
+    unsigned getRank(unsigned n);
+    
     /**
      * @brief getID Of a process with IP and port
      * @param IP IP address of a process
