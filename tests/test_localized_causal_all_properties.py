@@ -195,7 +195,25 @@ for msg in all_msgs:
 
   # collecting all visited
   msg_dep_all[msg] = list(deps)
-  print("Dependencies for %s: %d" % (str(msg), len(msg_dep_all[msg])))
 
+# PROPERTY TEST: for each process, for each delivered message, must have already delivered its causal past
+for p in processes:
+  # currently delivered by process
+  delivered = set()
+
+  # loop over events
+  for event in events[p]:
+    # only care about deliveries here
+    if event[0] != 'd': continue
+
+    # parsing message = (sender, seq)
+    msg = event[1:]
+
+    # adding as delivered
+    delivered.add(msg)
+
+    # for each message in past, must be past in delivered
+    for past in msg_dep_all[msg]:
+      soft_assert(past in delivered, "CRB5 Violated: message %s is causal past of message %s and it was not delivered before by process %d" % (str(past), str(msg), p))
 # printing the last line with status
 print("INCORRECT" if were_errors else "CORRECT")
