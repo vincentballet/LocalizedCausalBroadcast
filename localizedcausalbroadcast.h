@@ -16,8 +16,11 @@
 #include "udpreceiver.h"
 #include "broadcast.h"
 #include "common.h"
+#include "membership.h"
 #include <mutex>
+#include <utility>
 
+using std::pair;
 using std::vector;
 using std::list;
 using std::set;
@@ -47,7 +50,7 @@ private:
     
     /// @brief The buffer for not yet delivered messages per sender
     /// format: source -> (seq_num -> data)
-    map<unsigned, string>* buffer;
+    map<unsigned, pair<string, uint8_t*>>* buffer;
     
     /// @brief current sending sequence number
     unsigned send_seq_num;
