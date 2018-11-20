@@ -37,7 +37,7 @@ private:
     unsigned rank;
     
     ///
-    unsigned m;
+    unsigned n_process;
     
     /// @brief vector clock
     uint8_t* vclock;
@@ -77,7 +77,7 @@ public:
      * @param this_process_id ID of the current process
      * @param timeout_ms Timeout for failure detector
      */
-    LocalizedCausalBroadcast(Broadcast* broadcast, std::set<unsigned> locality, int m, int n);
+    LocalizedCausalBroadcast(Broadcast* broadcast, std::set<unsigned> locality, unsigned rank);
     
     virtual ~LocalizedCausalBroadcast();
 };

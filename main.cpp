@@ -193,7 +193,7 @@ int main(int argc, const char** argv)
 
     // parsing membership file
     Membership members(membership);
-
+    
     // list of processes
     vector<unsigned> processes = members.getProcesses();
 
@@ -265,11 +265,13 @@ int main(int argc, const char** argv)
     // creating UR broadcast
     UniformReliableBroadcast broadcast1(&broadcast2);
     
+    
+    
 #ifdef LOCALIZED_CAUSAL_BROADCAST
     // creating fifo broadcast
     FIFOBroadcast fifo(&broadcast1);
     // creating localized causal broadcast
-    LocalizedCausalBroadcast broadcast(&fifo, members.getLocality(n), m, n);
+    LocalizedCausalBroadcast broadcast(&fifo, members.getLocality(n), members.getRank(n));
 #else
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);
