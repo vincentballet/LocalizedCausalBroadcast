@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "inmemorylog.h"
 #include "common.h"
+#include <unistd.h>
 
 using std::endl;
 
@@ -12,6 +13,7 @@ void *InMemoryLog::dumpLoop(void *arg)
     while(true)
     {
         memorylog->dump();
+        usleep(500000);
     }
 
     // never returns
@@ -70,7 +72,7 @@ void InMemoryLog::log(std::string content)
     file_immediate << time << " " << content << endl;
 #endif
 
-    sem_wait(&full_sem);
+    //sem_wait(&full_sem);
 
     // beginning of critical section
     m.lock();
@@ -104,50 +106,46 @@ void InMemoryLog::log(std::string content)
     // end of critical section
     m.unlock();
 
-    sem_post(&empty_sem);
+    //sem_post(&empty_sem);
 }
 
 void InMemoryLog::dump()
 {
-    sem_wait(&empty_sem);
+    //sem_wait(&empty_sem);
 
     // not active (so there are no new messages)
-    active = false;
+    //active = false;
 
     // getting current number of messages
     // DONT CARE if there are writers right now
     int current_write_index = write_index;
 
+    if(current_write_index == MAX_MESSAGES)
+        current_write_index = 0;
+
     // loop over buffer
-    int i;
-    for(i = read_index; ; i++)
+    for(; ; read_index++)
     {
         // going to the beginning
-        if(i == MAX_MESSAGES)
-            i = 0;
+        if(read_index == MAX_MESSAGES)
+            read_index = 0;
 
         // if have i at an empty element
-        if(i == current_write_index)
+        if(read_index == current_write_index)
             break;
 
         // writing data
-        file << buffer[i] << std::endl;
+        file << buffer[read_index] << std::endl;
+        //sem_post(&full_sem);
 
 #ifdef DEBUG_FILES
-        file_ts << timestamps[i] << " " << buffer[i] << std::endl;
+        file_ts << timestamps[read_index] << " " << buffer[read_index] << std::endl;
 #endif
     }
-
-    // always have i = next element to read
-    read_index = i;
-    if(read_index == MAX_MESSAGES)
-        read_index = 0;
 
 #ifdef INMEMORY_PRINT
     // logging end
     fprintf(stderr, "END\n");
     file << "END" << std::endl;
 #endif
-
-    sem_post(&full_sem);
 }
