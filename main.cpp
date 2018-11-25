@@ -80,8 +80,7 @@ void writeOutputAndHalt()
     
     cout << "Writing output..." << endl;
 
-    // writing output file
-    memorylog->dump();
+    // The output is already in the file
 
     exit(0);
 }
