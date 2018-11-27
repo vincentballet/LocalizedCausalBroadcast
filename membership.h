@@ -17,17 +17,19 @@
 using std::string;
 using std::ifstream;
 using std::map;
+using std::set;
 using std::pair;
 using std::vector;
 
-/** @brief Parser for membership file */
+/** @brief Parser for membership file
+ * @todo Split into Membership + Locality classes? */
 class Membership
 {
 private:
     ifstream handle;
     map<unsigned, string> ips;
     map<unsigned, unsigned> ports;
-    map<unsigned, std::set<unsigned>> loc;
+    map<unsigned, set<unsigned>> loc;
     vector<unsigned> processes;
 public:
     /**
@@ -84,6 +86,11 @@ public:
      * @return map of processes dependance
      */
     std::set<unsigned> getLocality(unsigned process);
+
+    /**
+     * @brief Prints the locality information and membership information
+     */
+    void print();
 
 };
 
