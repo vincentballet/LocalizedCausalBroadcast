@@ -32,7 +32,6 @@ f.close()
 membership = list(map(lambda x : x.split()[1:], filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:])))
 
 # Counting processes
-n = len(membership)
 print('There are %d processes' % n)
 
 # writing down crashed processes
