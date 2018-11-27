@@ -23,17 +23,25 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     assert(length >= 4);
     assert(logical_source <= senders.size() + 1);
    
-    cout << "RCV from " << logical_source << " | " << message << endl;
+    // obtaining the content
+    string content(message + 4 + n_process, length - (4 + n_process));
+
+    cout << "RCV from " << logical_source << " | " << content << endl;
+
     // process is affected by logical source
-    if(this->loc.find(logical_source) != this->loc.end())
+    if(loc.find(logical_source) != loc.end())
     {
         mtx_recv.lock();
-
-        // obtaining the content
-        string content(message + 4 + n_process, length - (4 + n_process));
         
         // obtaining the clock
-        uint8_t W[n_process];
+        /// @todo: MUST use new() because each message has a different vector clock
+        // otherwise ALL of them will point to the same place in memory
+        // and thus will have the same content
+        // MOREOVER, in C++, a local variable points NOWHERE after the function ends (which
+        // can happen here because we might want to deliver a message later),
+        // so the content would be garbage (and trying to write it will result in segfault)
+        // uint8_t W[n_process];
+        uint8_t* W = new uint8_t[n_process];
         
         // TODO Not sure how to decypher this
         memcpy(W, message + 4, n_process);
@@ -52,8 +60,8 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // FIFO has done its job, we deliver 
     else {
         // debug
-        cout << "FIFO deliver " << logical_source << " | " << message << endl;
-        deliverToAll(logical_source, message, sizeof message / sizeof message[0]);
+        cout << "FIFO deliver " << logical_source << " | " << content << endl;
+        deliverToAll(logical_source, content.c_str(), content.length());
     }
     
 }
@@ -125,7 +133,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 {
     // buffer for sending
     char buffer[MAXLEN];
-    uint8_t W[n_process];
+    uint8_t* W = new uint8_t[n_process];
     
     mtx_send.lock();
     
@@ -139,6 +147,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     mtx_send.unlock();
     
     // copying sequence number
+    /// @todo Why do we need the sequence number if it's already inside the vector clock?
     int32ToChars(seqnum, buffer);
     
     // copying vector clock
@@ -153,6 +162,9 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 
     // broadcasting data
     b->broadcast(buffer, min(length + n_process + 4, MAXLEN), source);
+
+    // freeing up the memory
+    delete[] W;
 }
 
 bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
