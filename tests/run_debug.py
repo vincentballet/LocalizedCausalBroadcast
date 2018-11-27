@@ -25,6 +25,7 @@ n = 2
 f.write('%d\n' % n)
 for i in range(1, n + 1):
   f.write('%d 127.0.0.1 110%02d\n' % (i, i))
+f.write('1 2\n2 1\n')
 f.close()
 
 # Reading membership file
