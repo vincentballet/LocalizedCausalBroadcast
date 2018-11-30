@@ -31,7 +31,7 @@ using std::chrono::steady_clock;
 //#define DEBUG_TEST 1
 
 /// @macro Output debug files (.timestamps and .recvall)
-//#define DEBUG_FILES 1
+#define DEBUG_FILES 1
 
 /// @macro Message = 1000 * sender + payload
 //#define UNIQUE_MESSAGES 1
