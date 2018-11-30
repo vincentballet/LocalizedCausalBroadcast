@@ -24,7 +24,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     assert(logical_source <= senders.size() + 1);
    
     // obtaining the content
-    string content(message + 4 + n_process, length - (4 + n_process));
+    string content(message + 4 + (n_process * 4), length - (4 + (n_process * 4)));
 
     cout << "RCV from " << logical_source << " | " << content << endl;
 
@@ -41,15 +41,15 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         // can happen here because we might want to deliver a message later),
         // so the content would be garbage (and trying to write it will result in segfault)
         // uint8_t W[n_process];
-        uint8_t* W = new uint8_t[n_process];
+        uint32_t* W = new uint32_t[n_process];
         
         // TODO Not sure how to decypher this
-        memcpy(W, message + 4, n_process);
+        memcpy(W, message + 4, (n_process * 4));
         
         // obtaining seq num
         unsigned seq_num = charsToInt32(message);
 
-        pair<string, uint8_t* > p (content, W);
+        pair<string, uint32_t* > p (content, W);
         buffer[logical_source][seq_num] = p;
         
         // trying to deliver all messages
@@ -69,15 +69,15 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 {
     // for going over buffer
-    map<unsigned, pair<string, uint8_t*>>::iterator it;
+    map<unsigned, pair<string, uint32_t*>>::iterator it;
     
     // loop over buffer
     for(it = buffer[sender].begin(); it != buffer[sender].end(); )
     {
         unsigned seq_num = (*it).first;
-        pair<string, uint8_t*> p = (*it).second;
+        pair<string, uint32_t*> p = (*it).second;
         string content = p.first;
-        uint8_t* W = p.second;
+        uint32_t* W = p.second;
         
         if(compare_vclocks(W)){
             vclock[Membership::getRank(sender)] += 1;
@@ -98,7 +98,7 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     n_process = (unsigned int)this->senders.size() + 1;
     
     // init new vlock of size m (whatever the locality is)
-    vclock = new uint8_t[n_process];
+    vclock = new uint32_t[n_process];
     for (int i = 0 ; i < n_process; i++)
         vclock[i] = 0;
     
@@ -115,7 +115,7 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     // allocating data for the buffer
     // n = |links| + 1
     // +1 for indexing from 1 instead of 0
-    buffer = new map<unsigned, pair<string, uint8_t*>>[senders.size() + 2];
+    buffer = new map<unsigned, pair<string, uint32_t*>>[senders.size() + 2];
     
     // saving broadcast object
     this->b = broadcast;
@@ -133,7 +133,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 {
     // buffer for sending
     char buffer[MAXLEN];
-    uint8_t* W = new uint8_t[n_process];
+    uint32_t* W = new uint32_t[n_process];
     
     mtx_send.lock();
     
@@ -141,7 +141,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     unsigned seqnum = send_seq_num++;
     
     // updating the sending vclock
-    memcpy(W, vclock, n_process);
+    memcpy(W, vclock, n_process * 4);
     W[this->rank] = seqnum;
     
     mtx_send.unlock();
@@ -151,23 +151,23 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     int32ToChars(seqnum, buffer);
     
     // copying vector clock
-    memcpy(buffer + 4, W, min(n_process, MAXLEN - 4));
+    memcpy(buffer + 4, W, min(n_process * 4, MAXLEN - 4));
 
     // copying payload
-    memcpy(buffer + 4 + n_process, message, min(length, MAXLEN - (4 + n_process)));
+    memcpy(buffer + 4 + (n_process * 4), message, min(length, MAXLEN - (4 + (n_process * 4))));
     
     // debug
     cout << "CRB sending " << seqnum << " | ";
     prettyprint(W, n_process);
 
     // broadcasting data
-    b->broadcast(buffer, min(length + n_process + 4, MAXLEN), source);
+    b->broadcast(buffer, min(length + (n_process * 4) + 4, MAXLEN), source);
 
     // freeing up the memory
     delete[] W;
 }
 
-bool LocalizedCausalBroadcast::compare_vclocks(uint8_t* W){
+bool LocalizedCausalBroadcast::compare_vclocks(uint32_t* W){
     for (int i = 0; i < n_process; i++) {
         if (!(vclock[i] <= W[i])) return false;
     }

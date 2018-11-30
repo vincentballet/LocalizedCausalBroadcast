@@ -22,7 +22,7 @@ uint32_t charsToInt32(const char* input_)
     return result;
 }
 
-void prettyprint(uint8_t* arr, unsigned length){
+void prettyprint(uint32_t* arr, unsigned length){
     std::cout << "[ ";
     std::copy(arr, arr + length, std::ostream_iterator<unsigned>(std::cout, " "));
     std::cout << "]" << std::endl;

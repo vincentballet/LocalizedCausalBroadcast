@@ -37,10 +37,10 @@ using std::chrono::steady_clock;
 //#define UNIQUE_MESSAGES 1
 
 /** @macro Print messages stored in memory */
-//#define INMEMORY_PRINT 1
+#define INMEMORY_PRINT 1
 
 /// @macro Dump to a separate file immediately
-//#define IMMEDIATE_FILE 1
+#define IMMEDIATE_FILE 1
 
 /// @macro Debug perfectlink
 //#define PERFECTLINK_DEBUG
@@ -74,7 +74,7 @@ void int32ToChars(uint32_t input, char* dest);
  */
 uint32_t charsToInt32(const char* input);
 
-void prettyprint(uint8_t* arr, unsigned length);
+void prettyprint(uint32_t* arr, unsigned length);
 
 
 /** @brief Maximal buffer size */

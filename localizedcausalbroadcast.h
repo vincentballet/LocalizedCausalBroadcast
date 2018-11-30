@@ -43,14 +43,14 @@ private:
     unsigned n_process;
     
     /// @brief vector clock
-    uint8_t* vclock;
+    uint32_t* vclock;
     
     /// @brief Processes dependance
     set<unsigned> loc;
     
     /// @brief The buffer for not yet delivered messages per sender
     /// format: source -> (seq_num -> data)
-    map<unsigned, pair<string, uint8_t*>>* buffer;
+    map<unsigned, pair<string, uint32_t*>>* buffer;
     
     /// @brief current sending sequence number
     unsigned send_seq_num;
@@ -72,7 +72,7 @@ private:
     void broadcast(const char* message, unsigned length, unsigned source);
     
     /** @brief vector clocks comparator */
-    bool compare_vclocks(uint8_t* W);
+    bool compare_vclocks(uint32_t* W);
 
 public:
     /**
