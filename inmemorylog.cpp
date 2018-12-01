@@ -142,10 +142,4 @@ void InMemoryLog::dump()
         file_ts << timestamps[read_index] << " " << buffer[read_index] << std::endl;
 #endif
     }
-
-#ifdef INMEMORY_PRINT
-    // logging end
-    fprintf(stderr, "END\n");
-    file << "END" << std::endl;
-#endif
 }
