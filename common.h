@@ -31,16 +31,16 @@ using std::chrono::steady_clock;
 //#define DEBUG_TEST 1
 
 /// @macro Output debug files (.timestamps and .recvall)
-#define DEBUG_FILES 1
+//#define DEBUG_FILES 1
 
 /// @macro Message = 1000 * sender + payload
 //#define UNIQUE_MESSAGES 1
 
 /** @macro Print messages stored in memory */
-#define INMEMORY_PRINT 1
+//#define INMEMORY_PRINT 1
 
 /// @macro Dump to a separate file immediately
-#define IMMEDIATE_FILE 1
+//#define IMMEDIATE_FILE 1
 
 /// @macro Debug perfectlink
 //#define PERFECTLINK_DEBUG

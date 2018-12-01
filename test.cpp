@@ -84,8 +84,13 @@ void* logger_thread(void* arg)
     // logs a lot of messages to the log
     char buf[100];
 
+    //int n_msg = 100000000;
+    int n_msg = 10000;
+
+    printf("Thread %d will log %d messages...\n", threadid, n_msg);
+
     // for 100 000 000 messages...
-    for(int i = 0; i < 100000000; i++)
+    for(int i = 0; i < n_msg; i++)
     {
       snprintf(buf, 99, "process %d message %d", threadid, i);
       memorylog->log(buf);
