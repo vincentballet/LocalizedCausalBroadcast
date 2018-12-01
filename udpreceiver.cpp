@@ -81,16 +81,16 @@ void* UDPReceiver::receiveLoop(void *args)
     {
         unsigned len = instance->receive(buffer, MAXLEN);
         if(len == 0) continue;
-        if(len < 1) continue;
-        // <first byte sender 1> <0x01 1> <PF seq number 4 bytes> <logical sender 4> <fifo sequence number 4> <data 4>
-        int source = buffer[0];
+        if(len < 4) continue;
+        // <first 4 byte sender> <0x01 1> <PF seq number 4 bytes> <logical sender 4> <fifo sequence number 4> <data 4>
+        unsigned source = charsToInt32(buffer);
 
 #ifdef UDP_DEBUG
-        int type = buffer[1];
-        unsigned pk_seq = charsToInt32(buffer + 2);
-        unsigned log_sender = charsToInt32(buffer + 6);
-        unsigned fifo_seq = charsToInt32(buffer + 10);
-        unsigned payload = charsToInt32(buffer + 14);
+        int type = buffer[4];
+        unsigned pk_seq = charsToInt32(buffer + 5);
+        unsigned log_sender = charsToInt32(buffer + 9);
+        unsigned fifo_seq = charsToInt32(buffer + 13);
+        unsigned payload = charsToInt32(buffer + 17);
 
         if(type == 0x01)
         {
@@ -103,7 +103,7 @@ void* UDPReceiver::receiveLoop(void *args)
 #endif
 
         if(source >= 0)
-            instance->deliverToAll((uint8_t) buffer[0], buffer + 1, len - 1);
+            instance->deliverToAll(source, buffer + 4, len - 4);
     }
 
     // no return
