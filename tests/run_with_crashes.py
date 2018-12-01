@@ -98,6 +98,16 @@ did_crash = []
 # stopping times for processes
 timestamp_resume = {p: -1 for p in range(n)}
 
+# https://stackoverflow.com/questions/568271/how-to-check-if-there-exists-a-process-with-a-given-pid-in-python
+def check_pid(pid):        
+    """ Check For the existence of a unix pid. """
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
+
 # loop over milliseconds in time
 start_time = 1000 * time()
 while True:
@@ -136,7 +146,7 @@ while True:
 
     # checking that all processes are alive
     for pid in pids:
-        assert os.path.exists("/proc/" + str(pid))
+        assert check_pid(pid)
 
     # exiting loop at the end
     if delta >= max_send_time_ms: break
