@@ -315,9 +315,8 @@ int main(int argc, const char** argv)
 #ifdef DEBUG_FILES
         if(t.isFull())
         {
+            fprintf(stderr, "Process %d received all messages\n", n);
             stringstream ss, ss_fn;
-            ss << "Process " << n << " received all messages";
-            memorylog->log(ss.str());
 
             // writing a file
             ss_fn << "da_proc_" << n << ".recvall";
