@@ -244,14 +244,23 @@ int main(int argc, const char** argv)
 #ifdef DEBUG_TEST
     // if last argument is test, run tests
     string test = argv[argc];
-    if (test.compare("test") == 0){
+    if (test.compare("test") == 0)
+    {
         testPerfectLink(n, m, links);
         sleep(3);
         writeOutputAndHalt();
         return 0;    
     }
-    if (test.compare("testUDP") == 0){
+    else if (test.compare("testUDP") == 0)
+    {
         testUDP(n, senders, &r);
+        sleep(3);
+        writeOutputAndHalt();
+        return 0;
+    }
+    else if (test.compare("testLOG") == 0)
+    {
+        testLOG();
         sleep(3);
         writeOutputAndHalt();
         return 0;

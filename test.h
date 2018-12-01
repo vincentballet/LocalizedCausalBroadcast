@@ -16,5 +16,6 @@
 
 void testPerfectLink(unsigned n, unsigned m, vector<PerfectLink*> links);
 void testUDP(unsigned n, vector<UDPSender*> senders, UDPReceiver* receiver);
+void testLOG();
 
 #endif /* test_h */

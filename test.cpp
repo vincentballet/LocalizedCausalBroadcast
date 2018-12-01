@@ -75,3 +75,37 @@ void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
         }
     }
 }
+
+void* logger_thread(void* arg)
+{
+    // current thread number
+    int threadid = *(int*) arg;
+
+    // logs a lot of messages to the log
+    char buf[100];
+
+    // for 100 000 000 messages...
+    for(int i = 0; i < 100000000; i++)
+    {
+      snprintf(buf, 99, "process %d message %d", threadid, i);
+      memorylog->log(buf);
+    }
+
+    return(nullptr);
+}
+
+void testLOG()
+{
+    int n_threads = 50;
+    pthread_t* threads = new pthread_t[n_threads];
+    int* args = new int[n_threads];
+    for(int i = 0; i < n_threads; i++)
+    {
+        args[i] = i;
+        pthread_create(&threads[i], nullptr, logger_thread, &args[i]);
+    }
+    for(int i = 0; i < n_threads; i++)
+        pthread_join(threads[i], nullptr);
+    delete[] threads;
+    delete[] args;
+}
