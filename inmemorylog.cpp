@@ -46,12 +46,13 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     log("BEGINNING");
 #endif
 
+
     // initializing semaphores
     sem_init(&full_sem, 0, MAX_MESSAGES);
     sem_init(&empty_sem, 0, 0);
 
     // starting the thread for dumping data
-    pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
+//    pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
 }
 
 InMemoryLog::~InMemoryLog()
@@ -120,6 +121,8 @@ void InMemoryLog::dump()
     // DONT CARE if there are writers right now
     int current_write_index = write_index;
 
+printf("Writing...\n");
+
     if(current_write_index == MAX_MESSAGES)
         current_write_index = 0;
 
@@ -142,4 +145,9 @@ void InMemoryLog::dump()
         file_ts << timestamps[read_index] << " " << buffer[read_index] << std::endl;
 #endif
     }
+}
+
+void InMemoryLog::close()
+{
+    file.close();
 }

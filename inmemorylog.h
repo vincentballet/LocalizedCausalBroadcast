@@ -42,7 +42,7 @@ private:
     ofstream file_immediate;
 
     /// Maximal number of messages between dumps
-    static const int MAX_MESSAGES = 100000;
+    static const int MAX_MESSAGES = 1000000;
 
     /// Using a ring buffer
     /// [mm...mmm]
@@ -97,6 +97,9 @@ public:
      * Call from ONE thread only!
      */
     void dump();
+
+    /** @brief Close the file */
+    void close();
 };
 
 #endif // INMEMORYLOG_H
