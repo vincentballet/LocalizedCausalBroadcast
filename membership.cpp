@@ -73,6 +73,9 @@ Membership::Membership(std::string file)
         while (row >> dependency)
             locality.insert(dependency);
 
+        // adding self to locality
+        locality.insert(i+1);
+        
         // saving data
         loc[idx] = locality;
     }
