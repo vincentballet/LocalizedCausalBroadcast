@@ -1,5 +1,14 @@
 import sys
 
+
+def soft_assert(condition, message = None):
+    """ Print message if there was an error without exiting """
+    global were_errors
+    if not condition:
+        if message:
+            print("ASSERT failed " + message)
+        were_errors = True
+
 def main():
   # Showing help if arguments are incorrect
   if len(sys.argv) < 2:
@@ -51,17 +60,6 @@ def main():
 
   # how many messages should have been sent by each process?
   expected_messages = 10
-
-  # Were there errors?
-  were_errors = False
-
-  def soft_assert(condition, message = None):
-      """ Print message if there was an error without exiting """
-      global were_errors
-      if not condition:
-          if message:
-              print("ASSERT failed " + message)
-          were_errors = True
 
   # messages broadcast by a process. idx -> array
   broadcast_by = {i: [] for i in processes}
@@ -224,4 +222,5 @@ def main():
   print("INCORRECT" if were_errors else "CORRECT")
 
 if __name__ == '__main__':
+  were_errors = False
   main()
