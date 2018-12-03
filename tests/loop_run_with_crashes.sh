@@ -9,8 +9,7 @@ run() {
         echo "Correct !"
     else
         crash=1
-        echo "$first"
-        echo "$second"
+        echo "Incorrect."
     fi
     
 }
