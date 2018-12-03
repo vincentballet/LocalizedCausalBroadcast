@@ -31,7 +31,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // process is affected by logical source
     if(loc.find(logical_source) != loc.end())
     {
-        mtx_recv.lock();
+        mtx.lock();
         
         // obtaining the clock
         /// @todo: MUST use new() because each message has a different vector clock
@@ -55,7 +55,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         // trying to deliver all messages
         tryDeliverAll(logical_source);
         
-        mtx_recv.unlock();
+        mtx.unlock();
     }
     // FIFO has done its job, we deliver 
     else {
@@ -135,7 +135,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     char buffer[MAXLEN];
     uint32_t* W = new uint32_t[n_process];
     
-    mtx_send.lock();
+    mtx.lock();
     
     // incrementing sequence number
     unsigned seqnum = send_seq_num++;
@@ -144,7 +144,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     memcpy(W, vclock, n_process * 4);
     W[this->rank] = seqnum;
     
-    mtx_send.unlock();
+    mtx.unlock();
     
     // copying sequence number
     /// @todo Why do we need the sequence number if it's already inside the vector clock?
