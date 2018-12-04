@@ -25,7 +25,9 @@ d = sys.argv[1]
 os.chdir(d)
 
 # Reading membership file
-membership = list(map(lambda x : x.split()[1:], filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:])))
+membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n'))))
+n = int(membership[0][0])
+membership = [t[1:] for t in membership[1:n+1]]
 
 # Counting processes
 n = len(list(membership))
@@ -55,7 +57,7 @@ for key, value in logs.items():
 # ### No creation - No message is delivered unless it was sent
 for key, value in logs.items():
     logs_pld = list(filter(lambda l: l[0] == 'pld' in l, value))
-    for d in logs_pld[:2]:
+    for d in logs_pld:
         soft_assert(any(l[0] == 'pls' and l[2:] == d[1:] for l in logs[int(d[2])]), "Message {} is delivered while not sent ".format(d))
         # soft_assert(['pls', d[1], d[2], d[3]] in logs[int(d[2])], "Message {} is delivered while not sent ".format(d))
         

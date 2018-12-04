@@ -267,6 +267,13 @@ void PerfectLink::send(const char* buffer, unsigned length)
     // sending message NOW
     s->send(data, length + 5);
 
+#ifdef PERFECTLINK_DEBUG
+    // logging message
+    stringstream ss;
+    ss << "> pls " << TIME_MS_NOW() << " " << s->getTarget() << " " << r->getThis() << " " << this->seqnum;// << " " << charsToInt32(sdata + 5 + 8);
+    memorylog->log(ss.str());
+#endif
+
     // saving the message and current timestamp
     this->msgs[this->seqnum] = make_tuple(length + 5, data, TIME_MS_NOW());
 
