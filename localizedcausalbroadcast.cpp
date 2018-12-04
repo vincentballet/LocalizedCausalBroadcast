@@ -169,7 +169,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 
 bool LocalizedCausalBroadcast::compare_vclocks(uint32_t* W){
     for (int i = 0; i < n_process; i++) {
-        if (!(vclock[i] <= W[i])) return false;
+        if (!(W[i] <= vclock[i])) return false;
     }
     return true;
 }
