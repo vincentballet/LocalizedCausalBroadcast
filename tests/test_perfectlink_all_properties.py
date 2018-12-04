@@ -57,7 +57,7 @@ for key, value in logs.items():
 # ### No creation - No message is delivered unless it was sent
 for key, value in logs.items():
     logs_pld = list(filter(lambda l: l[0] == 'pld' in l, value))
-    for d in logs_pld[:2]:
+    for d in logs_pld:
         soft_assert(any(l[0] == 'pls' and l[2:] == d[1:] for l in logs[int(d[2])]), "Message {} is delivered while not sent ".format(d))
         # soft_assert(['pls', d[1], d[2], d[3]] in logs[int(d[2])], "Message {} is delivered while not sent ".format(d))
         
