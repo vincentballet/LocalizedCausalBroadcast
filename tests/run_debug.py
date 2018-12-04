@@ -29,7 +29,9 @@ f.write('1 2\n2 1\n')
 f.close()
 
 # Reading membership file
-membership = list(map(lambda x : x.split()[1:], filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n')[1:])))
+membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n'))))
+n = int(membership[0][0])
+membership = [t[1:] for t in membership[1:n+1]]
 
 # Counting processes
 print('There are %d processes' % n)
