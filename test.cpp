@@ -77,10 +77,13 @@ void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
 }
 
 // number of threads for log test
-const int n_threads = 50;
+const int n_threads = 10;
 
 // number of messages per thread
-const int n_msg = 1000;
+const int n_msg = 100000;
+
+// sleep us between messages
+const int sleep_us = 10;
 
 void* logger_thread(void* arg)
 {
@@ -90,13 +93,12 @@ void* logger_thread(void* arg)
     // logs a lot of messages to the log
     char buf[100];
 
-    printf("Thread %d will log %d messages...\n", threadid, n_msg);
-
     // for 100 000 000 messages...
     for(int i = 0; i < n_msg; i++)
     {
       snprintf(buf, 99, "thread %d message %d", threadid, i);
       memorylog->log(buf);
+      usleep(sleep_us);
     }
 
     return(nullptr);
@@ -112,6 +114,10 @@ void testLOG()
     char buf[100];
     snprintf(buf, 99, "%d %d", n_threads, n_msg);
     memorylog->log(buf);
+
+    printf("Will use %d threads each with %d messages, sleep %d us between messages\n", n_threads, n_msg, sleep_us);
+    printf("Total log throughput: %d messages / sec\n", n_threads * 1000000 / sleep_us);
+    printf("Expected time: %d seconds\n", sleep_us * n_msg / 1000000);
 
     // spawning threads
     for(int i = 0; i < n_threads; i++)

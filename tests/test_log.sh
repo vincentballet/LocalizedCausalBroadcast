@@ -1,5 +1,7 @@
 #!/bin/bash
 
+make -C .. -j10
+
 while true
 do
   ../da_proc 1 ../membership testLOG

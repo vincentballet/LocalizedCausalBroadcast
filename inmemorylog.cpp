@@ -15,17 +15,21 @@ void *InMemoryLog::dumpLoop(void *arg)
         // exit when not active
         if(!memorylog->active)
             return nullptr;
-        memorylog->dump();
-        usleep(500000);
+
+        int dumped = memorylog->dump();
+
+        // waiting 1 ms if there are no new messages
+        if(dumped == 0)
+            usleep(1000);
     }
 
-    return nullptr;
+    // never returns if always active
 }
 
 InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
 {
     // maximal number of messages in the buffer
-    MAX_MESSAGES = 10;
+    MAX_MESSAGES = 100000;
 
     // allocating memory
     buffer = new string[MAX_MESSAGES];
@@ -58,7 +62,7 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     sem_init(&empty_sem, 0, 0);
 
     // starting the thread for dumping data
-//    pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
+    pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
 }
 
 InMemoryLog::~InMemoryLog()
@@ -95,11 +99,17 @@ void InMemoryLog::log(std::string content)
 
     // if buffer is full, dumping data in the worker thread
     int current_read_index = read_index;
+    if(current_read_index == MAX_MESSAGES)
+        current_read_index = 0;
+
     if((current_read_index == 0 && write_index == MAX_MESSAGES - 1) || write_index == current_read_index - 1)
     {
         printf("WARNING: dumping data from the worker thread to avoid data loss. Consider increasing the buffer size\n");
+        printf("Current_read_index %d write index %d\n", current_read_index, write_index);
         dump();
     }
+
+    //printf("Current write index %d Current read index %d\n", write_index, read_index);
 
     // adding data
     buffer[write_index] = content;
@@ -116,7 +126,7 @@ void InMemoryLog::log(std::string content)
     //sem_post(&empty_sem);
 }
 
-void InMemoryLog::dump(bool last)
+int InMemoryLog::dump(bool last)
 {
     //sem_wait(&empty_sem);
 
@@ -126,8 +136,12 @@ void InMemoryLog::dump(bool last)
     // DONT CARE if there are writers right now
     int current_write_index = write_index;
 
+    // can read intermediate value for write_index
     if(current_write_index == MAX_MESSAGES)
         current_write_index = 0;
+
+    // number of dumped messages
+    int dumped = 0;
 
     // loop over buffer
     for(; ; read_index++)
@@ -143,6 +157,7 @@ void InMemoryLog::dump(bool last)
         // writing data
         file << buffer[read_index] << std::endl;
         //sem_post(&full_sem);
+        dumped++;
 
 #ifdef DEBUG_FILES
         file_ts << timestamps[read_index] << " " << buffer[read_index] << std::endl;
@@ -159,9 +174,11 @@ void InMemoryLog::dump(bool last)
     // otherwise, allow for subsequent dump() calls
     else
     {
-        printf("%s", "Dumped some messages, continuing...\n");
+        //printf("Dumped %d messages up to %d, continuing...\n", dumped, current_write_index);
         m_read.unlock();
     }
+
+    return dumped;
 }
 
 void InMemoryLog::close()

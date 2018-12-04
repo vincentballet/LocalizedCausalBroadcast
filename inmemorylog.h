@@ -95,8 +95,9 @@ public:
     /**
      * @brief Dump all data to file from memory
      * @param last Set to true to close the file after writing
+     * @returns Number of dumped messages
      */
-    void dump(bool last = false);
+    int dump(bool last = false);
 
     /** @brief Close the file */
     void close();
