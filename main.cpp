@@ -263,7 +263,6 @@ int main(int argc, const char** argv)
     else if (test.compare("testLOG") == 0)
     {
         testLOG();
-        sleep(3);
         writeOutputAndHalt();
         return 0;
     }
