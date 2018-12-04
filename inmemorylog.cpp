@@ -12,11 +12,14 @@ void *InMemoryLog::dumpLoop(void *arg)
     // dumping data continuously
     while(true)
     {
+        // exit when not active
+        if(!memorylog->active)
+            return nullptr;
         memorylog->dump();
         usleep(500000);
     }
 
-    // never returns
+    return nullptr;
 }
 
 InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
@@ -76,7 +79,7 @@ void InMemoryLog::log(std::string content)
     //sem_wait(&full_sem);
 
     // beginning of critical section
-    m.lock();
+    m_write.lock();
 
     /// Using a ring buffer
     /// [....mmmm..]
@@ -91,7 +94,7 @@ void InMemoryLog::log(std::string content)
     {
         // WARNING: dropping message
         fprintf(stderr, "DROP   | %lu %s\n", time, content.c_str());
-        m.unlock();
+        m_write.unlock();
         return;
     }
 
@@ -105,23 +108,20 @@ void InMemoryLog::log(std::string content)
         write_index = 0;
 
     // end of critical section
-    m.unlock();
+    m_write.unlock();
 
     //sem_post(&empty_sem);
 }
 
-void InMemoryLog::dump()
+void InMemoryLog::dump(bool last)
 {
     //sem_wait(&empty_sem);
 
-    // not active (so there are no new messages)
-    //active = false;
+    m_read.lock();
 
     // getting current number of messages
     // DONT CARE if there are writers right now
     int current_write_index = write_index;
-
-printf("Writing...\n");
 
     if(current_write_index == MAX_MESSAGES)
         current_write_index = 0;
@@ -145,9 +145,29 @@ printf("Writing...\n");
         file_ts << timestamps[read_index] << " " << buffer[read_index] << std::endl;
 #endif
     }
+
+    // at last iteration: close the file
+    // and do not unlock the mutex
+    if(last)
+    {
+        printf("%s", "Dumped all remaining messages. Closing the log file...\n");
+        close();
+    }
+    // otherwise, allow for subsequent dump() calls
+    else
+    {
+        printf("%s", "Dumped some messages, continuing...\n");
+        m_read.unlock();
+    }
 }
 
 void InMemoryLog::close()
 {
     file.close();
+}
+
+void InMemoryLog::disable()
+{
+    m_write.lock();
+    active = false;
 }

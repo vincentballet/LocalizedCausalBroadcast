@@ -65,7 +65,7 @@ private:
     uint64_t *timestamps;
 
     /// Mutex for buffer access
-    mutex m;
+    mutex m_write, m_read;
 
     /// @brief Process ID
     unsigned n;
@@ -94,12 +94,17 @@ public:
 
     /**
      * @brief Dump all data to file from memory
-     * Call from ONE thread only!
+     * @param last Set to true to close the file after writing
      */
-    void dump();
+    void dump(bool last = false);
 
     /** @brief Close the file */
     void close();
+
+    /**
+     * @brief disable Make subsequent log() calls do nothing
+     */
+    void disable();
 };
 
 #endif // INMEMORYLOG_H
