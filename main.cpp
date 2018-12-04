@@ -80,9 +80,9 @@ void writeOutputAndHalt()
     
     cout << "Writing output..." << endl;
 
-    // The output is already in the file
-    memorylog->dump();
-    memorylog->close();
+    // Dumping remaining messages to file and closing the log file
+    memorylog->disable();
+    memorylog->dump(true);
 
     exit(0);
 }
@@ -263,7 +263,6 @@ int main(int argc, const char** argv)
     else if (test.compare("testLOG") == 0)
     {
         testLOG();
-        sleep(3);
         writeOutputAndHalt();
         return 0;
     }

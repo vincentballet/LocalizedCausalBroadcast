@@ -42,7 +42,7 @@ private:
     ofstream file_immediate;
 
     /// Maximal number of messages between dumps
-    static const int MAX_MESSAGES = 1000000;
+    int MAX_MESSAGES;
 
     /// Using a ring buffer
     /// [mm...mmm]
@@ -65,7 +65,7 @@ private:
     uint64_t *timestamps;
 
     /// Mutex for buffer access
-    mutex m;
+    mutex m_write, m_read;
 
     /// @brief Process ID
     unsigned n;
@@ -94,12 +94,18 @@ public:
 
     /**
      * @brief Dump all data to file from memory
-     * Call from ONE thread only!
+     * @param last Set to true to close the file after writing
+     * @returns Number of dumped messages
      */
-    void dump();
+    int dump(bool last = false);
 
     /** @brief Close the file */
     void close();
+
+    /**
+     * @brief disable Make subsequent log() calls do nothing
+     */
+    void disable();
 };
 
 #endif // INMEMORYLOG_H
