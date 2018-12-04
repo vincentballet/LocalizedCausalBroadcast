@@ -26,12 +26,12 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // obtaining the content
     string content(message + 4 + (n_process * 4), length - (4 + (n_process * 4)));
 
-    cout << "RCV from " << logical_source << " | " << content << endl;
+    cout << (this->rank + 1) << " RCV from " << logical_source << " | " << content << endl;
 
     // process is affected by logical source
     if(loc.find(logical_source) != loc.end())
     {
-        mtx.lock();
+        mtx_rcv.lock();
         
         // obtaining the clock
         /// @todo: MUST use new() because each message has a different vector clock
@@ -55,12 +55,12 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         // trying to deliver all messages
         tryDeliverAll(logical_source);
         
-        mtx.unlock();
+        mtx_rcv.unlock();
     }
     // FIFO has done its job, we deliver 
     else {
         // debug
-        cout << "FIFO deliver " << logical_source << " | " << content << endl;
+        cout << (this->rank + 1) << " FIFO deliver " << logical_source << " | " << content << endl;
         deliverToAll(logical_source, content.c_str(), content.length());
     }
     
@@ -70,23 +70,37 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 {
     // for going over buffer
     map<unsigned, pair<string, uint32_t*>>::iterator it;
+    uint32_t* V = new uint32_t[n_process];
+
+    mtx_clock.lock();
+    memcpy(V, vclock, n_process * 4);
+    mtx_clock.unlock();
     
     // loop over buffer
     for(it = buffer[sender].begin(); it != buffer[sender].end(); )
     {
-        unsigned seq_num = (*it).first;
         pair<string, uint32_t*> p = (*it).second;
         string content = p.first;
         uint32_t* W = p.second;
         
-        if(compare_vclocks(W)){
+        
+
+        if(compare_vclocks(V, W)){
+            //CRB Delivering a message
+            mtx_clock.lock();
             vclock[Membership::getRank(sender)] += 1;
+            mtx_clock.unlock();
+            
+            //Incrementing our local variable for the loop to continue without issue
+            V[Membership::getRank(sender)] += 1;
+
             //debug
-            cout << "CRB deliver " << sender << " | " << content << endl;
+            cout << this->rank << " CRB deliver " << sender << " | " << content << endl;
             deliverToAll(sender, content.c_str(), content.length());
             // erase() returns the next element
             it = buffer[sender].erase(it);
         }
+        
         // otherwise just incrementing the counter
         else it++;
     }
@@ -109,8 +123,8 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     // locality
     this->loc = locality;
     
-    // sending sequence number is initially 1
-    send_seq_num = 1;
+    // sending sequence number is initially 0 for clock comparison to work
+    send_seq_num = 0;
     
     // allocating data for the buffer
     // n = |links| + 1
@@ -135,17 +149,18 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     char buffer[MAXLEN];
     uint32_t* W = new uint32_t[n_process];
     
-    mtx.lock();
-    
-    // incrementing sequence number
-    unsigned seqnum = send_seq_num++;
-    
+    mtx_snd.lock();
     // updating the sending vclock
+    mtx_clock.lock();
     memcpy(W, vclock, n_process * 4);
+    mtx_clock.unlock();
+
+    // incrementing sequence number
+    unsigned seqnum = send_seq_num;
     W[this->rank] = seqnum;
-    
-    mtx.unlock();
-    
+    send_seq_num++;
+    mtx_snd.unlock();
+
     // copying sequence number
     /// @todo Why do we need the sequence number if it's already inside the vector clock?
     int32ToChars(seqnum, buffer);
@@ -167,9 +182,9 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     delete[] W;
 }
 
-bool LocalizedCausalBroadcast::compare_vclocks(uint32_t* W){
+bool LocalizedCausalBroadcast::compare_vclocks(uint32_t* V, uint32_t* W){
     for (int i = 0; i < n_process; i++) {
-        if (!(W[i] <= vclock[i])) return false;
+        if (!(W[i] <= V[i])) return false;
     }
     return true;
 }

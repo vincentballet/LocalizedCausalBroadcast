@@ -10,6 +10,8 @@ run() {
     else
         crash=1
         echo "Incorrect."
+        echo "$first"
+        echo "$second"
     fi
     
 }

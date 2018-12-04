@@ -31,7 +31,7 @@ class LocalizedCausalBroadcast : public Broadcast
 {
 private:
     /// @brief Mutex for the object
-    mutex mtx;
+    mutex mtx_snd, mtx_rcv, mtx_clock;
     
     /// @brief Reliable broadcast instance
     Broadcast* b;
@@ -72,7 +72,7 @@ private:
     void broadcast(const char* message, unsigned length, unsigned source);
     
     /** @brief vector clocks comparator */
-    bool compare_vclocks(uint32_t* W);
+    bool compare_vclocks(uint32_t* V, uint32_t* W);
 
 public:
     /**
