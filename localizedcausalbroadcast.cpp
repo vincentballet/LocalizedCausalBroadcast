@@ -28,11 +28,6 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 
     cout << (this->rank + 1) << " RCV from " << logical_source << " | " << content << endl;
 
-#ifdef LCB_DEBUG
-    stringstream ss;
-    ss << "lcback from " << logical_source << " content " << content;
-    memorylog->log(ss.str());
-#endif
     
     mtx_rcv.lock();
     
@@ -48,6 +43,13 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     
     // TODO Not sure how to decypher this
     memcpy(W, message + 4, (n_process * 4));
+    
+    
+#ifdef LCB_DEBUG
+    stringstream ss;
+    ss << "lcback from " << logical_source << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
+    memorylog->log(ss.str());
+#endif
     
     // process is affected by logical source
     if(loc.find(logical_source) != loc.end())
