@@ -42,7 +42,7 @@ private:
     ofstream file_immediate;
 
     /// Maximal number of messages between dumps
-    static const int MAX_MESSAGES = 1000000;
+    int MAX_MESSAGES;
 
     /// Using a ring buffer
     /// [mm...mmm]

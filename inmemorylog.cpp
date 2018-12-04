@@ -24,6 +24,9 @@ void *InMemoryLog::dumpLoop(void *arg)
 
 InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
 {
+    // maximal number of messages in the buffer
+    MAX_MESSAGES = 10;
+
     // allocating memory
     buffer = new string[MAX_MESSAGES];
     timestamps = new uint64_t[MAX_MESSAGES];
@@ -90,12 +93,12 @@ void InMemoryLog::log(std::string content)
     ///    ^ next write pointer (for logging)
     ///       ^ next read pointer (for dumping)
 
-    if(write_index == read_index - 1)
+    // if buffer is full, dumping data in the worker thread
+    int current_read_index = read_index;
+    if((current_read_index == 0 && write_index == MAX_MESSAGES - 1) || write_index == current_read_index - 1)
     {
-        // WARNING: dropping message
-        fprintf(stderr, "DROP   | %lu %s\n", time, content.c_str());
-        m_write.unlock();
-        return;
+        printf("WARNING: dumping data from the worker thread to avoid data loss. Consider increasing the buffer size\n");
+        dump();
     }
 
     // adding data
