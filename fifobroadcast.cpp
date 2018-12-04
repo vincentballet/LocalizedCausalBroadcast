@@ -96,6 +96,9 @@ FIFOBroadcast::FIFOBroadcast(Broadcast *broadcast) : Broadcast(broadcast->this_p
     // +1 for indexing from 1 instead of 0
     buffer = new map<unsigned, string>[senders.size() + 2];
 
+    // sanity check
+    assert(buffer);
+
     // expecting to receive 1
     vector<Sender*>::iterator it;
     for(it = senders.begin(); it != senders.end(); it++)

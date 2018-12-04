@@ -248,7 +248,10 @@ int main(int argc, const char** argv)
             // creating objects for broadcast
             br_receivers.push_back(link);
 
+            // wrapping link as threaded sender for broadcast object
             ThreadedSender* threaded_sender = new ThreadedSender(link);
+
+            // sanity check
             assert(threaded_sender);
 
             br_senders.push_back(threaded_sender);
