@@ -12,7 +12,7 @@ if len(sys.argv) < 2:
 d = sys.argv[1]
 
 # Reading membership file
-membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open('membership', 'r').read().split('\n'))))
+membership = list(map(lambda x : x.split(), filter(lambda x: len(x) > 0, open(d + '/membership', 'r').read().split('\n'))))
 n = int(membership[0][0])
 membership = [t[1:] for t in membership[1:n+1]]
 
