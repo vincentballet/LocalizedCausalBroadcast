@@ -54,6 +54,9 @@ using std::chrono::steady_clock;
 /// @macro Debug UniformReliableBroadcast
 //#define URB_DEBUG
 
+/// @macro Debug UniformReliableBroadcast
+#define LCB_DEBUG
+
 /// @macro Debug Failure Detector
 //#define FAILUREDETECTOR_DEBUG
 

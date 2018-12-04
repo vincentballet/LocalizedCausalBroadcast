@@ -28,6 +28,12 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 
     cout << (this->rank + 1) << " RCV from " << logical_source << " | " << content << endl;
 
+#ifdef LCB_DEBUG
+    stringstream ss;
+    ss << "lcback from " << logical_source << " content " << content;
+    memorylog->log(ss.str());
+#endif
+    
     // process is affected by logical source
     if(loc.find(logical_source) != loc.end())
     {
@@ -61,6 +67,11 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     else {
         // debug
         cout << (this->rank + 1) << " FIFO deliver " << logical_source << " | " << content << endl;
+#ifdef LCB_DEBUG
+        stringstream ss;
+        ss << "lcback FIFO " << logical_source << " content " << content;
+        memorylog->log(ss.str());
+#endif
         deliverToAll(logical_source, content.c_str(), content.length());
     }
     
@@ -96,6 +107,11 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 
             //debug
             cout << this->rank << " CRB deliver " << sender << " | " << content << endl;
+#ifdef LCB_DEBUG
+            stringstream ss;
+            ss << "lcback CRB " << sender << " content " << content;
+            memorylog->log(ss.str());
+#endif
             deliverToAll(sender, content.c_str(), content.length());
             // erase() returns the next element
             it = buffer[sender].erase(it);
@@ -173,6 +189,11 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     
     // debug
     cout << "CRB sending " << seqnum << " | ";
+#ifdef LCB_DEBUG
+    stringstream ss;
+    ss << "lcbsend" << send_seq_num; 
+    memorylog->log(ss.str());
+#endif
     prettyprint(W, n_process);
 
     // broadcasting data
