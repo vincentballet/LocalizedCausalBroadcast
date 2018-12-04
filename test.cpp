@@ -66,12 +66,12 @@ void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
     for(sender_ = senders.begin(); sender_ != senders.end(); sender_++)
     {
         UDPSender* sender = *sender_;
-        char buf[6];
+        char buf[MAXLEN - 10];
         buf[0] = 0x01;
         for(unsigned i = 0; i < 10000000; i++)
         {
             int32ToChars(i, buf + 1);
-            sender->send(buf, 5);
+            sender->send(buf, MAXLEN - 10);
         }
     }
 }
@@ -109,6 +109,10 @@ void testLOG()
     // allocating memory
     pthread_t* threads = new pthread_t[n_threads];
     int* args = new int[n_threads];
+
+    // sanity check
+    assert(threads);
+    assert(args);
 
     // saving number of threads/messages
     char buf[100];

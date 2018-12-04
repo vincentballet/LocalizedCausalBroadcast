@@ -2,6 +2,7 @@
 #include "inmemorylog.h"
 #include "common.h"
 #include <unistd.h>
+#include <cassert>
 
 using std::endl;
 
@@ -34,6 +35,10 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     // allocating memory
     buffer = new string[MAX_MESSAGES];
     timestamps = new uint64_t[MAX_MESSAGES];
+
+    // sanity check
+    assert(buffer);
+    assert(timestamps);
 
     // currently, active
     active = true;

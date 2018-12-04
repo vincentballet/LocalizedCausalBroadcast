@@ -250,7 +250,10 @@ void PerfectLink::send(const char* buffer, unsigned length)
     sem_wait(&empty_sem);
 
     // allocating new memory
-    char* data = static_cast<char*>(malloc(length + 5));
+    char* data = new char[length + 5];
+
+    // sanity check
+    assert(data);
     
     // adding the message to the list
     mtx.lock();

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <iostream>
+#include <cassert>
 
 using std::cout;
 using std::endl;
@@ -42,6 +43,9 @@ void UDPSender::send(const char* data, unsigned N)
 #ifdef UDPSENDER_DELAY_MS
     mtx.lock();
 #endif
+    // sanity check
+    assert(N + 4 < MAXLEN);
+
     char buf[MAXLEN];
 
     unsigned len1 = min(N, MAXLEN - 4);

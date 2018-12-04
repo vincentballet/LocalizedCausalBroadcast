@@ -42,6 +42,9 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         // so the content would be garbage (and trying to write it will result in segfault)
         // uint8_t W[n_process];
         uint32_t* W = new uint32_t[n_process];
+
+        // sanity check
+        assert(W);
         
         // TODO Not sure how to decypher this
         memcpy(W, message + 4, (n_process * 4));
@@ -71,6 +74,9 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
     // for going over buffer
     map<unsigned, pair<string, uint32_t*>>::iterator it;
     uint32_t* V = new uint32_t[n_process];
+
+    // sanity check
+    assert(V);
 
     mtx_clock.lock();
     memcpy(V, vclock, n_process * 4);
@@ -113,6 +119,10 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     
     // init new vlock of size m (whatever the locality is)
     vclock = new uint32_t[n_process];
+
+    // sanity check
+    assert(vclock);
+
     for (int i = 0 ; i < n_process; i++)
         vclock[i] = 0;
     
@@ -131,6 +141,9 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     // +1 for indexing from 1 instead of 0
     buffer = new map<unsigned, pair<string, uint32_t*>>[senders.size() + 2];
     
+    // sanity check
+    assert(buffer);
+
     // saving broadcast object
     this->b = broadcast;
     
@@ -149,6 +162,9 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     char buffer[MAXLEN];
     uint32_t* W = new uint32_t[n_process];
     
+    // sanity check
+    assert(W);
+
     mtx_snd.lock();
     // updating the sending vclock
     mtx_clock.lock();

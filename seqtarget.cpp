@@ -9,6 +9,10 @@ using std::endl;
 SeqTarget::SeqTarget(unsigned n, unsigned maxSeq) : maxSeq(maxSeq), n(n)
 {
     seqs = new unsigned[n + 1];
+
+    // sanity check
+    assert(seqs);
+
     for(unsigned i = 1; i <= n; i++)
         seqs[i] = 0;
 }
