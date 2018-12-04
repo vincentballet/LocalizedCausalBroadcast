@@ -34,24 +34,25 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     memorylog->log(ss.str());
 #endif
     
+    mtx_rcv.lock();
+    
+    // obtaining the clock
+    /// @todo: MUST use new() because each message has a different vector clock
+    // otherwise ALL of them will point to the same place in memory
+    // and thus will have the same content
+    // MOREOVER, in C++, a local variable points NOWHERE after the function ends (which
+    // can happen here because we might want to deliver a message later),
+    // so the content would be garbage (and trying to write it will result in segfault)
+    // uint8_t W[n_process];
+    uint32_t* W = new uint32_t[n_process];
+    
+    // TODO Not sure how to decypher this
+    memcpy(W, message + 4, (n_process * 4));
+    
     // process is affected by logical source
     if(loc.find(logical_source) != loc.end())
     {
-        mtx_rcv.lock();
-        
-        // obtaining the clock
-        /// @todo: MUST use new() because each message has a different vector clock
-        // otherwise ALL of them will point to the same place in memory
-        // and thus will have the same content
-        // MOREOVER, in C++, a local variable points NOWHERE after the function ends (which
-        // can happen here because we might want to deliver a message later),
-        // so the content would be garbage (and trying to write it will result in segfault)
-        // uint8_t W[n_process];
-        uint32_t* W = new uint32_t[n_process];
-        
-        // TODO Not sure how to decypher this
-        memcpy(W, message + 4, (n_process * 4));
-        
+    
         // obtaining seq num
         unsigned seq_num = charsToInt32(message);
 
@@ -61,7 +62,6 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         // trying to deliver all messages
         tryDeliverAll(logical_source);
         
-        mtx_rcv.unlock();
     }
     // FIFO has done its job, we deliver 
     else {
@@ -69,11 +69,13 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         cout << (this->rank + 1) << " FIFO deliver " << logical_source << " | " << content << endl;
 #ifdef LCB_DEBUG
         stringstream ss;
-        ss << "lcback FIFO " << logical_source << " content " << content;
+        ss << "lcback FIFO from " << logical_source << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
         memorylog->log(ss.str());
 #endif
         deliverToAll(logical_source, content.c_str(), content.length());
     }
+    mtx_rcv.unlock();
+
     
 }
 
@@ -109,7 +111,7 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
             cout << this->rank << " CRB deliver " << sender << " | " << content << endl;
 #ifdef LCB_DEBUG
             stringstream ss;
-            ss << "lcback CRB " << sender << " content " << content;
+            ss << "lcback CRB from " << sender << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
             memorylog->log(ss.str());
 #endif
             deliverToAll(sender, content.c_str(), content.length());
@@ -191,7 +193,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     cout << "CRB sending " << seqnum << " | ";
 #ifdef LCB_DEBUG
     stringstream ss;
-    ss << "lcbsend" << send_seq_num; 
+    ss << "lcbsend" << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
     memorylog->log(ss.str());
 #endif
     prettyprint(W, n_process);
