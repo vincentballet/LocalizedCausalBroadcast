@@ -36,16 +36,17 @@ private:
     /// @brief Reliable broadcast instance
     Broadcast* b;
     
-    ///
+    /// @todo What is this?
     unsigned rank;
     
-    ///
+    /// @todo What is this?
     unsigned n_process;
     
     /// @brief vector clock
+    /// What is this? Which variable in the algorithm 3.15 is it?
     uint32_t* vclock;
     
-    /// @brief Processes dependance
+    /// @brief Processes dependencies
     set<unsigned> loc;
     
     /// @brief The buffer for not yet delivered messages per sender
