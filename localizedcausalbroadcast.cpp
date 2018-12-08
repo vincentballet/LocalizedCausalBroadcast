@@ -28,7 +28,8 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 
     cout << (this->rank + 1) << " RCV from " << logical_source << " | " << content << endl;
 
-    
+    /// @todo Why do we have a lock here? the next command does not require it.
+    /// @todo Which data does it protect and from what?
     mtx_rcv.lock();
     
     // obtaining the clock
@@ -39,6 +40,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // can happen here because we might want to deliver a message later),
     // so the content would be garbage (and trying to write it will result in segfault)
     // uint8_t W[n_process];
+    /// @todo When is it free()d?
     uint32_t* W = new uint32_t[n_process];
     
     // TODO Not sure how to decypher this
@@ -54,18 +56,24 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // process is affected by logical source
     if(loc.find(logical_source) != loc.end())
     {
-    
         // obtaining seq num
+        /// @todo In the LCB algorithm Sequence Number alone does not play any role
+        /// Why does it appear here? What is the purpose of it?
         unsigned seq_num = charsToInt32(message);
 
         pair<string, uint32_t* > p (content, W);
         buffer[logical_source][seq_num] = p;
         
+        /// @TODO (!!!) For LCB it's not true that you need to go over the buffer
+        /// only for the logical_sender
+        /// Note the loop over buffer[logical_source] instead of a loop over all objects!
+
         // trying to deliver all messages
         tryDeliverAll(logical_source);
         
     }
-    // FIFO has done its job, we deliver 
+    // FIFO has done its job, we deliver
+    /// @todo The code would be more performant if FIFO was not used
     else {
         // debug
         cout << (this->rank + 1) << " FIFO deliver " << logical_source << " | " << content << endl;
@@ -74,17 +82,23 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         ss << "lcback FIFO from " << logical_source << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
         memorylog->log(ss.str());
 #endif
+
+        /// @todo (!!!) Could it be that you need to update current vector clock even if you are not directly affected by a process?
+        /// Suppose that a message m2 was sent to you and the other process depends on m1. You don't depend on the sender of m1 directly but you do INDIRECTLY
+        /// The best way would be to get rid of the if.. else case and handle both FIFO and non-FIFO cases in LCB(.) instead of LCB(FIFO(.))
+
         deliverToAll(logical_source, content.c_str(), content.length());
     }
+    /// @todo Again, why is this mutex here? What data does it protect?
     mtx_rcv.unlock();
-
-    
 }
 
 void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
 {
     // for going over buffer
     map<unsigned, pair<string, uint32_t*>>::iterator it;
+
+    /// @todo When is it freed?
     uint32_t* V = new uint32_t[n_process];
 
     mtx_clock.lock();
@@ -97,7 +111,6 @@ void LocalizedCausalBroadcast::tryDeliverAll(unsigned sender)
         pair<string, uint32_t*> p = (*it).second;
         string content = p.first;
         uint32_t* W = p.second;
-        
         
 
         if(compare_vclocks(V, W)){
