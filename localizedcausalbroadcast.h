@@ -32,7 +32,7 @@ class LocalizedCausalBroadcast : public Broadcast
 {
 private:
     /// @brief Mutex for the object
-    mutex mtx_snd, mtx_rcv, mtx_clock;
+    mutex mtx_send_lsn, mtx_send_clock, mtx_recv_clock;
     
     /// @brief Reliable broadcast instance
     Broadcast* b;
@@ -43,9 +43,11 @@ private:
     /// @todo What is this?
     unsigned n_process;
     
-    /// @brief vector clock
-    /// What is this? Which variable in the algorithm 3.15 is it?
-    uint32_t* vclock;
+    /// @brief send vector clock
+    uint32_t* V_send;
+    
+    /// @brief recv vector clock
+    uint32_t* V_recv;
     
     /// @brief Processes dependencies
     set<unsigned> loc;
