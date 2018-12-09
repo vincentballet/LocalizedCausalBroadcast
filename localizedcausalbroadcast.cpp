@@ -24,12 +24,12 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     assert(logical_source <= senders.size() + 1);
    
     // obtaining the content
-    string content(message + 4 + (n_process * 4), length - (4 + (n_process * 4)));
+    string content(message + (n_process * 4), length - (n_process * 4));
     
     // obtaining the clock
     uint32_t* W = new uint32_t[n_process];
     
-    memcpy(W, message + 4, (n_process * 4));
+    memcpy(W, message, (n_process * 4));
    
     assert(W); 
     
@@ -161,7 +161,7 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
 
 LocalizedCausalBroadcast::~LocalizedCausalBroadcast()
 {
-//    delete buffer;
+    free(vclock);
 }
 
 void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, unsigned source)
@@ -173,6 +173,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     // sanity check
     assert(W);
 
+    //mtx for send_seq_num
     mtx_snd.lock();
     // updating the sending vclock
     mtx_clock.lock();
@@ -183,31 +184,26 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     unsigned seqnum = send_seq_num;
     W[this->rank] = seqnum;
     send_seq_num++;
+    
     mtx_snd.unlock();
-
-    // copying sequence number
-    /// @todo Why do we need the sequence number if it's already inside the vector clock?
-    int32ToChars(seqnum, buffer);
     
     // copying vector clock
-    memcpy(buffer + 4, W, min(n_process * 4, MAXLEN - 4));
+    memcpy(buffer, W, min(n_process * 4, MAXLEN));
 
     // copying payload
-    memcpy(buffer + 4 + (n_process * 4), message, min(length, MAXLEN - (4 + (n_process * 4))));
+    memcpy(buffer + (n_process * 4), message, min(length, MAXLEN - (n_process * 4)));
     
-    // debug
-    cout << "CRB sending " << seqnum << " | ";
 #ifdef LCB_DEBUG
     stringstream ss;
     ss << "lcbsend" << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
     memorylog->log(ss.str());
 #endif
-    prettyprint(W, n_process);
 
     // broadcasting data
-    b->broadcast(buffer, min(length + (n_process * 4) + 4, MAXLEN), source);
+    b->broadcast(buffer, min(length + (n_process * 4), MAXLEN), source);
 
     // freeing up the memory
+    // todo difference here between delete[] and free?
     delete[] W;
 }
 
