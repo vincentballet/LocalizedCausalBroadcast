@@ -1,9 +1,9 @@
 \documentclass[a4paper]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{hyperref}
+\usepackage{hyperref,amsthm}
 \usepackage{graphicx,alltt}
 %opening
-\title{Philosophy of Life Sciences.\\ On Reinfocement Learning and Compatibilism}
+\title{Localized causal broadcast}
 \author{Sergei Volodin, EPFL MSc student}
 \date{}
 
@@ -29,11 +29,11 @@
     \textit{W} := \textit{V-send};
     \textit{W}[rank(self)] := lsn;
     \textit{lsn} := lsn + 1;
-    \textbf{trigger} \textit{\(<\)rb, Broadcast \(|\) self, (DATA, W, m)\(>\)};
+    \textbf{trigger} \textit{\(<\)urb, Broadcast \(|\) self, (DATA, W, m)\(>\)};
 
-\textbf{upon event} \textit{\(<\)rb, Deliver \(|\) p, (DATA, W, m)\(>\)} \textbf{do}
+\textbf{upon event} \textit{\(<\)urb, Deliver \(|\) p, (DATA, W, m)\(>\)} \textbf{do}
     \textit{pending} := \textit{pending} \(\cup\,\{(p,W,m)\}\) 
-    \textbf{while exists} \((p1,W',m')\) \(\in\) \textit{pending} such that \(W'\leq \)\textit{V-recv} \textbf{do}
+    \textbf{while exists} \((p',W',m')\) \(\in\) \textit{pending} such that \(W'\leq \)\textit{V-recv} \textbf{do}
         \textit{pending} := \textit{pending} \(\setminus\,\{(p',W',m')\}\)
         \textit{V-recv}[rank(p')] := \textit{V-recv}[rank(p')] + 1;
         \textbf{if} \textit{p'} \(\in\) \textit{locality}(self) \textbf{then}
@@ -61,7 +61,18 @@
 	\item There exists some message $m$ such that $m_1 \to m$ and $m \to m_2$
 \end{enumerate}
 
+\begin{proof}
+We argue that the algorithm implements $LCURB$. We note that ATTA the meaning of {\it V-recv} is the number of messages currently delivered from other processes. The meaning of {\it V-send} is the current number of dependencies for a newly sent message and this is respected by the algorithm because the newly sent message must depend on a message received from some other process only if that process is inside the set of dependencies. In case the process is not in the set of dependencies, the send vector clock is not incremented because the newly sent messages don't depend on the received message.
 
+We note that a set of dependencies of a message $dep(m)$ has a following property: if a message $m'\in dep(m)$, then $dep(m)$ contains all previous messages sent by the sender of $m'$ because of the FIFO ordering of the relation $\to$. Therefore, the set of dependencies is 1-to-1 mapped to a vector clock.
+Therefore we send, together with a message, the current set of dependencies of a message {\it W=V-send} represented by a vector clock.
+\begin{enumerate}
+	\item {\bf LCURB1}. Suppose that a correct process $p$ broadcasts $m$. ATTA message was broadcast with the current value {\it V-send'}. We note that ATTA {\it V-send'} $\leq$ {\it V-recv'} and also both of these vectors' entries can only increase. Therefore, when instance {\it urb} would deliver $(m, \textit{V-send'})$, it would be true that {\it V-send'} $\leq$ {\it V-send} $\leq$ {\it V-recv}, and, therefore, the message would be {\it crb}-delivered
+	\item {\bf LCURB2, LCURB3} Since every {\it crb} delivery corresponds to a previously {\it urb}-delivered, we have no duplication/creation by properties of {\it urb}
+	\item {\bf LCURB5}. Suppose that a process has delivered a message $m$ with vector clock $W$. Therefore, by the meaning of $W$ this message has sequence numbers of dependencies sent by $i$: $1..\textit{W}(i)$. According to the algorithm, before delivery it must be that {\textit W} $\leq$ {\textit V-recv}. This implies that the process has delivered all the dependencies of $m$.
+	\item {\bf LCURB4}. Suppose that any process $p$ has delivered $m$. We prove that correct process $p'$ would also deliver $m$. Since $p$ has delivered $m$, by {\bf LCURB5} it has delivered every $m'\to m$. Therefore, they were {\it urb}-delivered. Therefore by agreement property of {\it urb} we have $p'$ also delivering $m$ and all $m'\to m$. ATTA this would imply that $p'$ would deliver $m$.
+\end{enumerate}
+\end{proof}
 
 
 \end{document}
