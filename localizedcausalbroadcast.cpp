@@ -56,7 +56,6 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         
     }
     // FIFO has done its job, we deliver
-    /// @todo The code would be more performant if FIFO was not used
     else {
 
 #ifdef LCB_DEBUG
@@ -68,7 +67,10 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         /// @todo (!!!) Could it be that you need to update current vector clock even if you are not directly affected by a process?
         /// Suppose that a message m2 was sent to you and the other process depends on m1. You don't depend on the sender of m1 directly but you do INDIRECTLY
         /// The best way would be to get rid of the if.. else case and handle both FIFO and non-FIFO cases in LCB(.) instead of LCB(FIFO(.))
-
+        mtx_clock.lock();
+        vclock[Membership::getRank(logical_source)] += 1;
+        mtx_clock.unlock();
+        
         deliverToAll(logical_source, content.c_str(), content.length());
     }
 
