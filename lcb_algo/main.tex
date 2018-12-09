@@ -1,0 +1,44 @@
+\documentclass[a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx,alltt}
+%opening
+\title{Philosophy of Life Sciences.\\ On Reinfocement Learning and Compatibilism}
+\author{Sergei Volodin, EPFL MSc student}
+\date{}
+
+\begin{document}
+	
+\maketitle
+
+\begin{alltt}
+\normalfont
+\textbf{Implements}:
+    LocalizedCausalBroadcast, \textbf{instance} \textit{lcrb}.
+
+\textbf{Uses}:
+    UniformReliableBroadcast, \textbf{instance} \textit{urb}.
+
+\textbf{upon event} \textit{\(<\)lcrb, Init\(>\)} \textbf{do}
+    \textit{V-send} := \([0]\sp{N}\);
+    \textit{V-recv} := \([0]\sp{N}\);
+    \textit{lsn} := 0;
+    \textit{pending} := \(\emptyset\);
+
+\textbf{upon event} \textit{\(<\)lcrb, Broadcast \(|\) \textit{m}\(>\)} \textbf{do}
+    \textit{W} := \textit{V-send};
+    \textit{W}[rank(self)] := lsn;
+    \textit{lsn} := lsn + 1;
+    \textbf{trigger} \textit{\(<\)rb, Broadcast \(|\) self, (DATA, W, m)\(>\)};
+
+\textbf{upon event} \textit{\(<\)rb, Deliver \(|\) p, (DATA, W, m)\(>\)} \textbf{do}
+    \textit{pending} := \textit{pending} \(\cup\,\{(p,W,m)\}\) 
+    \textbf{while exists} \((p1,W',m')\) \(\in\) \textit{pending} such that \(W'\leq \)\textit{V-recv} \textbf{do}
+        \textit{pending} := \textit{pending} \(\setminus\,\{(p',W',m')\}\)
+        \textit{V-recv}[rank(p')] := \textit{V-recv}[rank(p')] + 1;
+        \textbf{if} \textit{p'} \(\in\) \textit{locality}(self) \textbf{then}
+            \textit{V-send}[rank(p')] := \textit{V-send}[rank(p')] + 1;
+        \textbf{trigger} \textit{\(<\)lcrb, Deliver \(|\) p', m\(>\)};
+\end{alltt}
+
+\end{document}
