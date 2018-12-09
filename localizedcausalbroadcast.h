@@ -23,6 +23,7 @@
 using std::pair;
 using std::vector;
 using std::list;
+using std::tuple;
 using std::set;
 using std::mutex;
 
@@ -50,8 +51,8 @@ private:
     set<unsigned> loc;
     
     /// @brief The buffer for not yet delivered messages per sender
-    /// format: source -> (seq_num -> data)
-    map<unsigned, pair<string, uint32_t*>>* buffer;
+    /// format: (sender, content, vectorclock)
+    list<tuple<unsigned, string, uint32_t*>> buffer;
     
     /// @brief current sending sequence number
     unsigned send_seq_num;
@@ -59,8 +60,8 @@ private:
     /// @brief React on a message with parsed source
     virtual void onMessage(unsigned logical_source, const char* buffer, unsigned length);
     
-    /// @brief React on a parsed message
-    void tryDeliverAll(unsigned sender);
+    /// @brief React on all parsed messages
+    void tryDeliverAll();
     
     /**
      * @brief tryDeliver Try delivering a message
