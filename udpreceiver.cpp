@@ -89,15 +89,14 @@ void* UDPReceiver::receiveLoop(void *args)
         int type = buffer[4];
         unsigned pk_seq = charsToInt32(buffer + 5);
         unsigned log_sender = charsToInt32(buffer + 9);
-        unsigned fifo_seq = charsToInt32(buffer + 13);
-        unsigned payload = charsToInt32(buffer + 17);
+        unsigned payload = charsToInt32(buffer + 13 + 4 * instance->membership->getProcesses().size());
 
         if(type == 0x01)
         {
             stringstream ss;
             ss << "Source " << source << " type " << type
                << " pkseq " << pk_seq << " log_sender " << log_sender
-               << " fifo_seq " << fifo_seq << " payload " << payload;
+               << " payload " << payload;
             memorylog->log(ss.str());
         }
 #endif
