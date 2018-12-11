@@ -1,5 +1,5 @@
 # input file
-f = open('../da_proc_1.out').read().splitlines()
+f = open('da_proc_1.out').read().splitlines()
 
 # number of threads and messages
 n_thread, n_msg = [int(t) for t in f[0].split()]
@@ -11,6 +11,9 @@ sent_by = {}
 
 # loop over lines
 for line in f[1:]:
+  # dropping extra lines
+  if not line.startswith('thread'): continue
+
   # parsing one line
   thread, n, message, x = line.split()
 
