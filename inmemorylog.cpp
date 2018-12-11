@@ -22,16 +22,19 @@ void *InMemoryLog::dumpLoop(void *arg)
         // waiting for new data to appear
         if(dumped == 0)
         {
-            struct timespec ts;
+            struct timespec ts_old, ts, ts_new;
 
             // locking the timedwait mutex
             pthread_mutex_lock(&memorylog->lock);
 
             // obtaining current time
-            clock_gettime(CLOCK_REALTIME, &ts);
+            clock_gettime(CLOCK_REALTIME, &ts_old);
+
+            // copying data to ts
+            ts = ts_old;
 
             // waiting at most 1000000 * 1e-9 sec = 1e-3 sec = 1ms
-            ts.tv_nsec += 1000000;
+            ts.tv_sec += 1000000;
 
             // normalize timespec to protect against EINVAL
             /// @see https://stackoverflow.com/questions/25254392/how-to-properly-set-timespec-for-sem-timedwait-to-protect-against-einval-error
@@ -43,6 +46,11 @@ void *InMemoryLog::dumpLoop(void *arg)
 
             // unlocking the mutex
             pthread_mutex_unlock(&memorylog->lock);
+
+            // current time
+//            clock_gettime(CLOCK_REALTIME, &ts_new);
+//            printf("OLD %lld.%lld\n", ts_old.tv_sec, ts_old.tv_nsec);
+//            printf("NEW %lld.%lld\n", ts_new.tv_sec, ts_new.tv_nsec);
         }
     }
 
