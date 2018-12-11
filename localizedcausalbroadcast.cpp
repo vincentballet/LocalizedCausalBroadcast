@@ -39,11 +39,16 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
         memorylog->log(ss.str());
 #endif
 
+    /// Lock for the messages buffer & V_rcve
+    mtx.lock();
+    
     tuple<unsigned, string, uint32_t*> t(logical_source, content, W);
     buffer.push_back(t);
 
     // trying to deliver all messages
     tryDeliverAll();
+    
+    mtx.unlock();
     
 }
 
@@ -52,18 +57,7 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     // for going over buffer
     list<tuple<unsigned, string, uint32_t*>>::iterator it;
 
-    // local vector clocks
-    uint32_t* V_send_cpy = new uint32_t[n_process];
-
-    // sanity check
-    assert(V_send_cpy);
-
-    mtx_send_clock.lock();
-    memcpy(V_send_cpy, V_send, n_process * 4);
-    mtx_send_clock.unlock();
     
-    /// Lock for the messages buffer & V_rcve
-    mtx_recv_clock.lock();
    
     // loop over messages in buffer
     for(it = buffer.begin(); it != buffer.end(); )
@@ -84,12 +78,10 @@ void LocalizedCausalBroadcast::tryDeliverAll()
             
             if(loc.find(sender) != loc.end()){
                 //CRB Delivering a message
-                mtx_send_clock.lock();
+//                mtx_send_clock.lock();
                 V_send[Membership::getRank(sender)] += 1;
-                mtx_send_clock.unlock();
-                
-                //Incrementing our local variable for the loop to continue without issue
-                V_send_cpy[Membership::getRank(sender)] += 1;
+//                mtx_send_clock.unlock();
+        
             }
             
             //passing to target
@@ -106,10 +98,6 @@ void LocalizedCausalBroadcast::tryDeliverAll()
         // otherwise just incrementing the counter
         else it++;
     }
-    
-    mtx_recv_clock.unlock();
-    
-    free(V_send_cpy);
 }
 
 LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<unsigned> locality, unsigned rank) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
@@ -163,18 +151,18 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     assert(W);
 
     //mtx for send_seq_num
-    mtx_send_lsn.lock();
+    mtx.lock();
     // updating the sending vclock
-    mtx_send_clock.lock();
+//    mtx_send_clock.lock();
     memcpy(W, V_send, n_process * 4);
-    mtx_send_clock.unlock();
+//    mtx_send_clock.unlock();
 
     // incrementing sequence number
     unsigned seqnum = send_seq_num;
     W[this->rank] = seqnum;
     send_seq_num++ ;
     
-    mtx_send_lsn.unlock();
+    mtx.unlock();
     
     // copying vector clock
     memcpy(buffer, W, min(n_process * 4, MAXLEN));
