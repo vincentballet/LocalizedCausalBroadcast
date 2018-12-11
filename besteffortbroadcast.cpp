@@ -7,7 +7,18 @@ void BestEffortBroadcast::onMessage(unsigned source, const char* buffer, unsigne
     // log BEB deliver
 #ifdef BEB_DEBUG
     stringstream ss;
-    ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 8);
+    ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 4 + 4 * (senders.size() + 1));
+//    printf("BEBD\n");
+//    for(int i = 0; i < length; i++)
+//    {
+//        printf("%d\t", i);
+//    }
+//    printf("\n");
+//    for(int i = 0; i < length; i++)
+//    {
+//        printf("0x%x\t", (uint8_t) buffer[i]);
+//    }
+//    printf("\n");
     memorylog->log(ss.str());
 #endif
 
