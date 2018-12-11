@@ -19,9 +19,31 @@ void *InMemoryLog::dumpLoop(void *arg)
 
         int dumped = memorylog->dump();
 
-        // waiting 1 ms if there are no new messages
+        // waiting for new data to appear
         if(dumped == 0)
-            usleep(1000);
+        {
+            struct timespec ts;
+
+            // locking the timedwait mutex
+            pthread_mutex_lock(&memorylog->lock);
+
+            // obtaining current time
+            clock_gettime(CLOCK_REALTIME, &ts);
+
+            // waiting at most 1000000 * 1e-9 sec = 1e-3 sec = 1ms
+            ts.tv_nsec += 1000000;
+
+            // normalize timespec to protect against EINVAL
+            /// @see https://stackoverflow.com/questions/25254392/how-to-properly-set-timespec-for-sem-timedwait-to-protect-against-einval-error
+            ts.tv_sec += ts.tv_nsec / 1000000000;
+            ts.tv_nsec %= 1000000000;
+
+            // waiting for messages to appear or for a timeout
+            pthread_cond_timedwait(&memorylog->cond, &memorylog->lock, &ts);
+
+            // unlocking the mutex
+            pthread_mutex_unlock(&memorylog->lock);
+        }
     }
 
     // never returns if always active
@@ -60,6 +82,12 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     // Logging the beginning
     log("BEGINNING");
 #endif
+
+    // initializing mutex
+    pthread_mutex_init(&lock, nullptr);
+
+    // initializing condition
+    pthread_cond_init(&cond, nullptr);
 
     // starting the thread for dumping data
     pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
@@ -120,6 +148,9 @@ void InMemoryLog::log(std::string content)
 
     // end of critical section
     m_write.unlock();
+
+    // signalling the dumping thread that there are new messages
+    pthread_cond_signal(&cond);
 }
 
 int InMemoryLog::dump(bool last)
