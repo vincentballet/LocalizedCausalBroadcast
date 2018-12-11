@@ -1,10 +1,11 @@
 #!/bin/bash
 
+make -C .. -j10
 crash=-1
 
 run() {
-    first=$(python run_with_crashes.py .. 2>&1)
-    second=$(python test_localized_causal_all_properties.py .. 2>&1)  
+    first=$(python3 run_with_crashes.py .. 2>&1)
+    second=$(python3 test_localized_causal_all_properties.py .. 2>&1)
     if [ "$second" == "CORRECT" ]; then
         echo "Correct !"
     else
