@@ -46,7 +46,6 @@ void runPerfectLink(PerfectLink* l, int nbr){
     }
 }
 
-
 void testPerfectLink(unsigned n, unsigned m, vector<PerfectLink*> links)
 {
         
@@ -66,8 +65,13 @@ void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
     for(sender_ = senders.begin(); sender_ != senders.end(); sender_++)
     {
         UDPSender* sender = *sender_;
-        char buf[MAXLEN - 10];
+        const int L = MAXLEN - 10;
+        char buf[L];
         buf[0] = 0x01;
+        for(int i = 1; i < L; i++)
+        {
+            buf[i] = i;
+        }
         for(unsigned i = 0; i < 10000000; i++)
         {
             int32ToChars(i, buf + 1);
@@ -83,7 +87,7 @@ const int n_threads = 10;
 const int n_msg = 1000000;
 
 // sleep us between messages
-const int sleep_us = 1;
+const int sleep_us = 1000;
 
 void* logger_thread(void* arg)
 {
