@@ -23,12 +23,6 @@ using std::mutex;
 class InMemoryLog
 {
 private:
-    /// Semaphore with N - number of messages
-    sem_t full_sem;
-
-    /// Semaphore with number of messages
-    sem_t empty_sem;
-
     /// Dump thread
     pthread_t dump_thread;
 

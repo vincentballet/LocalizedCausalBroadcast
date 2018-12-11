@@ -61,11 +61,6 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     log("BEGINNING");
 #endif
 
-
-    // initializing semaphores
-    sem_init(&full_sem, 0, MAX_MESSAGES);
-    sem_init(&empty_sem, 0, 0);
-
     // starting the thread for dumping data
     pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
 }
@@ -87,8 +82,6 @@ void InMemoryLog::log(std::string content)
 #ifdef IMMEDIATE_FILE
     file_immediate << time << " " << content << endl;
 #endif
-
-    //sem_wait(&full_sem);
 
     // beginning of critical section
     m_write.lock();
@@ -127,14 +120,10 @@ void InMemoryLog::log(std::string content)
 
     // end of critical section
     m_write.unlock();
-
-    //sem_post(&empty_sem);
 }
 
 int InMemoryLog::dump(bool last)
 {
-    //sem_wait(&empty_sem);
-
     m_read.lock();
 
     // getting current number of messages
@@ -161,7 +150,6 @@ int InMemoryLog::dump(bool last)
 
         // writing data
         file << buffer[read_index] << std::endl;
-        //sem_post(&full_sem);
         dumped++;
 
 #ifdef DEBUG_FILES
