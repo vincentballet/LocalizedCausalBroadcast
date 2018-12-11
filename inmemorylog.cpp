@@ -52,7 +52,7 @@ void *InMemoryLog::dumpLoop(void *arg)
 InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
 {
     // maximal number of messages in the buffer
-    MAX_MESSAGES = 100000;
+    MAX_MESSAGES = 1000000;
 
     // allocating memory
     buffer = new string[MAX_MESSAGES];
