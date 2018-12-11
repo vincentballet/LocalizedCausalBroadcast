@@ -7,7 +7,7 @@ void BestEffortBroadcast::onMessage(unsigned source, const char* buffer, unsigne
     // log BEB deliver
 #ifdef BEB_DEBUG
     stringstream ss;
-    ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 8);
+    ss << "bebd " << source << " " << charsToInt32(buffer) << " " << charsToInt32(buffer + 4 + 4 * (senders.size() + 1));
     memorylog->log(ss.str());
 #endif
 
@@ -20,7 +20,7 @@ void BestEffortBroadcast::broadcast(const char* message, unsigned length, unsign
 #ifdef BEB_DEBUG
     // log BEB broadcast
     stringstream ss;
-    ss << "bebb " << charsToInt32(message + 4);
+    ss << "bebb " << charsToInt32(message + 4 * (senders.size() + 1));
     memorylog->log(ss.str());
 #endif
 

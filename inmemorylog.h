@@ -23,12 +23,6 @@ using std::mutex;
 class InMemoryLog
 {
 private:
-    /// Semaphore with N - number of messages
-    sem_t full_sem;
-
-    /// Semaphore with number of messages
-    sem_t empty_sem;
-
     /// Dump thread
     pthread_t dump_thread;
 
@@ -40,6 +34,12 @@ private:
 
     /// Output file (immediate)
     ofstream file_immediate;
+
+    /// @brief The lock for cond wait
+    pthread_mutex_t lock;
+
+    /// @brief The wait condition to wake up the dumper thread
+    pthread_cond_t cond;
 
     /// Maximal number of messages between dumps
     int MAX_MESSAGES;

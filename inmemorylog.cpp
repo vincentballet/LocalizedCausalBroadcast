@@ -19,9 +19,39 @@ void *InMemoryLog::dumpLoop(void *arg)
 
         int dumped = memorylog->dump();
 
-        // waiting 1 ms if there are no new messages
+        // waiting for new data to appear
         if(dumped == 0)
-            usleep(1000);
+        {
+            struct timespec ts_old, ts, ts_new;
+
+            // locking the timedwait mutex
+            pthread_mutex_lock(&memorylog->lock);
+
+            // obtaining current time
+            clock_gettime(CLOCK_REALTIME, &ts_old);
+
+            // copying data to ts
+            ts = ts_old;
+
+            // waiting at most 1000000 * 1e-9 sec = 1e-3 sec = 1ms
+            ts.tv_sec += 1000000;
+
+            // normalize timespec to protect against EINVAL
+            /// @see https://stackoverflow.com/questions/25254392/how-to-properly-set-timespec-for-sem-timedwait-to-protect-against-einval-error
+            ts.tv_sec += ts.tv_nsec / 1000000000;
+            ts.tv_nsec %= 1000000000;
+
+            // waiting for messages to appear or for a timeout
+            pthread_cond_timedwait(&memorylog->cond, &memorylog->lock, &ts);
+
+            // unlocking the mutex
+            pthread_mutex_unlock(&memorylog->lock);
+
+            // current time
+//            clock_gettime(CLOCK_REALTIME, &ts_new);
+//            printf("OLD %lld.%lld\n", ts_old.tv_sec, ts_old.tv_nsec);
+//            printf("NEW %lld.%lld\n", ts_new.tv_sec, ts_new.tv_nsec);
+        }
     }
 
     // never returns if always active
@@ -30,7 +60,7 @@ void *InMemoryLog::dumpLoop(void *arg)
 InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
 {
     // maximal number of messages in the buffer
-    MAX_MESSAGES = 100000;
+    MAX_MESSAGES = 1000000;
 
     // allocating memory
     buffer = new string[MAX_MESSAGES];
@@ -61,10 +91,11 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
     log("BEGINNING");
 #endif
 
+    // initializing mutex
+    pthread_mutex_init(&lock, nullptr);
 
-    // initializing semaphores
-    sem_init(&full_sem, 0, MAX_MESSAGES);
-    sem_init(&empty_sem, 0, 0);
+    // initializing condition
+    pthread_cond_init(&cond, nullptr);
 
     // starting the thread for dumping data
     pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
@@ -87,8 +118,6 @@ void InMemoryLog::log(std::string content)
 #ifdef IMMEDIATE_FILE
     file_immediate << time << " " << content << endl;
 #endif
-
-    //sem_wait(&full_sem);
 
     // beginning of critical section
     m_write.lock();
@@ -128,13 +157,12 @@ void InMemoryLog::log(std::string content)
     // end of critical section
     m_write.unlock();
 
-    //sem_post(&empty_sem);
+    // signalling the dumping thread that there are new messages
+    pthread_cond_signal(&cond);
 }
 
 int InMemoryLog::dump(bool last)
 {
-    //sem_wait(&empty_sem);
-
     m_read.lock();
 
     // getting current number of messages
@@ -161,7 +189,6 @@ int InMemoryLog::dump(bool last)
 
         // writing data
         file << buffer[read_index] << std::endl;
-        //sem_post(&full_sem);
         dumped++;
 
 #ifdef DEBUG_FILES

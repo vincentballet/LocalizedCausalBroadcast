@@ -20,31 +20,48 @@ using std::endl;
 void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* message, unsigned length)
 {
     // must have at least 4 bytes for seq num
-    assert(length >= 4);
+    assert(length >= n_process * 4);
     assert(logical_source <= senders.size() + 1);
-   
+
     // obtaining the content
     string content(message + (n_process * 4), length - (n_process * 4));
     
     // obtaining the clock
     uint32_t* W = new uint32_t[n_process];
-    
     memcpy(W, message, (n_process * 4));
-   
+
+    // sanity check
     assert(W);
     
 #ifdef LCB_DEBUG
+    {
         stringstream ss;
-        ss << "lcback from " << logical_source << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
+        ss << "lcbrecv " << logical_source << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
         memorylog->log(ss.str());
+    }
 #endif
 
+    // lock for the messages buffer & V_recv
+    mtx_recv_clock.lock();
+    
+    // representation of all the received messages (source, payload, vectorclock)
     tuple<unsigned, string, uint32_t*> t(logical_source, content, W);
+
+    // adding message to the buffer
     buffer.push_back(t);
 
     // trying to deliver all messages
     tryDeliverAll();
     
+    mtx_recv_clock.unlock();
+
+#ifdef LCB_DEBUG
+    {
+        stringstream ss;
+        ss << "lcbrecv " << logical_source << " " << charsToInt32(content.c_str()) << " END";
+        memorylog->log(ss.str());
+    }
+#endif
 }
 
 void LocalizedCausalBroadcast::tryDeliverAll()
@@ -52,69 +69,78 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     // for going over buffer
     list<tuple<unsigned, string, uint32_t*>>::iterator it;
 
-    // local vector clocks
-    uint32_t* V_send_cpy = new uint32_t[n_process];
+    // indicates whether or not need one more pass over the buffer
+    bool needMoreLoops = true;
 
-    // sanity check
-    assert(V_send_cpy);
-
-    mtx_send_clock.lock();
-    memcpy(V_send_cpy, V_send, n_process * 4);
-    mtx_send_clock.unlock();
-    
-    /// Lock for the messages buffer & V_rcve
-    mtx_recv_clock.lock();
-   
-    // loop over messages in buffer
-    for(it = buffer.begin(); it != buffer.end(); )
+    // doing multiple passes over the buffer
+    // because otherwise can have order 2 1, then need two passes to deliver 1 2
+    // ordering will fix this issue
+    /// @todo Sort data over W and return if can't deliver anything else
+    while(needMoreLoops)
     {
-        unsigned sender = std::get<0>(*it);
-        string content = std::get<1>(*it);
-        uint32_t* W = std::get<2>(*it);
-        
-#ifdef LCB_DEBUG
-        stringstream ss;
-        ss << "lcback CRB from " << sender << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
-        memorylog->log(ss.str());
-#endif
-            
-        if(compare_vclocks(W, V_recv)){
-            
-            V_recv[Membership::getRank(sender)] += 1;
-            
-            if(loc.find(sender) != loc.end()){
-                //CRB Delivering a message
-                mtx_send_clock.lock();
-                V_send[Membership::getRank(sender)] += 1;
-                mtx_send_clock.unlock();
-                
-                //Incrementing our local variable for the loop to continue without issue
-                V_send_cpy[Membership::getRank(sender)] += 1;
-            }
-            
-            //passing to target
-            deliverToAll(sender, content.c_str(), content.length());
-            
-            //free memory
-            free(W);
-            
-            // erase() returns the next element
-            it = buffer.erase(it);
-            
-        }
+        needMoreLoops = false;
+        // loop over messages in buffer
+        for(it = buffer.begin(); it != buffer.end(); )
+        {
+            // logical sender id
+            unsigned sender = std::get<0>(*it);
+            // payload
+            string content = std::get<1>(*it);
+            // V_send at sender at time of broadcasting the received message
+            uint32_t* W = std::get<2>(*it);
 
-        // otherwise just incrementing the counter
-        else it++;
+            // CRB delivering a message if W <= V_recv
+            if(compare_vclocks(W, V_recv))
+            {
+#ifdef LCB_DEBUG
+                stringstream ss;
+                ss << "lcbd " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
+                memorylog->log(ss.str());
+#endif
+                // if have a message delivered, potentially can have more
+                needMoreLoops = true;
+
+                // increments nbr of received messages
+                V_recv[Membership::getRank(sender)] += 1;
+
+                // source of message is affecting receiver in terms of LCB
+                if(loc.find(sender) != loc.end()){
+                    // mtx for send_seq_num & V_send clock
+                    mtx_send_clock.lock();
+
+                    // increments the current nbr of dependencies
+                    V_send[Membership::getRank(sender)] += 1;
+
+                    // unlocking the V_send lock
+                    mtx_send_clock.unlock();
+                }
+
+                // passing to target
+                deliverToAll(sender, content.c_str(), content.length());
+
+                // free memory
+                free(W);
+
+                // erase() returns the next element
+                it = buffer.erase(it);
+
+            }
+            // otherwise just incrementing the counter (can't deliver now)
+            else {
+#ifdef LCB_DEBUG
+                stringstream ss;
+                ss << "lcb can't deliver " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
+                memorylog->log(ss.str());
+#endif
+                it++;
+            }
+        }
     }
-    
-    mtx_recv_clock.unlock();
-    
-    free(V_send_cpy);
 }
 
 LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<unsigned> locality, unsigned rank) : Broadcast(broadcast->this_process, broadcast->senders, broadcast->receivers)
 {
-    
+    // number of processes
     n_process = (unsigned int)this->senders.size() + 1;
     
     // init new vlock of size m (whatever the locality is)
@@ -125,6 +151,7 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     assert(V_send);
     assert(V_recv);
 
+    // zeroing vector clocks
     for (int i = 0 ; i < n_process; i++){
         V_send[i] = 0;
         V_recv[i] = 0;
@@ -157,26 +184,29 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 {
     // buffer for sending
     char buffer[MAXLEN];
+
+    // send vector clock copy
     uint32_t* W = new uint32_t[n_process];
     
     // sanity check
     assert(W);
 
-    //mtx for send_seq_num
-    mtx_send_lsn.lock();
-    // updating the sending vclock
+    // mtx for send_seq_num & V_send clock
     mtx_send_clock.lock();
+
+    // updating the sending vclock
     memcpy(W, V_send, n_process * 4);
-    mtx_send_clock.unlock();
+
+    // WARNING: must use CURRENT send_seq_num
+    W[this->rank] = send_seq_num;
 
     // incrementing sequence number
-    unsigned seqnum = send_seq_num;
-    W[this->rank] = seqnum;
-    send_seq_num++ ;
+    send_seq_num++;
+
+    // unlocking
+    mtx_send_clock.unlock();
     
-    mtx_send_lsn.unlock();
-    
-    // copying vector clock
+    // copying vector clock to the buffer
     memcpy(buffer, W, min(n_process * 4, MAXLEN));
 
     // copying payload
@@ -184,7 +214,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
     
 #ifdef LCB_DEBUG
     stringstream ss;
-    ss << "lcbsend" << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
+    ss << "lcbb " << this_process << " " << charsToInt32(message) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
     memorylog->log(ss.str());
 #endif
 

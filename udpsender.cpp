@@ -57,15 +57,14 @@ void UDPSender::send(const char* data, unsigned N)
     int type = buf[4];
     unsigned pk_seq = charsToInt32(buf + 5);
     unsigned log_sender = charsToInt32(buf + 9);
-    unsigned fifo_seq = charsToInt32(buf + 13);
-    unsigned payload = charsToInt32(buf + 17);
+    unsigned payload = charsToInt32(buf + 13 + 4 * membership->getProcesses().size());
 
     if(type == 0x01)
     {
         stringstream ss;
         ss << "Destination " << target << " source " << this_process << " type " << type
            << " pkseq " << pk_seq << " log_sender " << log_sender
-           << " fifo_seq " << fifo_seq << " payload " << payload;
+           << " payload " << payload;
         memorylog->log(ss.str());
     }
 

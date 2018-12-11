@@ -293,10 +293,8 @@ int main(int argc, const char** argv)
     UniformReliableBroadcast broadcast1(&broadcast2);
     
 #ifdef LOCALIZED_CAUSAL_BROADCAST
-    // creating fifo broadcast
-    FIFOBroadcast fifo(&broadcast1);
     // creating localized causal broadcast
-    LocalizedCausalBroadcast broadcast(&fifo, members.getLocality(n), Membership::getRank(n));
+    LocalizedCausalBroadcast broadcast(&broadcast1, members.getLocality(n), Membership::getRank(n));
 #else
     // creating fifo broadcast
     FIFOBroadcast broadcast(&broadcast1);

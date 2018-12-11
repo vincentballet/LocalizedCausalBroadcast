@@ -43,8 +43,14 @@ n = len(membership)
 print('There are %d processes' % n)
 
 # maximal number of crashed processes
-max_crashed = n // 2 if len(sys.argv) == 2 else 0
-#max_crashed = 0
+def minority(n):
+  """ Get minority """
+  if n % 2 == 0:
+    return (n // 2) - 1
+  else: return n // 2
+
+# crashing only a minority at most
+max_crashed = minority(n) if len(sys.argv) == 2 else 0
 
 # checking that max_crashed is valid
 assert 2 * max_crashed < n, "Must have a valid majority"
@@ -52,10 +58,7 @@ assert 2 * max_crashed < n, "Must have a valid majority"
 print("Crashing %d at most" % max_crashed)
 
 # choosing how many processes to crash
-p = [0.1, 0.5, 0.4][:max_crashed + 1]
-p = np.array(p) / np.sum(p)
-p = list(p)
-n_crashed = np.random.choice(range(max_crashed + 1), p = p)
+n_crashed = np.random.choice(range(max_crashed + 1))
 
 # choosing which to crash
 crashed_processes = np.random.choice(range(n), n_crashed, replace = False)
