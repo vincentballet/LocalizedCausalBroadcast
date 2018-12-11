@@ -46,7 +46,7 @@ void UniformReliableBroadcast::onMessage(unsigned source, unsigned logical_sourc
 
 #ifdef URB_DEBUG
     stringstream ss;
-    ss << "urback " << charsToInt32(buffer + 4) << " " << source;
+    ss << "urback " << charsToInt32(buffer + 4 * (senders.size() + 1)) << " " << source;
     memorylog->log(ss.str());
 #endif
 
@@ -138,7 +138,7 @@ bool UniformReliableBroadcast::tryDeliver()
 #ifdef URB_DEBUG
         // log BEB deliver
         stringstream ss;
-        ss << "urbd " << source << " " << charsToInt32(message.c_str() + 4);
+        ss << "urbd " << source << " " << charsToInt32(message.c_str() + 4 * (senders.size() + 1));
         memorylog->log(ss.str());
 #endif
         deliverToAll(source, message.c_str(), message.length());
