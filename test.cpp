@@ -80,10 +80,10 @@ void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
 const int n_threads = 10;
 
 // number of messages per thread
-const int n_msg = 100000;
+const int n_msg = 1000000;
 
 // sleep us between messages
-const int sleep_us = 10;
+const int sleep_us = 1;
 
 void* logger_thread(void* arg)
 {
