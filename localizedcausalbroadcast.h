@@ -32,8 +32,9 @@ class LocalizedCausalBroadcast : public Broadcast
 {
 private:
     /// @brief Mutex for the object
-    mutex mtx_send_lsn, mtx_send_clock, mtx_recv_clock;
-    
+//    mutex mtx_send_lsn, mtx_send_clock, mtx_recv_clock;
+    mutex mtx;
+
     /// @brief Reliable broadcast instance
     Broadcast* b;
     
