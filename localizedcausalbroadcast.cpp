@@ -22,21 +22,23 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // must have at least 4 bytes for seq num
     assert(length >= n_process * 4);
     assert(logical_source <= senders.size() + 1);
-   
+
     // obtaining the content
     string content(message + (n_process * 4), length - (n_process * 4));
     
     // obtaining the clock
     uint32_t* W = new uint32_t[n_process];
     memcpy(W, message, (n_process * 4));
-   
+
     // sanity check
     assert(W);
     
 #ifdef LCB_DEBUG
+    {
         stringstream ss;
-        ss << "lcbd " << logical_source << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
+        ss << "lcbrecv " << logical_source << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "]";
         memorylog->log(ss.str());
+    }
 #endif
 
     // lock for the messages buffer & V_recv
@@ -52,6 +54,14 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     tryDeliverAll();
     
     mtx_recv_clock.unlock();
+
+#ifdef LCB_DEBUG
+    {
+        stringstream ss;
+        ss << "lcbrecv " << logical_source << " " << charsToInt32(content.c_str()) << " END";
+        memorylog->log(ss.str());
+    }
+#endif
 }
 
 void LocalizedCausalBroadcast::tryDeliverAll()
@@ -59,48 +69,72 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     // for going over buffer
     list<tuple<unsigned, string, uint32_t*>>::iterator it;
 
-    // loop over messages in buffer
-    for(it = buffer.begin(); it != buffer.end(); )
+    // indicates whether or not need one more pass over the buffer
+    bool needMoreLoops = true;
+
+    // doing multiple passes over the buffer
+    // because otherwise can have order 2 1, then need two passes to deliver 1 2
+    // ordering will fix this issue
+    /// @todo Sort data over W and return if can't deliver anything else
+    while(needMoreLoops)
     {
-        // logical sender id
-        unsigned sender = std::get<0>(*it);
-        // payload
-        string content = std::get<1>(*it);
-        // V_send at sender at time of broadcasting the received message
-        uint32_t* W = std::get<2>(*it);
-        
-        // CRB delivering a message if W <= V_recv
-        if(compare_vclocks(W, V_recv))
+        needMoreLoops = false;
+        // loop over messages in buffer
+        for(it = buffer.begin(); it != buffer.end(); )
         {
-            // increments nbr of received messages
-            V_recv[Membership::getRank(sender)] += 1;
-            
-            // source of message is affecting receiver in terms of LCB
-            if(loc.find(sender) != loc.end()){
-                // mtx for send_seq_num & V_send clock
-                mtx_send_clock.lock();
+            // logical sender id
+            unsigned sender = std::get<0>(*it);
+            // payload
+            string content = std::get<1>(*it);
+            // V_send at sender at time of broadcasting the received message
+            uint32_t* W = std::get<2>(*it);
 
-                // increments the current nbr of dependencies
-                V_send[Membership::getRank(sender)] += 1;
+            // CRB delivering a message if W <= V_recv
+            if(compare_vclocks(W, V_recv))
+            {
+#ifdef LCB_DEBUG
+                stringstream ss;
+                ss << "lcbd " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
+                memorylog->log(ss.str());
+#endif
+                // if have a message delivered, potentially can have more
+                needMoreLoops = true;
 
-                // unlocking the V_send lock
-                mtx_send_clock.unlock();
+                // increments nbr of received messages
+                V_recv[Membership::getRank(sender)] += 1;
+
+                // source of message is affecting receiver in terms of LCB
+                if(loc.find(sender) != loc.end()){
+                    // mtx for send_seq_num & V_send clock
+                    mtx_send_clock.lock();
+
+                    // increments the current nbr of dependencies
+                    V_send[Membership::getRank(sender)] += 1;
+
+                    // unlocking the V_send lock
+                    mtx_send_clock.unlock();
+                }
+
+                // passing to target
+                deliverToAll(sender, content.c_str(), content.length());
+
+                // free memory
+                free(W);
+
+                // erase() returns the next element
+                it = buffer.erase(it);
+
             }
-            
-            // passing to target
-            deliverToAll(sender, content.c_str(), content.length());
-            
-            // free memory
-            free(W);
-            
-            // erase() returns the next element
-            it = buffer.erase(it);
-            
+            // otherwise just incrementing the counter (can't deliver now)
+            else {
+#ifdef LCB_DEBUG
+                stringstream ss;
+                ss << "lcb can't deliver " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
+                memorylog->log(ss.str());
+#endif
+                it++;
+            }
         }
-        // otherwise just incrementing the counter (can't deliver now)
-        else it++;
-
-        /// @todo Sort data over W and return if can't deliver anything else
     }
 }
 
@@ -159,7 +193,7 @@ void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, u
 
     // mtx for send_seq_num & V_send clock
     mtx_send_clock.lock();
-   
+
     // updating the sending vclock
     memcpy(W, V_send, n_process * 4);
 
