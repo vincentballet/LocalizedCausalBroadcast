@@ -9,9 +9,9 @@ run() {
         echo "Correct !"
     else
         crash=1
-        echo "Incorrect."
-        echo "$first"
-        echo "$second"
+        echo "Incorrect. See prog_output.txt and test_output.txt"
+        echo "$first" | tee prog_output.txt
+        echo "$second" | tee test_output.txt
     fi
     
 }
