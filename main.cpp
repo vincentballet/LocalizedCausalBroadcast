@@ -80,9 +80,8 @@ void writeOutputAndHalt()
     
     cout << "Writing output..." << endl;
 
-    // Dumping remaining messages to file and closing the log file
-    memorylog->disable();
-    memorylog->dump(true);
+    // writing output file
+    memorylog->dump();
 
     exit(0);
 }
