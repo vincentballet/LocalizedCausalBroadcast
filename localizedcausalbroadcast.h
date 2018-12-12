@@ -53,10 +53,22 @@ private:
     /// @brief Processes dependencies
     set<unsigned> loc;
     
+    /** @brief comparator to order set of clocks **/
+    struct cmpStruct {
+        bool operator() (const tuple<unsigned, string, uint32_t*> lhs, const tuple<unsigned, string, uint32_t*> rhs) const
+        {
+            unsigned sender = std::get<0>(lhs) - 1;
+            uint32_t* W1 = std::get<2>(lhs);
+            uint32_t* W2 = std::get<2>(rhs);
+            return W1[sender] < W2[sender];
+        }
+    };
+    
     /// @brief The buffer for not yet delivered messages per sender
     /// format: (sender, content, vectorclock)
-    list<tuple<unsigned, string, uint32_t*>> buffer;
-    
+    //  set<tuple<unsigned, string, uint32_t*>, cmpStruct> buffer;
+    set<tuple<unsigned, string, uint32_t*>, cmpStruct>* buffer;
+
     /// @brief current sending sequence number
     unsigned send_seq_num;
     
@@ -78,6 +90,8 @@ private:
     
     /** @brief vector clocks comparator */
     bool compare_vclocks(uint32_t* V, uint32_t* W);
+    
+
 
 public:
     /**

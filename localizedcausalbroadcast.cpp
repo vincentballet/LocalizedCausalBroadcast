@@ -48,7 +48,8 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     tuple<unsigned, string, uint32_t*> t(logical_source, content, W);
 
     // adding message to the buffer
-    buffer.push_back(t);
+    // -1 because indexed at 0
+    buffer[logical_source-1].insert(t);
 
     // trying to deliver all messages
     tryDeliverAll();
@@ -67,8 +68,8 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 void LocalizedCausalBroadcast::tryDeliverAll()
 {
     // for going over buffer
-    list<tuple<unsigned, string, uint32_t*>>::iterator it;
-
+    set<tuple<unsigned, string, uint32_t*>, cmpStruct>::iterator it;
+    
     // indicates whether or not need one more pass over the buffer
     bool needMoreLoops = true;
 
@@ -79,60 +80,65 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     while(needMoreLoops)
     {
         needMoreLoops = false;
-        // loop over messages in buffer
-        for(it = buffer.begin(); it != buffer.end(); )
-        {
-            // logical sender id
-            unsigned sender = std::get<0>(*it);
-            // payload
-            string content = std::get<1>(*it);
-            // V_send at sender at time of broadcasting the received message
-            uint32_t* W = std::get<2>(*it);
+        // loop over all the processes
+        for(int p = 0; p < senders.size(); p++){
 
-            // CRB delivering a message if W <= V_recv
-            if(compare_vclocks(W, V_recv))
+            // loop over all messages from process p
+            for(it = buffer[p].begin(); it != buffer[p].end(); )
             {
+                // logical sender id
+                unsigned sender = std::get<0>(*it);
+                // payload
+                string content = std::get<1>(*it);
+                // V_send at sender at time of broadcasting the received message
+                uint32_t* W = std::get<2>(*it);
+
+                // CRB delivering a message if W <= V_recv
+                if(compare_vclocks(W, V_recv))
+                {
 #ifdef LCB_DEBUG
-                stringstream ss;
-                ss << "lcbd " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
-                memorylog->log(ss.str());
+                    stringstream ss;
+                    ss << "lcbd " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
+                    memorylog->log(ss.str());
 #endif
-                // if have a message delivered, potentially can have more
-                needMoreLoops = true;
+                    // if have a message delivered, potentially can have more
+                    needMoreLoops = true;
 
-                // increments nbr of received messages
-                V_recv[Membership::getRank(sender)] += 1;
+                    // increments nbr of received messages
+                    V_recv[Membership::getRank(sender)] += 1;
 
-                // source of message is affecting receiver in terms of LCB
-                if(loc.find(sender) != loc.end()){
-                    // mtx for send_seq_num & V_send clock
-                    mtx_send_clock.lock();
+                    // source of message is affecting receiver in terms of LCB
+                    if(loc.find(sender) != loc.end()){
+                        // mtx for send_seq_num & V_send clock
+                        mtx_send_clock.lock();
 
-                    // increments the current nbr of dependencies
-                    V_send[Membership::getRank(sender)] += 1;
+                        // increments the current nbr of dependencies
+                        V_send[Membership::getRank(sender)] += 1;
 
-                    // unlocking the V_send lock
-                    mtx_send_clock.unlock();
+                        // unlocking the V_send lock
+                        mtx_send_clock.unlock();
+                    }
+
+                    // passing to target
+                    deliverToAll(sender, content.c_str(), content.length());
+
+                    // free memory
+                    free(W);
+
+                    // erase() returns the next element
+                    it = buffer[p].erase(it);
+
                 }
-
-                // passing to target
-                deliverToAll(sender, content.c_str(), content.length());
-
-                // free memory
-                free(W);
-
-                // erase() returns the next element
-                it = buffer.erase(it);
-
-            }
-            // otherwise just incrementing the counter (can't deliver now)
-            else {
+                // otherwise just incrementing the counter (can't deliver now)
+                else {
 #ifdef LCB_DEBUG
-                stringstream ss;
-                ss << "lcb can't deliver " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
-                memorylog->log(ss.str());
+                    stringstream ss;
+                    ss << "lcb can't deliver " << sender << " " << charsToInt32(content.c_str()) << " | [" << W[0] << "," << W[1] << ","<< W[2] << ","<< W[3] << ","<< W[4] << "] Vrecv=[" << V_recv[0] << "," << V_recv[1] << ","<< V_recv[2] << ","<< V_recv[3] << ","<< V_recv[4] << "]";
+                    memorylog->log(ss.str());
 #endif
-                it++;
+                    // If we cannot deliver the message from the ordered set, then we cannot deliver any, so break.
+                    break;
+                }
             }
         }
     }
@@ -146,8 +152,12 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     // init new vlock of size m (whatever the locality is)
     V_send = new uint32_t[n_process];
     V_recv = new uint32_t[n_process];
-
+    
+    // allocating memory for the buffer
+    buffer = new set<tuple<unsigned, string, uint32_t*>, cmpStruct>[senders.size()];
+    
     // sanity check
+    assert(buffer);
     assert(V_send);
     assert(V_recv);
 
