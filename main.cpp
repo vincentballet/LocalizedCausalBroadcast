@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <string>
 #include <stdlib.h>
+#include <fstream>
 #include <csignal>
 #include "membership.h"
 #include "udpreceiver.h"
@@ -32,6 +33,7 @@
 
 using std::string;
 using std::cout;
+using std::ofstream;
 using std::endl;
 using std::stringstream;
 
@@ -81,7 +83,7 @@ void writeOutputAndHalt()
     cout << "Writing output..." << endl;
 
     // writing output file
-    memorylog->dump();
+    memorylog->waitForFinishAndExit();
 
     exit(0);
 }

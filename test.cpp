@@ -103,7 +103,7 @@ void* logger_thread(void* arg)
     {
       snprintf(buf, 99, "thread %d message %d", threadid, i);
       memorylog->log(buf);
-      usleep(sleep_us);
+      //usleep(sleep_us);
     }
 
     return(nullptr);
