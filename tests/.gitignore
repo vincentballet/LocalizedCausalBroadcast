@@ -1,3 +1,4 @@
+test_log
 *.txt
 output.txt
 .ipynb_checkpoints
