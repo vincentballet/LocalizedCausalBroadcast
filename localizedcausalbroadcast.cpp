@@ -81,7 +81,7 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     {
         needMoreLoops = false;
         // loop over all the processes
-        for(int p = 0; p < senders.size(); p++){
+        for(int p = 0; p < senders.size() + 1; p++){
 
             // loop over all messages from process p
             for(it = buffer.at(p)->begin(); it != buffer.at(p)->end(); )
