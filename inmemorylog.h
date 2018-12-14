@@ -14,12 +14,11 @@ class ImMemoryLog;
 #include <list>
 #include <pthread.h>
 #include <stdio.h>
+#include <semaphore.h>
 
 using std::string;
 using std::mutex;
 using std::list;
-
-#define LMAX 255
 
 /** @class This class implements the In Memory Log */
 class InMemoryLog
@@ -35,35 +34,44 @@ private:
     /// Output file (immediate)
     FILE* file_immediate;
 
+    /// @brief Producer-consumer semaphore, number of elements inside, 0 if the buffer is empty
+    sem_t sem_fill_count;
+
+    /// @brief Producer-consumer semaphore, number of free cells, 0 if the buffer is full
+    sem_t sem_empty_count;
+
     /// Maximal number of messages
-    static const int MAX_MESSAGES = 1000000;
+    unsigned MAX_MESSAGES;
+
+    /// Maximal length of a message, including \0
+    unsigned LMAX;
 
     /// Current write pointer
-    volatile int writeIndex = 0;
+    volatile unsigned writeIndex = 0;
 
     /// Current read pointer
-    volatile int readIndex = 0;
-
-    /// Is function log() working now?
-    volatile bool active;
+    volatile unsigned readIndex = 0;
 
     /// Should dumper thread dump data?
     volatile bool dumperActive;
 
-    /// Buffer for data
-    volatile string *buffer;
+    /// Buffer for data. Usage: buffer[LMAX * index + offset]
+    volatile char *buffer;
 
     /// Buffer for data
     volatile uint64_t *timestamps;
 
-    /// Is a cell used by some message?
-    volatile bool* used;
+    /// Should log() work for new messages?
+    bool active;
 
     /// Number of iterations dump thread made
     volatile uint64_t dumpedIterations = 0;
 
     /// Mutex for buffer access
     mutex m;
+
+    /// Mutex for the dumpedIterations variable
+    mutex m_dump;
 
     /// @brief Process ID
     unsigned n;
@@ -79,7 +87,6 @@ private:
 
     /**
      * @brief Dump all data to file from memory
-     * Call from ONE thread only!
      */
     void dump();
 public:
@@ -95,7 +102,8 @@ public:
      */
     void log(string content);
 
-    /** Waits until all data is in the file and closes the file */
+    /** @brief waitForFinishAndExit Waits until all data is in the file and closes the file
+     */
     void waitForFinishAndExit();
 };
 

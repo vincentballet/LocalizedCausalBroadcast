@@ -30,7 +30,7 @@ int main()
     int msg;
 
     // reading a message
-    if(scanf("thread %d message %d\n", &t, &msg) != 2)
+    if(scanf("t %d m %d\n", &t, &msg) != 2)
     {
         printf("Cannot read next message, sequence = [");
         for(int j = 0; j < n; j++) printf("%d ", seqs[j]);
@@ -42,7 +42,11 @@ int main()
     assert(t < n);
 
     // checking that the next message is correct
-    assert(seqs[t] == msg);
+    if(seqs[t] != msg)
+    {
+        printf("Got out-of-order log message from thread %d. Expected %d and got %d\n", t, seqs[t], msg);
+        exit(1);
+    }
 
     // incrementing corresponding sequence number
     seqs[t]++;

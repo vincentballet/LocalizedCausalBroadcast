@@ -82,10 +82,10 @@ void testUDP(unsigned n, vector<UDPSender *> senders, UDPReceiver *receiver)
 }
 
 // number of threads for log test
-const int n_threads = 10;
+const int n_threads = 2;
 
 // number of messages per thread
-const int n_msg = 100000;
+const int n_msg = 500000;
 
 // sleep us between messages
 const int sleep_us = 0;
@@ -101,7 +101,7 @@ void* logger_thread(void* arg)
     // for 100 000 000 messages...
     for(int i = 0; i < n_msg; i++)
     {
-      snprintf(buf, 99, "thread %d message %d", threadid, i);
+      snprintf(buf, 99, "t %d m %d", threadid, i);
       memorylog->log(buf);
       //usleep(sleep_us);
     }
