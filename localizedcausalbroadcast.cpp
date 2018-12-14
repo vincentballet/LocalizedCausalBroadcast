@@ -6,12 +6,12 @@
 //  Copyright © 2018 Vincent Ballet. All rights reserved.
 //
 
-#include "localizedcausalbroadcast.h"
 #include <iostream>
 #include <cassert>
 #include <cstring>
 #include <cmath>
 #include <iomanip>
+#include "localizedcausalbroadcast.h"
 
 using std::cout;
 using std::endl;
