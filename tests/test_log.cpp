@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <cassert>
+#include <stdlib.h>
 
 int main()
 {
@@ -29,7 +30,13 @@ int main()
     int msg;
 
     // reading a message
-    assert(scanf("thread %d message %d\n", &t, &msg) == 2);
+    if(scanf("thread %d message %d\n", &t, &msg) != 2)
+    {
+        printf("Cannot read next message, sequence = [");
+        for(int j = 0; j < n; j++) printf("%d ", seqs[j]);
+        printf("]\n");
+        exit(1);
+    }
 
     // sanity check
     assert(t < n);
