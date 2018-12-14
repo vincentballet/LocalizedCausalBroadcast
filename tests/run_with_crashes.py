@@ -1,6 +1,7 @@
 import sys, os, math, signal
 import numpy as np
 from time import sleep, time
+import psutil
 
 # Showing help if arguments are incorrect
 if len(sys.argv) < 2:
@@ -9,10 +10,13 @@ if len(sys.argv) < 2:
     sys.exit(0)
 
 # messages to send
-m = 50
+m = 150
 
 # time to initialize
 wait_time = 5
+
+# time to send messages
+wait_time_end = 20
 
 # maximal time of crash in ms
 max_crash_time_ms = 50
@@ -163,13 +167,20 @@ for p in timestamp_resume.keys():
     print("Resuming process %d" % (p + 1))
     os.kill(pids[p], signal.SIGCONT)
 
-# waiting for log to be written
-sleep(wait_time)
+# waiting for the messages to be delivered
+sleep(wait_time_end)
 
-# stopping all processes
-print("Stopping processes")
-for pid in pids:
-  os.kill(pid, signal.SIGINT)
+# terminating running processes
+for p in range(len(pids)):
+  if p not in did_crash:
+    print("Interrupting process %d" % (p + 1))
+    os.kill(pids[p], signal.SIGINT)
+
+# waiting for all processes to write logs...
+while True:
+  if all([psutil.Process(pid).status() == psutil.STATUS_ZOMBIE for pid in pids]): break
+  print("Waiting...")
+  sleep(1)
 
 sleep(wait_time)
 
