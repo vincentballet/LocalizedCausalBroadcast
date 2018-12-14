@@ -21,7 +21,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 {
     // must have at least 4 bytes for seq num
     assert(length >= n_process * 4);
-    assert(logical_source <= senders.size() + 1);
+    assert(logical_source <= n_process);
 
     // obtaining the content
     string content(message + (n_process * 4), length - (n_process * 4));
@@ -81,7 +81,7 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     {
         needMoreLoops = false;
         // loop over all the processes
-        for(int p = 0; p < senders.size() + 1; p++){
+        for(int p = 0; p < n_process; p++){
 
             // loop over all messages from process p
             for(it = buffer.at(p)->begin(); it != buffer.at(p)->end(); )

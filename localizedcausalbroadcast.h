@@ -38,10 +38,11 @@ private:
     /// @brief Reliable broadcast instance
     Broadcast* b;
     
-    /// @todo What is this?
+    /// @brief rank of process
+    /// Process 1, 2, 3 could have ranks 0, 1, 2 or 0, 2, 1 for some reason
     unsigned rank;
     
-    /// @todo What is this?
+    /// @brief number of processes
     unsigned n_process;
     
     /// @brief send vector clock
