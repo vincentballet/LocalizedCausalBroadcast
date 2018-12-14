@@ -11,7 +11,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
-
+#include <iomanip>
 
 using std::cout;
 using std::endl;
@@ -21,7 +21,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 {
     // must have at least 4 bytes for seq num
     assert(length >= n_process * 4);
-    assert(logical_source <= senders.size() + 1);
+    assert(logical_source <= n_process);
 
     // obtaining the content
     string content(message + (n_process * 4), length - (n_process * 4));
@@ -45,16 +45,32 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     mtx_recv_clock.lock();
     
     // representation of all the received messages (source, payload, vectorclock)
-    tuple<unsigned, string, uint32_t*> t(logical_source, content, W);
+    pair<string, uint32_t*> t(content, W);
 
     // adding message to the buffer
     // -1 because indexed at 0
-    buffer[logical_source-1].insert(t);
+    buffer.at(logical_source-1)->insert(t);
 
     // trying to deliver all messages
     tryDeliverAll();
     
+    
+    // Looking at buffer of proces 1 and only when messages comes from process 3
+//    if (this->rank == 0){
+//        set<pair<string, uint32_t*>, cmpStruct>::iterator it;
+//        cout<< "\n=== DEBUG PRINTING === " << endl;
+//        for(int p = 0; p < n_process; p++){
+//            cout << "== Process " << p + 1 <<endl;
+//            for(it = buffer.at(p)->begin(); it != buffer.at(p)->end(); ++it )
+//            {
+//                uint32_t* W = it->second;
+//                cout << "DEBUG S" << p << " : [" << std::setfill('0') << std::setw(2) << W[0] << "," <<  std::setfill('0') << std::setw(2) <<W[1] << ","<< std::setfill('0') << std::setw(2) << W[2] << ","<<  std::setfill('0') << std::setw(2) <<W[3] << ","<<  std::setfill('0') << std::setw(2) <<W[4] << "]" << endl;
+//            }
+//        }
+//    }
+    
     mtx_recv_clock.unlock();
+
 
 #ifdef LCB_DEBUG
     {
@@ -68,7 +84,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
 void LocalizedCausalBroadcast::tryDeliverAll()
 {
     // for going over buffer
-    set<tuple<unsigned, string, uint32_t*>, cmpStruct>::iterator it;
+    set<pair<string, uint32_t*>, cmpStruct>::iterator it;
     
     // indicates whether or not need one more pass over the buffer
     bool needMoreLoops = true;
@@ -81,17 +97,19 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     {
         needMoreLoops = false;
         // loop over all the processes
-        for(int p = 0; p < senders.size(); p++){
+        
+        
+        for(int p = 0; p < n_process; p++){
 
             // loop over all messages from process p
-            for(it = buffer[p].begin(); it != buffer[p].end(); )
+            for(it = buffer.at(p)->begin(); it != buffer.at(p)->end(); )
             {
                 // logical sender id
-                unsigned sender = std::get<0>(*it);
+                unsigned sender = p + 1;
                 // payload
-                string content = std::get<1>(*it);
+                string content = it->first;
                 // V_send at sender at time of broadcasting the received message
-                uint32_t* W = std::get<2>(*it);
+                uint32_t* W = it->second;
 
                 // CRB delivering a message if W <= V_recv
                 if(compare_vclocks(W, V_recv))
@@ -126,7 +144,7 @@ void LocalizedCausalBroadcast::tryDeliverAll()
                     free(W);
 
                     // erase() returns the next element
-                    it = buffer[p].erase(it);
+                    it = buffer.at(p)->erase(it);
 
                 }
                 // otherwise just incrementing the counter (can't deliver now)
@@ -154,10 +172,11 @@ LocalizedCausalBroadcast::LocalizedCausalBroadcast(Broadcast *broadcast, set<uns
     V_recv = new uint32_t[n_process];
     
     // allocating memory for the buffer
-    buffer = new set<tuple<unsigned, string, uint32_t*>, cmpStruct>[senders.size()];
+    for(int p = 0; p < n_process; p++){
+        buffer.push_back(new set<pair<string, uint32_t*>, cmpStruct>(cmpStruct(p)));
+    }
     
     // sanity check
-    assert(buffer);
     assert(V_send);
     assert(V_recv);
 
@@ -188,6 +207,9 @@ LocalizedCausalBroadcast::~LocalizedCausalBroadcast()
 {
     free(V_send);
     free(V_recv);
+    for(int p = 0; p < n_process; p++){
+        free(buffer.at(p));
+    }
 }
 
 void LocalizedCausalBroadcast::broadcast(const char* message, unsigned length, unsigned source)

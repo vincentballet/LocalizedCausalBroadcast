@@ -38,10 +38,11 @@ private:
     /// @brief Reliable broadcast instance
     Broadcast* b;
     
-    /// @todo What is this?
+    /// @brief rank of process
+    /// Process 1, 2, 3 could have ranks 0, 1, 2 or 0, 2, 1 for some reason
     unsigned rank;
     
-    /// @todo What is this?
+    /// @brief number of processes
     unsigned n_process;
     
     /// @brief send vector clock
@@ -55,19 +56,21 @@ private:
     
     /** @brief comparator to order set of clocks **/
     struct cmpStruct {
-        bool operator() (const tuple<unsigned, string, uint32_t*> lhs, const tuple<unsigned, string, uint32_t*> rhs) const
+        int index;
+        cmpStruct(int k){
+            this->index = k;
+        }
+        bool operator() (const pair<string, uint32_t*> lhs, const pair<string, uint32_t*> rhs) const
         {
-            unsigned sender = std::get<0>(lhs) - 1;
-            uint32_t* W1 = std::get<2>(lhs);
-            uint32_t* W2 = std::get<2>(rhs);
-            return W1[sender] < W2[sender];
+            uint32_t* W1 = lhs.second;
+            uint32_t* W2 = rhs.second;
+            return W1[this->index] < W2[this->index];
         }
     };
     
     /// @brief The buffer for not yet delivered messages per sender
-    /// format: (sender, content, vectorclock)
-    //  set<tuple<unsigned, string, uint32_t*>, cmpStruct> buffer;
-    set<tuple<unsigned, string, uint32_t*>, cmpStruct>* buffer;
+    /// format: vector[sender] = set<content, vectorclock>
+    vector<set<pair<string, uint32_t*>, cmpStruct>*> buffer;
 
     /// @brief current sending sequence number
     unsigned send_seq_num;
