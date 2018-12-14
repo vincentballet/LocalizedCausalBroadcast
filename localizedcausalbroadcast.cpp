@@ -11,7 +11,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
-
+#include <iomanip>
 
 using std::cout;
 using std::endl;
@@ -54,7 +54,23 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     // trying to deliver all messages
     tryDeliverAll();
     
+    
+    // Looking at buffer of proces 1 and only when messages comes from process 3
+//    if (this->rank == 0){
+//        set<pair<string, uint32_t*>, cmpStruct>::iterator it;
+//        cout<< "\n=== DEBUG PRINTING === " << endl;
+//        for(int p = 0; p < n_process; p++){
+//            cout << "== Process " << p + 1 <<endl;
+//            for(it = buffer.at(p)->begin(); it != buffer.at(p)->end(); ++it )
+//            {
+//                uint32_t* W = it->second;
+//                cout << "DEBUG S" << p << " : [" << std::setfill('0') << std::setw(2) << W[0] << "," <<  std::setfill('0') << std::setw(2) <<W[1] << ","<< std::setfill('0') << std::setw(2) << W[2] << ","<<  std::setfill('0') << std::setw(2) <<W[3] << ","<<  std::setfill('0') << std::setw(2) <<W[4] << "]" << endl;
+//            }
+//        }
+//    }
+    
     mtx_recv_clock.unlock();
+
 
 #ifdef LCB_DEBUG
     {
@@ -81,6 +97,8 @@ void LocalizedCausalBroadcast::tryDeliverAll()
     {
         needMoreLoops = false;
         // loop over all the processes
+        
+        
         for(int p = 0; p < n_process; p++){
 
             // loop over all messages from process p
