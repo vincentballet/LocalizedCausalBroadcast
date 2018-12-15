@@ -31,6 +31,8 @@ print('Using %d messages and %d processes' % (m, n))
 f.write('%d\n' % n)
 for i in range(1, n + 1):
   f.write('%d 127.0.0.1 110%02d\n' % (i, i))
+for i in range(1, n + 1):
+  f.write('%d %s\n' % (i, ' '.join(map(str, range(1, n + 1)))))
 f.close()
 
 # Reading membership file
