@@ -7,7 +7,7 @@ void *ThreadedReceiver::deliverLoop(void *arg)
     while(true)
     {
         // waiting for data
-        sem_wait(&(receiver->fill_sem));
+        receiver->fill_sem->wait();
 
         // locking the buffer
         receiver->m.lock();
@@ -64,7 +64,7 @@ void ThreadedReceiver::deliverToAll(unsigned source, unsigned logical_source, co
     m.unlock();
 
     // +1 to the semaphore
-    sem_post(&fill_sem);
+    fill_sem->notify();
 }
 
 void ThreadedReceiver::deliverToAll(unsigned source, const char* message, unsigned length)
@@ -76,7 +76,7 @@ void ThreadedReceiver::deliverToAll(unsigned source, const char* message, unsign
 ThreadedReceiver::ThreadedReceiver(unsigned this_process, Target *target) : Receiver(this_process, target)
 {
     // creating the fill semaphore
-    sem_init(&fill_sem, 0, 0);
+    fill_sem = new semaphore(0);
 
     // creating the delivery thread
     pthread_create(&deliver_thread, nullptr, &ThreadedReceiver::deliverLoop, this);

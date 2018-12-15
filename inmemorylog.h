@@ -14,7 +14,7 @@ class ImMemoryLog;
 #include <list>
 #include <pthread.h>
 #include <stdio.h>
-#include <semaphore.h>
+#include "mysemaphore.h"
 
 using std::string;
 using std::mutex;
@@ -35,10 +35,10 @@ private:
     FILE* file_immediate;
 
     /// @brief Producer-consumer semaphore, number of elements inside, 0 if the buffer is empty
-    sem_t sem_fill_count;
+    semaphore* sem_fill_count;
 
     /// @brief Producer-consumer semaphore, number of free cells, 0 if the buffer is full
-    sem_t sem_empty_count;
+    semaphore* sem_empty_count;
 
     /// Maximal number of messages
     unsigned MAX_MESSAGES;

@@ -18,7 +18,7 @@
 #include "sender.h"
 #include "receiver.h"
 #include "threadedreceiver.h"
-#include <semaphore.h>
+#include "mysemaphore.h"
 
 using std::mutex;
 using std::map;
@@ -44,11 +44,11 @@ private:
 
     /// @brief Fill semaphore for the msgs buffer
     /// @see https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem
-    sem_t fill_sem;
+    semaphore* fill_sem;
 
     /// @brief Empty semaphore for the msgs buffer
     /// @see https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem
-    sem_t empty_sem;
+    semaphore* empty_sem;
 
     /**
      * @brief sendLoop Runs the sending loop

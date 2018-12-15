@@ -9,7 +9,7 @@
 
 #include "sender.h"
 #include <pthread.h>
-#include <semaphore.h>
+#include "mysemaphore.h"
 #include <mutex>
 #include <list>
 
@@ -28,7 +28,7 @@ private:
     mutex mtx;
 
     /// @brief Semaphore with number of items in the queue
-    sem_t fill_sem;
+    semaphore* fill_sem;
 
     /// @brief Send thread
     pthread_t send_thread;

@@ -13,7 +13,7 @@
 #include <string>
 #include "receiver.h"
 #include <pthread.h>
-#include <semaphore.h>
+#include "mysemaphore.h"
 
 using std::list;
 using std::string;
@@ -40,7 +40,7 @@ private:
     /// @brief fill semaphore
     /// Indicates the number of entries inside the messages buffer
     /// @see https://en.wikipedia.org/wiki/Producer%E2%80%93consumer_problem
-    sem_t fill_sem;
+    semaphore* fill_sem;
 
     /// @brief Buffer for delivery
     list<queued_message> messages;

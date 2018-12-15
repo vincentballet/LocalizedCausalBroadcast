@@ -14,7 +14,7 @@ void *ThreadedSender::sendLoop(void *arg)
     while(true)
     {
         // waiting for some data
-        sem_wait(&(sender->fill_sem));
+        sender->fill_sem->wait();
 
         // critical section
         sender->mtx.lock();
@@ -44,7 +44,7 @@ ThreadedSender::ThreadedSender(Sender *underlying_sender) :
     Sender(underlying_sender->getTarget()), underlying_sender(underlying_sender)
 {
     // creating the fill semaphore
-    sem_init(&fill_sem, 0, 0);
+    fill_sem = new semaphore(0);
 
     // creating the delivery thread
     pthread_create(&send_thread, nullptr, &ThreadedSender::sendLoop, this);
@@ -62,5 +62,5 @@ void ThreadedSender::send(const char *data, unsigned N)
     mtx.unlock();
 
     // +1 to the semaphore
-    sem_post(&fill_sem);
+    fill_sem->notify();
 }

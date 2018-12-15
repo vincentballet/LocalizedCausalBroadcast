@@ -93,8 +93,8 @@ InMemoryLog::InMemoryLog(unsigned n, string destination_filename) : n(n)
 #endif
 
     // initializing semaphores
-    sem_init(&sem_fill_count, 0, 0);
-    sem_init(&sem_empty_count, 0, MAX_MESSAGES);
+    sem_fill_count = new semaphore(0);
+    sem_empty_count = new semaphore(MAX_MESSAGES);
 
     // spawning dumper thread
     pthread_create(&dump_thread, nullptr, &InMemoryLog::dumpLoop, this);
@@ -126,7 +126,7 @@ void InMemoryLog::log(std::string content)
     if(!active) return;
 
     // decreasing number of free cells
-    sem_wait(&sem_empty_count);
+    sem_empty_count->wait();
 
     // beginning of critical section
     m.lock();
@@ -146,7 +146,7 @@ void InMemoryLog::log(std::string content)
     m.unlock();
 
     // increasing the number of used cells
-    sem_post(&sem_fill_count);
+    sem_fill_count->notify();
 }
 
 void InMemoryLog::waitForFinishAndExit()
@@ -190,7 +190,7 @@ void InMemoryLog::dump()
     {
         // waiting when have the element filled
         // or returning if the buffer is empty
-        if(sem_trywait(&sem_fill_count) != 0)
+        if(sem_fill_count->try_wait() == false)
             break;
 
         // locking to allow for memory synchronization
@@ -213,7 +213,7 @@ void InMemoryLog::dump()
         m.unlock();
 
         // marking the dumped cell as empty
-        sem_post(&sem_empty_count);
+        sem_empty_count->notify();
 
         // writing data
         fprintf(file, "%s\n", buf);

@@ -53,10 +53,10 @@ void PerfectLink::onMessage(unsigned source, const char* buf, unsigned len)
             inqueue--;
 
             // +1 to the empty
-            sem_post(&empty_sem);
+            empty_sem->notify();
 
             // -1 from the fill
-            sem_wait(&fill_sem);
+            fill_sem->wait();
         } // else: ACKed an unknown message!
         mtx.unlock();
 
@@ -129,8 +129,8 @@ void *PerfectLink::sendLoop(void *arg)
             // incrementing sem
             for(unsigned i = 0; i < sz; i++)
             {
-                sem_post(&(link->empty_sem));
-                sem_wait(&(link->fill_sem));
+                link->empty_sem->notify();
+                link->fill_sem->wait();
             }
 
             // removing all messages
@@ -144,8 +144,8 @@ void *PerfectLink::sendLoop(void *arg)
         }
 
         // checking if there are messages in the queue
-        sem_wait(&(link->fill_sem));
-        sem_post(&(link->fill_sem));
+        link->fill_sem->wait();
+        link->fill_sem->notify();
 
         // doing nothing if the link is not running anymore
         if(!link->running)
@@ -217,8 +217,8 @@ PerfectLink::PerfectLink(Sender *s, Receiver *r, Target *target) :
     inqueue = 0;
     
     // initializing fill/empty semaphores
-    sem_init(&fill_sem, 0, 0);
-    sem_init(&empty_sem, 0, MAX_IN_QUEUE);
+    fill_sem = new semaphore(0);
+    empty_sem = new semaphore(MAX_IN_QUEUE);
 
     // starting sending thread
     pthread_create(&send_thread, nullptr, &PerfectLink::sendLoop, this);
@@ -247,7 +247,7 @@ void PerfectLink::send(const char* buffer, unsigned length)
 
     // waiting until can send
     // VIA -1 to the empty semaphore
-    sem_wait(&empty_sem);
+    empty_sem->wait();
 
     // allocating new memory
     char* data = new char[length + 5];
@@ -289,7 +289,7 @@ void PerfectLink::send(const char* buffer, unsigned length)
     inqueue++;
 
     // +1 to the fill semaphore
-    sem_post(&fill_sem);
+    fill_sem->notify();
 
     // finished critical section
     mtx.unlock();
