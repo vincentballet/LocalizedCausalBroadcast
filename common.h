@@ -28,7 +28,7 @@ using std::chrono::steady_clock;
 #define LOCALIZED_CAUSAL_BROADCAST
 
 /// @macro Enable tests for main()
-#define DEBUG_TEST 1
+//#define DEBUG_TEST 1
 
 /// @macro Output debug files (.timestamps and .recvall)
 //#define DEBUG_FILES 1
@@ -55,7 +55,7 @@ using std::chrono::steady_clock;
 //#define URB_DEBUG
 
 /// @macro Debug UniformReliableBroadcast
-#define LCB_DEBUG
+//#define LCB_DEBUG
 
 /// @macro Debug Failure Detector
 //#define FAILUREDETECTOR_DEBUG
