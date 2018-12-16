@@ -193,7 +193,6 @@ def main():
 
       # delivery case: incrementing v_send if depend on the sender
       if type_ == 'd' and msg[0] in dependencies[p]:
-        if msg in msg_vc:
         v_send[msg[0] - 1] += 1
 
   # PROPERTY TEST: for each process, for each delivery, must have W <= V_recv
@@ -217,8 +216,6 @@ def main():
 
       # incrementing v_recv
       v_recv[msg[0] - 1] += 1
-
-  print(msg_vc[(2, 484)])
 
   print("CRB5 : {}".format(time.time() - start_time))
   
