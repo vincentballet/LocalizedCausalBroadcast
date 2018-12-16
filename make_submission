@@ -18,11 +18,12 @@ mkdir $id
 cp *.h *.cpp Makefile $id/
 
 # adding lcb algo and proof 
-cp -r lcb_algo $id/
+mkdir $id/lcb_algo
+cp lcb_algo/main.pdf lcb_algo/main.tex $id/lcb_algo/
 
 # adding our tests
 mkdir $id/tests
-cp tests/test_localized_causal_all_properties.py tests/run_with_crashes.py $id/tests/
+cp -r tests/*.ipynb tests/test_localized_causal_all_properties.py tests/run_with_crashes.py tests/run_performance.py tests/test_fifo_all_properties.py tests/tests_for_tests $id/tests/
 
 # zip to submit
 zip -r $id.zip $id
