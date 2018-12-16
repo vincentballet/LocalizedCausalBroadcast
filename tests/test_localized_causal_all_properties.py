@@ -123,8 +123,8 @@ def main():
   # BEB2: No duplication
   for p in processes:
     for s in processes:
-      delivered_by_p_f_s = delivered_by_from_set[(p, s)]
-      soft_assert(len(delivered_by_p_f_s) == len(set(delivered_by_p_f_s)), "BEB2 Violated. Process %d delivered some messages from %d twice" % (p, s))
+      delivered_by_p_f = delivered_by_from[(p, s)]
+      soft_assert(len(delivered_by_p_f) == len(set(delivered_by_p_f)), "BEB2 Violated. Process %d delivered some messages from %d twice" % (p, s))
   print("BEB2 : {}".format(time.time() - start_time))
   start_time = time.time()
   
