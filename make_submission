@@ -17,6 +17,13 @@ rm *.out
 mkdir $id
 cp *.h *.cpp Makefile $id/
 
+# adding lcb algo and proof 
+cp -r lcb_algo $id/
+
+# adding our tests
+mkdir $id/tests
+cp tests/test_localized_causal_all_properties.py tests/run_with_crashes.py $id/tests/
+
 # zip to submit
 zip -r $id.zip $id
 
