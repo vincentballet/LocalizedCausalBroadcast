@@ -28,7 +28,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     
     // obtaining the clock
     uint32_t* W = new uint32_t[n_process];
-    memcpy(W, message, (n_process * 4));
+    memcpy(W, message, (n_process * 9));
 
     // sanity check
     assert(W);
@@ -45,7 +45,7 @@ void LocalizedCausalBroadcast::onMessage(unsigned logical_source, const char* me
     mtx_recv_clock.lock();
     
     // representation of all the received messages (source, payload, vectorclock)
-    pair<string, uint32_t*> t(content, W);
+    tuple<string, uint32_t*> t(content, W);
 
     // adding message to the buffer
     // -1 because indexed at 0
