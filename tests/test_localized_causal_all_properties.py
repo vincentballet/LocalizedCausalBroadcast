@@ -1,6 +1,24 @@
 import sys
 import time
 
+def vec_leq(vec1, vec2):
+  """ Check that vec1 is less than vec2 elemtwise """
+  assert isinstance(vec1, list), "Only work with lists"
+  assert isinstance(vec2, list), "Only work with lists"
+  assert len(vec1) == len(vec2), "Vector lengths should be the same"
+  for x, y in zip(vec1, vec2):
+    # if a coordinate is greater, returning false
+    if x > y: return False
+
+  # returning True if all xs are <= than ys
+  return True
+
+# small sanity check before starting the actual test
+assert vec_leq([1,1,1], [1,1,1]) == True
+assert vec_leq([1,0,1], [1,1,1]) == True
+assert vec_leq([1,0,1], [0,1,1]) == False
+assert vec_leq([0,0,1], [1,0,0]) == False
+
 def soft_assert(condition, message = None):
     """ Print message if there was an error without exiting """
     global were_errors
@@ -139,88 +157,48 @@ def main():
   print("RB4 : {}".format(time.time() - start_time))
   start_time = time.time()
   
-  # FRB5: FIFO delivery: If some process broadcasts message m1 before it broadcasts message m2 , then no correct process delivers m2 unless it has already delivered m1
-  for p in processes:
-    for i, msg1 in enumerate(broadcast_by[p]):
-      for j, msg2 in enumerate(broadcast_by[p]):
-        if i < j:
-          for p1 in correct:
-            del_p1 = delivered_by[p1]
-            if msg1 in del_p1 and msg2 in del_p1:
-              ind1 = del_p1.index(msg1)
-              ind2 = del_p1.index(msg2)
-              soft_assert(ind1 < ind2, "FRB5 violated: Process %d sent %d before %d and correct process %d delivered %d before %d" %
-                                      (p, msg1, msg2, p1, msg2, msg1))
-  print("FRB5 : {}".format(time.time() - start_time))
-  start_time = time.time()
-  
   # CRB5: Causal delivery: For any message m1 that potentially caused a message m2, i.e., m1 -> m2 , no process delivers m2 unless it has already delivered m1.
   # (a) some process p broadcasts m1 before it broadcasts m2 ;
   # (b) some process p delivers m1 from a process (LOCALIZED) IT DEPENDS ON and subsequently broadcasts m2; or
   # (c) there exists some message m such that m1 -> m and m -> m2.
   # Process has dependencies dependencies[p] and itself
 
-  # message dependencies: (sender, seq) -> [(sender, seq), ..., (sender, seq)]
-  # if a message has a dependency (sender, seq), it also has dependencies of that message
-  msg_dep = {}
+  # message dependencies: (sender, seq) -> [seq1, ..., seqN]
+  msg_vc = {}
 
-  # filling in one-hop dependencies
+  # filling in vector clocks
   for p in processes:
-    # dependencies for messages at the moment of sending
-    current_dependencies = []
+    # current vector clock for a message (dependencies of a newly sent message)
+    v_send = [0 for _ in range(n)]
+    seqnum = 0
+
+    # going over events
     for event in events[p]:
       # current message and type of event
       type_, msg = event[0], event[1:]
 
-      # adding message as a dependency
-      soft_assert((msg not in current_dependencies) or msg[0] == p, "Error: broadcasted or delivered message %s twice!" % str(event))
-      if msg not in current_dependencies:
-        # (LOCALIZED) either it's my message or I depend on the process that has sent it
-        if msg[0] == p or msg[0] in dependencies[p]:
-          current_dependencies += [msg]
-
-      # on broadcast, fill in message dependencies
+      # broadcast case: incrementing v_send
       if type_ == 'b':
-        soft_assert(msg not in msg_dep.keys(), "Error: broadcasted message %s twice!" % str(event))
-        msg_dep[msg] = [x for x in current_dependencies]
+        # copying v_send
+        W = [x for x in v_send]
 
-  # performing BFS for each message, collecting all dependencies...
-  # list of all messages
-  all_msgs = sorted(list(msg_dep.keys()))
+        # filling in seqnum
+        W[p - 1] = seqnum
 
-  # true dependencies for messages
-  msg_dep_all = {}
+        # incrementing seqnum
+        seqnum += 1
 
-  # loop over messages
-  for msg in all_msgs:
-    # messages which are visited
-    deps = set()
+        # copying W to msg_vc
+        msg_vc[msg] = [x for x in W]
 
-    # queue for search (not bfs or dfs)
-    queue = set()
-    deps.add(msg)
-    queue.add(msg)
+      # delivery case: incrementing v_send if depend on the sender
+      if type_ == 'd' and msg[0] in dependencies[p]:
+        v_send[msg[0] - 1] += 1
 
-    # while queue is not empty...
-    while len(queue) > 0:
-      # taking one element from the front
-      elem = queue.pop()
-
-      # going over dependencies
-      for elem1 in msg_dep[elem]:
-        # if it's not yet added
-        if elem1 not in deps:
-          # adding it to the queue and to dependencies
-          queue.add(elem1)
-          deps.add(elem1)
-
-    # collecting all visited
-    msg_dep_all[msg] = list(deps)
-
-  # PROPERTY TEST: for each process, for each delivered message, must have already delivered its causal past
+  # PROPERTY TEST: for each process, for each delivery, must have W <= V_recv
   for p in processes:
-    # currently delivered by process
-    delivered = set()
+    # currently delivered messages by process
+    v_recv = [0 for _ in range(n)]
 
     # loop over events
     for event in events[p]:
@@ -230,15 +208,18 @@ def main():
       # parsing message = (sender, seq)
       msg = event[1:]
 
-      # adding as delivered
-      delivered.add(msg)
+      # sanity check
+      assert msg in msg_vc, "Must have a vector clock for %s" % str(msg)
 
-      # for each message in past, must be past in delivered
-      for past in msg_dep_all[msg]:
-        soft_assert(past in delivered, "CRB5 Violated: message %s is causal past of message %s and it was not delivered before by process %d" % (str(past), str(msg), p))
+      # property test
+      soft_assert(vec_leq(msg_vc[msg], v_recv), "CRB5 violated: Process %d have delivered %s with vector clock W = %s having V_recv = %s" % (p, str(msg), str(msg_vc[msg]), str(v_recv)))
+
+      # incrementing v_recv
+      v_recv[msg[0] - 1] += 1
+
   print("CRB5 : {}".format(time.time() - start_time))
   
-    # printing the last line with status
+  # printing the last line with status
   print("INCORRECT" if were_errors else "CORRECT")
 
 if __name__ == '__main__':

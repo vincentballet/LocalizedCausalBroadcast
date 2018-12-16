@@ -24,7 +24,12 @@ echo "5
 2 127.0.0.1 11002
 3 127.0.0.1 11003
 4 127.0.0.1 11004
-5 127.0.0.1 11005" > membership
+5 127.0.0.1 11005
+1 1 2 3 4 5
+2 1 2 3 4 5
+3 1 2 3 4 5
+4 1 2 3 4 5
+5 1 2 3 4 5" > membership
 
 # start 5 processes, each broadcasting 100 messages
 for i in `seq 1 5`
