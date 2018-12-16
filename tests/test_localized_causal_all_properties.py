@@ -1,5 +1,5 @@
 import sys
-
+import time
 
 def soft_assert(condition, message = None):
     """ Print message if there was an error without exiting """
@@ -88,41 +88,57 @@ def main():
         delivered_by[by] += [content]
         events[process] += [('d', from_, content)]
 
+  # Sets for performance
+  broadcast_by_set = {i: set(arr) for (i, arr) in broadcast_by.items()}
+  delivered_by_set = {i: set(arr) for (i, arr) in delivered_by.items()}
+  delivered_by_from_set = {(i, j): set(arr) for ((i, j), arr) in delivered_by_from.items()}
+
+  start_time = time.time()
   # BEB1 Validity: If a correct process broadcasts a message m, then every correct process eventually delivers m.
   for p in correct:
-    for msg in broadcast_by[p]:
+    for msg in broadcast_by_set[p]:
       for p1 in correct:
-        soft_assert(msg in delivered_by[p1], "BEB1 Violated. Correct %d broadcasted %s and correct %d did not receive it" % (p, msg, p1))
+        soft_assert(msg in delivered_by_set[p1], "BEB1 Violated. Correct %d broadcasted %s and correct %d did not receive it" % (p, msg, p1))
+  print("BEB1 : {}".format(time.time() - start_time))
+  start_time = time.time()
 
   # BEB2: No duplication
   for p in processes:
     for s in processes:
-      delivered_by_p_f_s = delivered_by_from[(p, s)]
+      delivered_by_p_f_s = delivered_by_from_set[(p, s)]
       soft_assert(len(delivered_by_p_f_s) == len(set(delivered_by_p_f_s)), "BEB2 Violated. Process %d delivered some messages from %d twice" % (p, s))
-
+  print("BEB2 : {}".format(time.time() - start_time))
+  start_time = time.time()
+  
   # BEB3: No creation
   for p in processes:
     for p1 in processes:
-      sent = broadcast_by[p]
-      delivered = delivered_by_from[(p1, p)]
+      sent = broadcast_by_set[p]
+      delivered = delivered_by_from_set[(p1, p)]
       for msg in delivered:
         soft_assert(msg in sent, "BEB3 violated. Message %d was NOT send from %d and WAS delivered by %d" % (msg, p, p1))
+  print("BEB3 : {}".format(time.time() - start_time))
+  start_time = time.time()
 
   # URB4: Agreement. If a message m is delivered by some (correct/faulty) process, then m is eventually delivered by every correct process.
-  all_delivered = [x for p in correct for x in delivered_by[p]]
+  all_delivered = [x for p in correct for x in delivered_by_set[p]]
   for msg in all_delivered:
-    delivered_all = [p for p in processes if msg in delivered_by[p]]
-    notdelivered_correct = [p for p in correct if msg not in delivered_by[p]]
+    delivered_all = [p for p in processes if msg in delivered_by_set[p]]
+    notdelivered_correct = [p for p in correct if msg not in delivered_by_set[p]]
     soft_assert(len(delivered_all) == 0 or len(notdelivered_correct) == 0, "URB4 Violated. Process %s delivered %d and correct %s did not deliver it" % (delivered_all, msg, notdelivered_correct))
+  print("URB4 : {}".format(time.time() - start_time))
+  start_time = time.time()
 
   # RB4 secondary check
   for p in correct:
-    delivered_by_p = delivered_by[p]
+    delivered_by_p = delivered_by_set[p]
     for p1 in correct:
-      delivered_by_p1 = delivered_by[p1]
+      delivered_by_p1 = delivered_by_set[p1]
       for msg in delivered_by_p:
         soft_assert(msg in delivered_by_p1)#, "RB4 Violated. Correct %d delivered %d and correct %d did not deliver it" % (p, msg, p1))
-
+  print("RB4 : {}".format(time.time() - start_time))
+  start_time = time.time()
+  
   # FRB5: FIFO delivery: If some process broadcasts message m1 before it broadcasts message m2 , then no correct process delivers m2 unless it has already delivered m1
   for p in processes:
     for i, msg1 in enumerate(broadcast_by[p]):
@@ -135,7 +151,9 @@ def main():
               ind2 = del_p1.index(msg2)
               soft_assert(ind1 < ind2, "FRB5 violated: Process %d sent %d before %d and correct process %d delivered %d before %d" %
                                       (p, msg1, msg2, p1, msg2, msg1))
-
+  print("FRB5 : {}".format(time.time() - start_time))
+  start_time = time.time()
+  
   # CRB5: Causal delivery: For any message m1 that potentially caused a message m2, i.e., m1 -> m2 , no process delivers m2 unless it has already delivered m1.
   # (a) some process p broadcasts m1 before it broadcasts m2 ;
   # (b) some process p delivers m1 from a process (LOCALIZED) IT DEPENDS ON and subsequently broadcasts m2; or
@@ -218,7 +236,9 @@ def main():
       # for each message in past, must be past in delivered
       for past in msg_dep_all[msg]:
         soft_assert(past in delivered, "CRB5 Violated: message %s is causal past of message %s and it was not delivered before by process %d" % (str(past), str(msg), p))
-  # printing the last line with status
+  print("CRB5 : {}".format(time.time() - start_time))
+  
+    # printing the last line with status
   print("INCORRECT" if were_errors else "CORRECT")
 
 if __name__ == '__main__':
