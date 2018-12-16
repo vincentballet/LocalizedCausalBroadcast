@@ -183,7 +183,7 @@ def main():
         W = [x for x in v_send]
 
         # filling in seqnum
-        W[p] = seqnum
+        W[p - 1] = seqnum
 
         # incrementing seqnum
         seqnum += 1
@@ -193,7 +193,8 @@ def main():
 
       # delivery case: incrementing v_send if depend on the sender
       if type_ == 'd' and msg[0] in dependencies[p]:
-        v_send[msg[0]] += 1
+        if msg in msg_vc:
+        v_send[msg[0] - 1] += 1
 
   # PROPERTY TEST: for each process, for each delivery, must have W <= V_recv
   for p in processes:
@@ -215,8 +216,9 @@ def main():
       soft_assert(vec_leq(msg_vc[msg], v_recv), "CRB5 violated: Process %d have delivered %s with vector clock W = %s having V_recv = %s" % (p, str(msg), str(msg_vc[msg]), str(v_recv)))
 
       # incrementing v_recv
-      v_recv[msg[0]] += 1
-    
+      v_recv[msg[0] - 1] += 1
+
+  print(msg_vc[(2, 484)])
 
   print("CRB5 : {}".format(time.time() - start_time))
   
