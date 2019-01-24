@@ -1,14 +1,26 @@
 ### Localized Causal and FIFO Uniform Reliable Broadcast
 Implementation of Localized Causal Broadcast and FIFO broadcast using UDP sockets in C++ for the CS-451 Distributed Algorithms [1] course at the Swiss Federal Institute of Technology in Lausanne (EPFL)
 
+This project implements Perfect Links on top of UDP sockets, Best Effort Broadcast, Uniform Reliable Broadcast, Uniform FIFO Broadcast, Uniform Localized Causal Broadcast. The definitions of all abstractions are present in [2], and Localized Causal Broadcast is defined in <a href="https://github.com/sergeivolodin/LocalizedCausalBroadcast/blob/master/lcb_algo/main.pdf">lcb_algo/main.pdf</a>. The code has comments and competitive performance.
+
+2018, Vincent Ballet and Sergei Volodin
+
 ### Compilation
 1. Build essentials (g++, make) are required. Build was tested on Linux and Mac OSX
 2. Run `make -j4`
 
-### Implementation
-This project implements Perfect Links on top of UDP sockets, Best Effort Broadcast, Uniform Reliable Broadcast, Uniform FIFO Broadcast, Uniform Localized Causal Broadcast. The definitions of all abstractions are present in [2], and Localized Causal Broadcast is defined in <a href="https://github.com/sergeivolodin/LocalizedCausalBroadcast/blob/master/lcb_algo/main.pdf">lcb_algo/main.pdf</a>. The code has comments and competitive performance.
+### Performance
+Tested on a Raspberry Pi 3 (4 cores) on loopback interface. Lossy network corresponds to `netem delay 50ms 200ms loss 10% 25% reorder 25% 50%`
+#### FIFO and LCB for number of processes n=5 and normal network, different number of messages m
+<img src="https://github.com/sergeivolodin/LocalizedCausalBroadcast/raw/master/tests/figures/FIFO_M_N5.png" /> <img src="https://github.com/sergeivolodin/LocalizedCausalBroadcast/raw/master/tests/figures/LCB_M_N5.png" />
 
-### Performance and implementation of the components
+### FIFO and LCB for n=5 and lossy network, different number of messages m 
+<img src="https://github.com/sergeivolodin/LocalizedCausalBroadcast/raw/master/tests/figures/FIFO_M_N5_lossy.png" /> <img src="https://github.com/sergeivolodin/LocalizedCausalBroadcast/raw/master/tests/figures/LCB_M_N5_lossy.png" />
+
+### URB and LCB for fixed m and different n
+<img src="https://github.com/sergeivolodin/LocalizedCausalBroadcast/raw/master/tests/figures/URB_N.png" /> <img src="https://github.com/sergeivolodin/LocalizedCausalBroadcast/raw/master/tests/figures/LCB_N.png" />
+
+### Implementation details
 1. Point-to-point links are subclassed from `Sender` and `Receiver` classes. A `Sender` is any object which can send data somewhere. A `Receiver` is an object containing links to many `Target` objects, and each time `Receiver` gets data it relays it to all targets.
 2. UDP primitivies are implemented as `UDPSender` and `UDPReceiver` classes. Receiver object starts a loop in a thread which listens to all incoming messages and processes them in that thread (relays data to connected `Target` objects). This level of abstraction adds additional first 4 bytes to the data which indicate the sender process ID.
 3. `ThreadedReceiver` is an abstraction which processes all received messages in a separate thread and allows for the `deliverToAll` to return immediately. Basically it implements an additional infinite buffer. `ThreadedSender` does the same for the `Sender` class.
@@ -34,6 +46,7 @@ See tests/
 6. `hyperparam_search.ipynb` and `hyperparam_search.py` and `tradeoff_timeout_windowsize.ipynb` searches for PerfectLink hyperparameters to minimize total transmission time
 7. `test_fifo_all_properties.py` will test the FIFO properties based on log files. Crashed processes are read from `../crashed.log`. `test_perfectlink_all_properties.py` does the same for perfect link. `test_localized_causal_all_properties.py` does the same for LCB.
 8. `timing.ipynb` and `timing_lcb.ipynb` contain performance analysis results
+9. `tests_for_tests` contain tricky cases for tests themselves
 
 ### Configuration
 See `common.h` file for macro definitions:
