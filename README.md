@@ -1,7 +1,7 @@
 ### Localized Causal and FIFO Uniform Reliable Broadcast
 Implementation of Localized Causal Broadcast and FIFO broadcast using UDP sockets in C++ for the CS-451 Distributed Algorithms [1] course at the Swiss Federal Institute of Technology in Lausanne (EPFL)
 
-This project implements Perfect Links on top of UDP sockets, Best Effort Broadcast, Uniform Reliable Broadcast, Uniform FIFO Broadcast, Uniform Localized Causal Broadcast. The definitions of all abstractions are present in [2], and Localized Causal Broadcast is defined in <a href="https://github.com/sergeivolodin/LocalizedCausalBroadcast/blob/master/lcb_algo/main.pdf">lcb_algo/main.pdf</a>. The code has comments and competitive performance.
+This project implements Perfect Links on top of UDP sockets, Best Effort Broadcast, Uniform Reliable Broadcast, Uniform FIFO Broadcast, Uniform Localized Causal Broadcast. The definitions of all abstractions are present in [2], and Localized Causal Broadcast is defined in <a href="https://github.com/sergeivolodin/LocalizedCausalBroadcast/blob/master/lcb_algo/main.pdf">lcb_algo/main.pdf</a>. The code has comments and competitive performance, see the `code/` folder.
 
 2018, Vincent Ballet and Sergei Volodin
 
