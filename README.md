@@ -17,14 +17,23 @@ This project implements Perfect Links on top of UDP sockets, Best Effort Broadca
 6. `BestEffortBroadcast` is a `Broadcast` simply relaying the message to all targets. We note that it adds additional 4 bytes at the beginning which indicate the logical sender. Each message is broadcast to all other processes.
 7. `UniformReliableBroadcast` implements URB with an assumption of correct majority of processes without any timing assumptions (without a failure detector). We note that each process relays each message it receives, so a single message sent from one machine will result in total of O(N^2) messages in the network. We achieve optimal performance by recomputing the number of ACKs a message has at each time we receive a new ACK. Therefore the performance is linear in number of messages: O(MN^2)
 8. `FIFOBroadcast` is a performant implementation of FIFO. A queued for delivery messages are sorted by their sequence numbers, thus amortized complexity is O(logM) for each message (compared to O(1) for a trivial case). It adds the sender sequence number at the beginning of the message as first 4 bytes.
-9. `LocalizedCausalBroadcast` is a performant blocking (waiting) implementation of LCB using vector clocks. Localized means that broadcast cares only about specific dependencies of a process provided my `Membership`, see <a href="https://github.com/sergeivolodin/LocalizedCausalBroadcast/blob/master/lcb_algo/main.pdf">lcb_algo/main.pdf</a>.. It uses N queues for messages (for each sender), and sorts them by sender sequence number and thus achieves performance of O(NlogM) for each arriving message. It adds 4N bytes at the beginning filled with vector clocks.
+9. `LocalizedCausalBroadcast` is a performant blocking (waiting) implementation of LCB using vector clocks. Localized means that broadcast cares only about specific dependencies of a process provided my `Membership`, see <a href="https://github.com/sergeivolodin/LocalizedCausalBroadcast/blob/master/lcb_algo/main.pdf">lcb_algo/main.pdf</a>. This file also provides pseudocode of the algorithm implemented. Implemented version is also optimized: it uses N queues for messages (for each sender), and sorts them by sender sequence number and thus achieves performance of O(NlogM) for each arriving message. It adds 4N bytes at the beginning filled with vector clocks.
 10. `InMemoryLog` implements a performant logger which first stores all debug information in memory, and only occasionally dumps data to a file
 11. `Membership` provides number of processes and their addresses, and also the locality information.
 12. `SeqTarget` prints each delivered message and is a `Target`
 13. `test.cpp` contains code tests
 14. `main.cpp` reads membership file (see Usage by running the program `da_proc`), waits for SIGUSR2 and starts to broadcast messages.
 
-### Performance
+### Tests
+See tests/
+1. `lossy.sh` configures a lossy loopback interface for UDP and ICMP traffic
+2. `test_log.py` and `test_log.cpp` tests log performance (corresponds to log test in `test.cpp`). `run_perfectlink.py` runs the Perfect Link code
+3. `run_performance.py` will run processes without crashes and measure the total time before all messages are delivered. Must enable `DEBUG_FILES` in `common.h` and recompile code.
+4. `get_time.py` will run `run_performance` and time the execution
+5. `run_with_crashes.py` runs processes with random pauses and crashes at most a minority of processes
+6. `hyperparam_search.ipynb` and `hyperparam_search.py` and `tradeoff_timeout_windowsize.ipynb` searches for PerfectLink hyperparameters to minimize total transmission time
+7. `test_fifo_all_properties.py` will test the FIFO properties based on log files. Crashed processes are read from `../crashed.log`. `test_perfectlink_all_properties.py` does the same for perfect link. `test_localized_causal_all_properties.py` does the same for LCB.
+8. `timing.ipynb` and `timing_lcb.ipynb` contain performance analysis results
 
 ### Configuration
 See `common.h` file for macro definitions:
